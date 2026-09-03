@@ -31,7 +31,7 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 	// IANA time zone for precise post and moment timestamps. It is independent of lang.
 	timeZone: "Asia/Shanghai",
 	themeColor: {
-		hue: 315, // Default hue 0-360. 站点设计默认粉紫（偏二次元）；262 紫 / 345 粉 也可选
+		hue: 205, // Default hue 0-360. 淡蓝色调；原默认粉紫 315（偏二次元）已改为天蓝
 		fixed: false, // Hide the theme color picker for visitors
 		// Dynamic Material 3 palette style (TonalSpot/Vibrant/Content/Expressive/Rainbow/FruitSalad/Monochrome/Neutral/Fidelity)
 		style: "tonalSpot",
@@ -57,8 +57,8 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		// desktop 用于 >= 1024px；mobile 仅用于 < 1024px 的首页，手机非首页不显示壁纸。
 		// 数组顺序就是轮播顺序；只需要静态 Banner 时，每组保留一张图片即可。
 		src: {
-			desktop: ["assets/images/banner/desktop/1.webp"],
-			mobile: ["assets/images/banner/mobile/1.webp"],
+			desktop: ["/banner/1.png"],
+			mobile: ["/banner/1.png"],
 		},
 		// 图片裁切焦点："top"、"center" 或 "bottom"。
 		position: "center",
