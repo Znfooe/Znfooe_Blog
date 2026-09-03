@@ -1,0 +1,23 @@
+---
+/**
+ * 番剧收藏页（多语言变体）：与根目录 anime.astro 同构，仅增加语言路由维度。
+ */
+import AnimeSection from "@components/organisms/AnimeSection.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { localeStaticPaths, renderWithLanguage } from "@utils/i18n-routing";
+import { getAnimeList } from "@utils/anime-data";
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const { lang } = Astro.props;
+
+renderWithLanguage(lang);
+
+const animes = await getAnimeList();
+---
+
+<MainGridLayout title={i18n(I18nKey.anime)} description={i18n(I18nKey.animeBanner)} page="anime" lang={lang}>
+    <AnimeSection animes={animes} client:visible></AnimeSection>
+</MainGridLayout>

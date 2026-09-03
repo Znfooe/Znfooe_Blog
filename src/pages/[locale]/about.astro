@@ -1,0 +1,42 @@
+---
+import { getEntry, render } from "astro:content";
+import Card from "@components/atoms/display/Card.svelte";
+import Markdown from "@components/content/Markdown.astro";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { localeStaticPaths, renderWithLanguage } from "@utils/i18n-routing";
+import { getMarkdownStylesheetAssets } from "@utils/markdown-assets";
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const { lang } = Astro.props;
+
+// 关键：在页面 frontmatter 内先进入语言上下文，后续本文件的 i18n() 才能读到正确语言。
+renderWithLanguage(lang);
+
+// spec collection 的双语约定：en 用 "about"，其它语言用 "about-<lang>"。
+// Astro glob loader 会把 id 规范化为小写并去除下划线，例如 zh_CN → about-zh-cn。
+const langKey = lang.toLowerCase().replace(/_/g, "-");
+const aboutId = lang === "en" ? "about" : `about-${langKey}`;
+const aboutPost = await getEntry("spec", aboutId);
+
+if (!aboutPost) {
+    throw new Error(`About page content not found for lang="${lang}" (id="${aboutId}")`);
+}
+
+const { Content, remarkPluginFrontmatter } = await render(aboutPost);
+const markdownStylesheetAssets = await getMarkdownStylesheetAssets(
+	remarkPluginFrontmatter.markdownSyntaxes,
+);
+---
+<MainGridLayout title={i18n(I18nKey.about)} description={i18n(I18nKey.about)} page="about" lang={lang}>
+    {markdownStylesheetAssets.map(({ pack, css }) => <style is:inline slot="head" data-swup-optional={pack} set:html={css}></style>)}
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <Card color="var(--card-bg)" radius="l" class="z-10 px-9 py-6 relative w-full">
+            <Markdown class="mt-2">
+                <Content />
+            </Markdown>
+        </Card>
+    </div>
+</MainGridLayout>

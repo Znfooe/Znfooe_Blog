@@ -1,0 +1,35 @@
+---
+/** 项目页（多语言变体）：与根目录 projects.astro 同构。 */
+import ProjectSection from "@components/organisms/ProjectSection.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { localeStaticPaths, renderWithLanguage } from "@utils/i18n-routing";
+import { projectsConfig } from "@/config/projectsConfig";
+import { resolveProjectsData } from "@/utils/feature-data";
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const { lang } = Astro.props;
+
+renderWithLanguage(lang);
+
+if (!projectsConfig.enable) {
+	return Astro.redirect("/404/");
+}
+
+const items = resolveProjectsData(projectsConfig);
+---
+
+<MainGridLayout
+	title={i18n(I18nKey.projects)}
+	description={i18n(I18nKey.projectsBanner)}
+	page="projects"
+	lang={lang}
+>
+	<ProjectSection
+		categories={projectsConfig.categories}
+		items={items}
+		client:visible
+	/>
+</MainGridLayout>

@@ -1,0 +1,35 @@
+---
+/** 时间线页（多语言变体）：与根目录 timeline.astro 同构。 */
+import TimelineSection from "@components/organisms/TimelineSection.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { localeStaticPaths, renderWithLanguage } from "@utils/i18n-routing";
+import { timelineConfig } from "@/config/timelineConfig";
+import { resolveTimelineData } from "@/utils/feature-data";
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const { lang } = Astro.props;
+
+renderWithLanguage(lang);
+
+if (!timelineConfig.enable) {
+	return Astro.redirect("/404/");
+}
+
+const items = resolveTimelineData(timelineConfig);
+---
+
+<MainGridLayout
+	title={i18n(I18nKey.timeline)}
+	description={i18n(I18nKey.timelineBanner)}
+	page="timeline"
+	lang={lang}
+>
+	<TimelineSection
+		categories={timelineConfig.categories}
+		items={items}
+		client:visible
+	/>
+</MainGridLayout>

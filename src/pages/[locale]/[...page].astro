@@ -1,0 +1,37 @@
+---
+import Pagination from "@components/molecules/Pagination.astro";
+import PostPage from "@components/organisms/PostPage.astro";
+import type { GetStaticPaths } from "astro";
+import { postListConfig } from "@/config/postListConfig";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { localeStaticPaths, renderWithLanguage } from "@utils/i18n-routing";
+import { getSortedPosts } from "@utils/content-utils";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const allBlogPosts = await getSortedPosts();
+	const locales = localeStaticPaths();
+	const result: any[] = [];
+	// 对每个启用的非默认语言，用 paginate 生成该语言前缀下的分页路径。
+	for (const loc of locales) {
+		const pages = paginate(allBlogPosts, {
+			pageSize: postListConfig.pageSize,
+			params: { locale: loc.params.locale },
+		});
+		for (const p of pages) {
+			result.push({ ...p, props: { ...p.props, lang: loc.props.lang } });
+		}
+	}
+	return result;
+}) satisfies GetStaticPaths;
+
+const { page, lang } = Astro.props;
+
+renderWithLanguage(lang);
+
+const len = page.data.length;
+---
+
+<MainGridLayout page="home" lang={lang}>
+    <PostPage page={page}></PostPage>
+    <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
+</MainGridLayout>
