@@ -1,15 +1,15 @@
 <script lang="ts">
 /**
- * 软件安利页主体（有机体）：页头 + 搜索/标签筛选 + 扁平列表 + 详情弹窗。
+ * 软件安利页主体（有机体）：页头 + 搜索/标签筛选 + 扁平列表 + 就地展开详情。
  * 数据由页面层构建期传入（本地数据源，零运行时请求）。
  * - 搜索对 name/summary/tags/description 做模糊包含匹配，即时过滤；
  * - 标签 chips 单选过滤（再点取消恢复全部），与搜索可叠加；
  * - 列表项为「主页文章般的文字列表」：图标 + 标题 + 摘要 + 标签徽章；
- * - 点击某项展开 Dialog 详情：完整描述 + 外链（GitHub / 网站）+ 底部致谢。
+ * - 点击列表项就地展开详情（仿主页文章页布局），顶部透明背景返回按钮；
+ *   返回按钮切换 selectedId 切回列表视图。
  */
 import Chips from "@components/atoms/action/Chips.svelte";
 import Card from "@components/atoms/display/Card.svelte";
-import Dialog from "@components/atoms/overlay/Dialog.svelte";
 import TextField from "@components/atoms/input/TextField.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import I18nKey from "@i18n/i18nKey";
@@ -24,13 +24,10 @@ let { items = [] as SoftwareEntry[] }: { items?: SoftwareEntry[] } = $props();
 let query = $state("");
 let selectedTag = $state("");
 let initialized = false;
-let activeItem = $state<SoftwareEntry | null>(null);
-let detailOpen = $state(false);
+let selectedId = $state<string | null>(null);
 
-function openDetail(item: SoftwareEntry) {
-	activeItem = item;
-	detailOpen = true;
-}
+/** 当前展开的条目（来自 selectedId 索引） */
+const selectedItem = $derived(items.find((item) => item.id === selectedId) ?? null);
 
 /** 从所有条目聚合去重的标签列表（数组顺序即 chips 顺序） */
 const allTags = $derived.by(() => {
@@ -68,16 +65,19 @@ const filteredItems = $derived.by(() => {
 	});
 });
 
-// 筛选状态同步到 URL（?q= / ?tag=），刷新/分享/回退保留
+// 筛选状态同步到 URL（?q= / ?tag= / ?id=），刷新/分享/回退保留
 $effect(() => {
 	const q = query;
 	const t = selectedTag;
+	const id = selectedId;
 	if (!initialized) return;
 	const params = new URLSearchParams(window.location.search);
 	params.delete("q");
 	params.delete("tag");
+	params.delete("id");
 	if (q) params.set("q", q);
 	if (t) params.set("tag", t);
+	if (id) params.set("id", id);
 	const qs = params.toString();
 	history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
 });
@@ -86,10 +86,25 @@ onMount(() => {
 	const params = new URLSearchParams(window.location.search);
 	query = params.get("q") || "";
 	selectedTag = params.get("tag") || "";
+	selectedId = params.get("id") || null;
 	initialized = true;
 });
 
-/** 描述按 \n 分段，供详情弹窗逐段渲染 */
+function openDetail(item: SoftwareEntry) {
+	selectedId = item.id;
+	if (typeof window !== "undefined") {
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	}
+}
+
+function closeDetail() {
+	selectedId = null;
+	if (typeof window !== "undefined") {
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	}
+}
+
+/** 描述按 \n 分段，供详情页逐段渲染 */
 function paragraphs(text: string): string[] {
 	return text.split(/\n+/).filter((s) => s.trim().length > 0);
 }
@@ -143,7 +158,65 @@ function paragraphs(text: string): string[] {
 		</div>
 	{/if}
 
-	{#if filteredItems.length > 0}
+	{#if selectedItem}
+		<!-- 详情视图（就地展开）：顶部透明返回按钮 + 标题/标签/描述/外链/致谢 -->
+		<article class="compass-detail" use:reveal>
+			<button
+				type="button"
+				class="compass-detail__back"
+				aria-label={i18n(I18nKey.backToHome)}
+				onclick={closeDetail}
+			>
+				<Icon icon="material-symbols:arrow-back-rounded" aria-hidden="true" />
+				<span>{i18n(I18nKey.backToHome)}</span>
+			</button>
+
+			<header class="compass-detail__head">
+				<span class="compass-detail__icon" aria-hidden="true">
+					<Icon icon={selectedItem.icon ?? "material-symbols:extension-rounded"} />
+				</span>
+				<h2 class="compass-detail__title">{selectedItem.name}</h2>
+				{#if selectedItem.tags.length > 0}
+					<div class="compass-detail__tags">
+						{#each selectedItem.tags as tag}
+							<span class="compass-detail__tag">{tag}</span>
+						{/each}
+					</div>
+				{/if}
+				<p class="compass-detail__summary">{selectedItem.summary}</p>
+			</header>
+
+			<div class="compass-detail__desc">
+				{#each paragraphs(selectedItem.description) as para}
+					{#if para.startsWith("·")}
+						<p class="compass-detail__bullet">{para}</p>
+					{:else}
+						<p>{para}</p>
+					{/if}
+				{/each}
+			</div>
+
+			<div class="compass-detail__links">
+				{#if selectedItem.github}
+					<a class="compass-detail__link" href={selectedItem.github} target="_blank" rel="noopener noreferrer">
+						<Icon icon="fa6-brands:github" aria-hidden="true" />
+						{i18n(I18nKey.compassViewSource)}
+					</a>
+				{/if}
+				<a class="compass-detail__link" href={selectedItem.href} target="_blank" rel="noopener noreferrer">
+					<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
+					{i18n(I18nKey.compassViewSite)}
+				</a>
+			</div>
+
+			{#if selectedItem.thanks}
+				<p class="compass-detail__thanks">
+					<Icon icon="material-symbols:favorite-rounded" aria-hidden="true" />
+					{selectedItem.thanks}
+				</p>
+			{/if}
+		</article>
+	{:else if filteredItems.length > 0}
 		<ul class="compass-list">
 			{#each filteredItems as item, i (item.id)}
 				<li class="compass-list__item" use:reveal={{ delay: Math.min(i, 7) * 45 }}>
@@ -178,55 +251,6 @@ function paragraphs(text: string): string[] {
 		</div>
 	{/if}
 </Card>
-
-{#if activeItem}
-	<Dialog bind:open={detailOpen} title={activeItem.name}>
-		<div class="compass-detail">
-			<div class="compass-detail__head">
-				<span class="compass-detail__icon" aria-hidden="true">
-					<Icon icon={activeItem.icon ?? "material-symbols:extension-rounded"} />
-				</span>
-				{#if activeItem.tags.length > 0}
-					<div class="compass-detail__tags">
-						{#each activeItem.tags as tag}
-							<span class="compass-detail__tag">{tag}</span>
-						{/each}
-					</div>
-				{/if}
-			</div>
-
-			<div class="compass-detail__desc">
-				{#each paragraphs(activeItem.description) as para}
-					{#if para.startsWith("·")}
-						<p class="compass-detail__bullet">{para}</p>
-					{:else}
-						<p>{para}</p>
-					{/if}
-				{/each}
-			</div>
-
-			<div class="compass-detail__links">
-				{#if activeItem.github}
-					<a class="compass-detail__link" href={activeItem.github} target="_blank" rel="noopener noreferrer">
-						<Icon icon="fa6-brands:github" aria-hidden="true" />
-						{i18n(I18nKey.compassViewSource)}
-					</a>
-				{/if}
-				<a class="compass-detail__link" href={activeItem.href} target="_blank" rel="noopener noreferrer">
-					<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
-					{i18n(I18nKey.compassViewSite)}
-				</a>
-			</div>
-
-			{#if activeItem.thanks}
-				<p class="compass-detail__thanks">
-					<Icon icon="material-symbols:favorite-rounded" aria-hidden="true" />
-					{activeItem.thanks}
-				</p>
-			{/if}
-		</div>
-	</Dialog>
-{/if}
 
 <style lang="stylus">
 @import "../../styles/breakpoints.styl"
@@ -376,30 +400,71 @@ function paragraphs(text: string): string[] {
 		width: 1.25rem
 		height: 1.25rem
 
-/* 详情弹窗 */
+/* 详情视图：就地展开的「文章式」布局，顶部透明背景返回按钮 */
 .compass-detail
 	display: flex
 	flex-direction: column
-	gap: 1rem
+	gap: 1.25rem
+	margin: 1.25rem 0 0
+	padding: 0 0.25rem
 	min-width: 0
+
+	&__back
+		align-self: flex-start
+		display: inline-flex
+		align-items: center
+		gap: 0.375rem
+		padding: 0.375rem 0.625rem
+		margin: 0
+		border: 1px solid var(--outline-variant)
+		border-radius: var(--shape-corner-full)
+		background: transparent
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-label-medium)
+		line-height: 1.25rem
+		cursor: pointer
+		text-decoration: none
+		transition:
+			background-color var(--m3e-duration-short) var(--m3e-easing-standard),
+			color var(--m3e-duration-short) var(--m3e-easing-standard),
+			border-color var(--m3e-duration-short) var(--m3e-easing-standard)
+		> :global(svg)
+			width: 1.125rem
+			height: 1.125rem
+		&:hover
+			background: unquote("color-mix(in oklab, var(--on-surface) 6%, transparent)")
+			color: var(--on-surface)
+			border-color: var(--outline)
+		&:focus-visible
+			outline: 2px solid var(--primary)
+			outline-offset: 2px
 
 	&__head
 		display: flex
 		flex-direction: column
-		gap: 0.625rem
+		gap: 0.75rem
+		padding-bottom: 1rem
+		border-bottom: 1px solid var(--outline-variant)
 
 	&__icon
 		display: flex
 		align-items: center
 		justify-content: center
-		width: 3rem
-		height: 3rem
-		border-radius: var(--shape-corner-m)
+		width: 3.5rem
+		height: 3.5rem
+		flex-shrink: 0
+		border-radius: var(--shape-corner-l)
 		background: unquote("color-mix(in oklab, var(--primary) 14%, var(--surface-container-high))")
 		color: var(--primary)
 		> :global(svg)
-			width: 1.75rem
-			height: 1.75rem
+			width: 2rem
+			height: 2rem
+
+	&__title
+		margin: 0
+		color: var(--on-surface)
+		font: var(--m3e-type-headline-small)
+		line-height: 1.3
 
 	&__tags
 		display: flex
@@ -409,19 +474,25 @@ function paragraphs(text: string): string[] {
 	&__tag
 		padding: 0.125rem 0.5625rem
 		border-radius: var(--shape-corner-full)
-		background: var(--surface-container-high)
-		color: var(--on-surface-variant)
+		background: unquote("color-mix(in oklab, var(--primary) 10%, var(--surface-container-high))")
+		color: var(--primary)
 		font: var(--m3e-type-label-small)
+
+	&__summary
+		margin: 0
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-large)
+		line-height: 1.5
 
 	&__desc
 		display: flex
 		flex-direction: column
-		gap: 0.5rem
+		gap: 0.625rem
 		p
 			margin: 0
 			color: var(--on-surface-variant)
-			font: var(--m3e-type-body-small)
-			line-height: 1.6
+			font: var(--m3e-type-body-medium)
+			line-height: 1.7
 
 		.compass-detail__bullet
 			padding-left: 0.5rem
@@ -436,7 +507,7 @@ function paragraphs(text: string): string[] {
 		display: inline-flex
 		align-items: center
 		gap: 0.375rem
-		padding: 0.375rem 0.75rem
+		padding: 0.4375rem 0.875rem
 		border-radius: var(--shape-corner-m)
 		background: unquote("color-mix(in oklab, var(--primary) 8%, transparent)")
 		color: var(--primary)
@@ -457,16 +528,16 @@ function paragraphs(text: string): string[] {
 		display: flex
 		align-items: center
 		justify-content: center
-		gap: 0.375rem
-		margin: 0.25rem 0 0
-		padding-top: 0.875rem
+		gap: 0.4375rem
+		margin: 0.5rem 0 0
+		padding-top: 1rem
 		border-top: 1px solid var(--outline-variant)
 		color: var(--on-surface-variant)
-		font: var(--m3e-type-body-small)
+		font: var(--m3e-type-body-medium)
 		font-weight: 600
 
 		> :global(svg)
-			width: 1rem
-			height: 1rem
+			width: 1.125rem
+			height: 1.125rem
 			color: #e57373
 </style>
