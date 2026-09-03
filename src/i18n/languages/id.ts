@@ -91,6 +91,7 @@ export const id: Translation = {
 	[Key.devicesStatusWishlist]: "Daftar keinginan",
 	[Key.devicesViewSpecs]: "Lihat detail",
 	[Key.devicesFeatured]: "Unggulan",
+	[Key.devicesSpecDetails]: "Spesifikasi",
 
 	[Key.timeline]: "Linimasa",
 	[Key.timelineBanner]:

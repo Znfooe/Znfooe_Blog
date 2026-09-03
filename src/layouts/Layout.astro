@@ -327,6 +327,31 @@ document.addEventListener("click", async (event) => {
 const setup = () => {
 	if (!window.swup || window.__shironeNavigationBound) return;
 	window.__shironeNavigationBound = true;
+	// 用户反馈：点击侧栏的分类/标签等内链跳转时，页面不应被强制滚到顶部。
+	// Swup 默认 resetScroll: true 会把 scrollY 归零；关闭后保留滚动位置，
+	// 仅当 URL 含 #hash 时再滚到锚点（语义与浏览器原生跳转一致）。
+	window.swup.options.resetScroll = false;
+	// SwupScrollPlugin 内部通过 visit.scroll.reset 控制是否滚到顶部；
+	// 仅修改 options.resetScroll 不足以阻止（scroll-plugin 会在 doScrollingBetweenPages
+	// 重新读取 visit 实例字段）。所以在 visit:start 里把当次访问的 reset 标记置 false。
+	// priority 必须小于 SwupScrollPlugin.onVisitStart 的 1，确保我们的修改先生效。
+	window.swup.hooks.before(
+		"visit:start",
+		(visit: { scroll?: { reset?: boolean } }) => {
+			if (visit?.scroll) visit.scroll.reset = false;
+		},
+		{ priority: -10 },
+	);
+	window.swup.hooks.on(
+		"visit:end",
+		(_visit: unknown) => {
+			const hash = window.location.hash;
+			if (!hash) return;
+			const id = decodeURIComponent(hash.slice(1));
+			const target = document.getElementById(id);
+			if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+		},
+	);
 	let scrollStarted = false;
 	let visitActive = false;
 	let finishTimer: number | undefined;

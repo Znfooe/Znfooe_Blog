@@ -113,12 +113,20 @@ export const LinkPresets: Record<string, NavBarLink> = {
 		pageKey: "about",
 	},
 	GitHub: {
-		// 外部品牌名，保持英文
+		// 外部品牌名，保持英文。指向 fork 仓库主人的个人 GitHub
 		name: "GitHub",
-		url: "https://github.com/LyraVoid/Shirone",
+		url: "https://github.com/Znfooe",
 		icon: "fa6-brands:github",
 		external: true,
 		pageKey: "github",
+	},
+	// 上游开源原项目（fork 来源），保留作为单独入口便于致敬作者
+	SourceRepo: {
+		name: "Original",
+		url: "https://github.com/LyraVoid/Shirone",
+		icon: "fa6-brands:github",
+		external: true,
+		pageKey: "source",
 	},
 };
 
@@ -145,6 +153,7 @@ const defaultNavBarConfig: NavBarConfig = {
 				// LinkPresets.Tags,
 				LinkPresets.About,
 				LinkPresets.GitHub,
+				LinkPresets.SourceRepo,
 			],
 		},
 	],

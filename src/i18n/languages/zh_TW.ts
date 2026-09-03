@@ -83,6 +83,7 @@ export const zh_TW: Translation = {
 	[Key.devicesStatusWishlist]: "心願清單",
 	[Key.devicesViewSpecs]: "查看詳情",
 	[Key.devicesFeatured]: "主力推薦",
+	[Key.devicesSpecDetails]: "規格參數",
 
 	[Key.timeline]: "時間線",
 	[Key.timelineBanner]: "成長軌跡、重要經歷與里程碑記錄。",

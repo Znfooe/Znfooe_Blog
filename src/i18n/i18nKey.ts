@@ -81,6 +81,7 @@ enum I18nKey {
 	devicesStatusWishlist = "devicesStatusWishlist",
 	devicesViewSpecs = "devicesViewSpecs",
 	devicesFeatured = "devicesFeatured",
+	devicesSpecDetails = "devicesSpecDetails",
 
 	timeline = "timeline",
 	timelineBanner = "timelineBanner",

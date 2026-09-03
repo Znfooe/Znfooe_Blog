@@ -100,8 +100,47 @@ if (typeof avatarAsset !== "string") {
                 {config.links[0].name}
             </Button>}
         </div>
+        {config.contacts && config.contacts.length > 0 && (
+            <ul class="profile-contacts flex flex-col items-center gap-1 mb-1">
+                {config.contacts.map((contact) => (
+                    <li class="profile-contacts__row">
+                        <span class="profile-contacts__name">{contact.name}</span>
+                        <span class="profile-contacts__sep">:</span>
+                        <span class="profile-contacts__value">{contact.value}</span>
+                    </li>
+                ))}
+            </ul>
+        )}
         <UmamiStats variant="profile" />
     </div>
 	</Card>
 </div>
+
+<style lang="stylus">
+	/* 联系方式纯文字行（QQ / WhatsApp 等）：与 bio 同一字号色阶，居中堆叠 */
+	.profile-contacts
+		list-style: none
+		padding: 0
+		margin: 0
+		font: var(--m3e-type-body-small)
+		color: var(--on-surface-variant)
+
+		&__row
+			display: flex
+			align-items: baseline
+			justify-content: center
+			gap: 0.25rem
+			line-height: 1.4
+
+		&__name
+			font-weight: 600
+			color: var(--on-surface)
+
+		&__sep
+			color: var(--on-surface-variant)
+			opacity: 0.7
+
+		&__value
+			font-feature-settings: "tnum" 1
+</style>
 

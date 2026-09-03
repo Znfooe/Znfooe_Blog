@@ -12,6 +12,7 @@
  * - 规格简述渲染为高可读性 pill 徽章；年份 chip；外链用 M3 胶囊按钮，
  *   带 rel=noopener noreferrer 由消费方保证的安全外链。
  */
+import Dialog from "@components/atoms/overlay/Dialog.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
@@ -21,6 +22,7 @@ import type { DeviceItem, DeviceStatus } from "@/types/devicesConfig";
 let { device, delay = 0 }: { device: DeviceItem; delay?: number } = $props();
 
 let coverFailed = $state(false);
+let detailsOpen = $state(false);
 
 const statusMeta: Record<
 	DeviceStatus,
@@ -108,16 +110,15 @@ const showImage = $derived(Boolean(device.image) && !coverFailed);
 		<p class="device-card__description">{device.description}</p>
 
 		<div class="device-card__footer">
-			{#if device.link}
-				<a
+			{#if device.specDetails?.length}
+				<button
+					type="button"
 					class="device-card__link"
-					href={device.link}
-					target="_blank"
-					rel="noopener noreferrer"
+					onclick={() => (detailsOpen = true)}
 				>
-					<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
+					<Icon icon="material-symbols:info-outline-rounded" aria-hidden="true" />
 					{i18n(I18nKey.devicesViewSpecs)}
-				</a>
+				</button>
 			{/if}
 			{#if device.featured}
 				<span class="device-card__featured" aria-hidden="true">
@@ -128,6 +129,55 @@ const showImage = $derived(Boolean(device.image) && !coverFailed);
 		</div>
 	</div>
 </article>
+
+<Dialog bind:open={detailsOpen} title={device.name}>
+	<div class="device-card__dialog">
+		<div class="device-card__dialog-head">
+			{#if !showImage}
+				<span class="device-card__icon" aria-hidden="true">
+					<Icon icon={device.icon ?? "material-symbols:devices-rounded"} />
+				</span>
+			{/if}
+			<div class="device-card__dialog-meta">
+				<span class="device-card__brand">{device.brand}</span>
+				{#if device.year}
+					<span class="device-card__year">{device.year}</span>
+				{/if}
+			</div>
+		</div>
+
+		{#if device.description}
+			<p class="device-card__dialog-desc">{device.description}</p>
+		{/if}
+
+		{#if device.specDetails?.length}
+			<h3 class="device-card__dialog-title">
+				<Icon icon="material-symbols:list-alt-outline-rounded" aria-hidden="true" />
+				{i18n(I18nKey.devicesSpecDetails)}
+			</h3>
+			<ul class="device-card__dialog-specs">
+				{#each device.specDetails as spec (spec.key)}
+					<li class="device-card__dialog-spec">
+						<span class="device-card__dialog-spec-label">{spec.label}</span>
+						<span class="device-card__dialog-spec-value">{spec.value}</span>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+
+		{#if device.link}
+			<a
+				class="device-card__dialog-link"
+				href={device.link}
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
+				{i18n(I18nKey.devicesViewSpecs)}
+			</a>
+		{/if}
+	</div>
+</Dialog>
 
 <style lang="stylus">
 @import "../../styles/breakpoints.styl"
@@ -334,6 +384,7 @@ const showImage = $derived(Boolean(device.image) && !coverFailed);
 		font-weight: 600
 		text-decoration: none
 		border: 1px solid unquote("color-mix(in oklab, var(--primary) 16%, transparent)")
+		cursor: pointer
 		transition:
 			background-color var(--m3e-duration-short) var(--m3e-easing-standard),
 			box-shadow var(--m3e-duration-short) var(--m3e-easing-standard),
@@ -360,4 +411,98 @@ const showImage = $derived(Boolean(device.image) && !coverFailed);
 			width: 0.875rem
 			height: 0.875rem
 			color: #facc15
+
+	/* 详情弹窗内容 */
+	&__dialog
+		display: flex
+		flex-direction: column
+		gap: 0.75rem
+		min-width: 0
+
+	&__dialog-head
+		display: flex
+		align-items: center
+		gap: 0.75rem
+		min-width: 0
+
+	&__dialog-meta
+		display: flex
+		align-items: center
+		gap: 0.5rem
+		min-width: 0
+		flex-wrap: wrap
+
+	&__dialog-desc
+		margin: 0
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-small)
+		line-height: 1.5
+
+	&__dialog-title
+		display: flex
+		align-items: center
+		gap: 0.5rem
+		margin: 0.25rem 0 0
+		padding-top: 0.75rem
+		border-top: 1px solid var(--outline-variant)
+		color: var(--on-surface)
+		font: var(--m3e-type-title-small)
+		font-weight: 700
+
+		> :global(svg)
+			width: 1.125rem
+			height: 1.125rem
+			color: var(--primary)
+
+	&__dialog-specs
+		display: flex
+		flex-direction: column
+		margin: 0
+		padding: 0
+		list-style: none
+
+	&__dialog-spec
+		display: grid
+		grid-template-columns: minmax(5.5rem, max-content) 1fr
+		gap: 0.75rem
+		padding: 0.5rem 0
+		border-bottom: 1px solid var(--outline-variant)
+
+		&:last-child
+			border-bottom: none
+
+	&__dialog-spec-label
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-label-medium)
+		font-weight: 600
+		white-space: nowrap
+
+	&__dialog-spec-value
+		color: var(--on-surface)
+		font: var(--m3e-type-body-small)
+		line-height: 1.5
+		overflow-wrap: anywhere
+
+	&__dialog-link
+		display: inline-flex
+		align-items: center
+		gap: 0.3125rem
+		align-self: flex-start
+		padding: 0.375rem 0.75rem
+		border-radius: var(--shape-corner-m)
+		background: unquote("color-mix(in oklab, var(--primary) 8%, transparent)")
+		color: var(--primary)
+		font: var(--m3e-type-label-medium)
+		font-weight: 600
+		text-decoration: none
+		border: 1px solid unquote("color-mix(in oklab, var(--primary) 16%, transparent)")
+		transition:
+			background-color var(--m3e-duration-short) var(--m3e-easing-standard)
+
+		&:hover
+			background: unquote("color-mix(in oklab, var(--primary) 16%, transparent)")
+
+		> :global(svg)
+			width: 1rem
+			height: 1rem
 </style>

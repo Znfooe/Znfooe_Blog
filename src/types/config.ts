@@ -140,6 +140,14 @@ export type ProfileConfig = {
 		url: string;
 		icon: string;
 	}[];
+	/**
+	 * 联系方式（QQ / WhatsApp 等）：在社交图标下方逐行展示纯文字。
+	 * 不渲染图标按钮，只用「名称: 值」的可读格式。
+	 */
+	contacts?: {
+		name: string;
+		value: string;
+	}[];
 };
 
 export type LicenseConfig = {

@@ -90,6 +90,7 @@ export const en: Translation = {
 	[Key.devicesStatusWishlist]: "Wishlist",
 	[Key.devicesViewSpecs]: "View details",
 	[Key.devicesFeatured]: "Featured",
+	[Key.devicesSpecDetails]: "Specifications",
 
 	[Key.timeline]: "Timeline",
 	[Key.timelineBanner]: "Growth trajectory, milestones, and memorable moments.",

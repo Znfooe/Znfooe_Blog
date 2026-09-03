@@ -89,6 +89,7 @@ export const tr: Translation = {
 	[Key.devicesStatusWishlist]: "İstek listesi",
 	[Key.devicesViewSpecs]: "Detayları gör",
 	[Key.devicesFeatured]: "Öne çıkan",
+	[Key.devicesSpecDetails]: "Özellikler",
 
 	[Key.timeline]: "Zaman Çizelgesi",
 	[Key.timelineBanner]:

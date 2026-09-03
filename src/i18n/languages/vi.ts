@@ -90,6 +90,7 @@ export const vi: Translation = {
 	[Key.devicesStatusWishlist]: "Danh sách mong muốn",
 	[Key.devicesViewSpecs]: "Xem chi tiết",
 	[Key.devicesFeatured]: "Nổi bật",
+	[Key.devicesSpecDetails]: "Thông số",
 
 	[Key.timeline]: "Dòng thời gian",
 	[Key.timelineBanner]:

@@ -142,6 +142,17 @@ let drawerEl: HTMLElement | undefined = $state();
 			{/each}
 
 		</nav>
+
+		<a
+			class="site-drawer__credit"
+			href="https://github.com/LyraVoid/Shirone"
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-label="向上游开源项目 LyraVoid/Shirone 致谢"
+		>
+			<Icon icon="material-symbols:favorite-outline-rounded" class="site-drawer__credit-icon" />
+			<span>感谢开源作者 matsuzaka-yuki</span>
+		</a>
 	</aside>
 </div>
 
@@ -311,4 +322,30 @@ let drawerEl: HTMLElement | undefined = $state();
 
 	&__group-body
 		padding: 4px 0 8px
+
+	/* 抽屉底部致谢行：感谢开源作者
+	   视觉上紧贴「更多」组展开后的最后一项（GitHub/原项目） */
+	&__credit
+		display: flex
+		align-items: center
+		justify-content: center
+		gap: 6px
+		flex: none
+		padding: 12px 16px 20px
+		margin: 8px 12px 12px
+		font: var(--m3e-type-body-small)
+		color: var(--on-surface-variant)
+		text-decoration: none
+		border-top: 1px solid unquote("color-mix(in oklab, var(--on-surface) 10%, transparent)")
+		border-radius: 0 0 var(--shape-corner-l) 0
+		transition: color var(--m3e-duration-short) var(--m3e-easing-standard)
+
+		&:hover
+			color: var(--primary)
+
+	&__credit-icon
+		display: flex
+		width: 1rem
+		height: 1rem
+		color: var(--tertiary)
 </style>

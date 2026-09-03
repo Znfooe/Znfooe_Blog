@@ -88,6 +88,7 @@ export const ja: Translation = {
 	[Key.devicesStatusWishlist]: "欲しいものリスト",
 	[Key.devicesViewSpecs]: "詳細を見る",
 	[Key.devicesFeatured]: "おすすめ",
+	[Key.devicesSpecDetails]: "スペック",
 
 	[Key.timeline]: "タイムライン",
 	[Key.timelineBanner]: "成長の軌跡、重要な経験、そしてマイルストーンの記録。",

@@ -88,6 +88,7 @@ export const ko: Translation = {
 	[Key.devicesStatusWishlist]: "위시리스트",
 	[Key.devicesViewSpecs]: "상세 정보",
 	[Key.devicesFeatured]: "메인 추천",
+	[Key.devicesSpecDetails]: "사양",
 
 	[Key.timeline]: "타임라인",
 	[Key.timelineBanner]: "성장 궤적, 중요한 경험 및 이정표 기록.",

@@ -83,6 +83,7 @@ export const th: Translation = {
 	[Key.devicesStatusWishlist]: "รายการที่อยากได้",
 	[Key.devicesViewSpecs]: "ดูรายละเอียด",
 	[Key.devicesFeatured]: "แนะนำ",
+	[Key.devicesSpecDetails]: "ข้อมูลจำเพาะ",
 
 	[Key.timeline]: "ไทม์ไลน์",
 	[Key.timelineBanner]: "เส้นทางการเติบโต เหตุการณ์สำคัญ และบันทึกหมุดหมายชีวิต",
