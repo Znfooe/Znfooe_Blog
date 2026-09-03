@@ -46,11 +46,13 @@ export const es: Translation = {
 	[Key.animeConfigMissingBilibili]: "UID de Bilibili no configurado",
 	[Key.animeSyncEmpty]: "No se encontraron animes en esta fuente de datos",
 
-	[Key.compass]: "Brújula",
+	[Key.compass]: "Recomendaciones",
 	[Key.compassBanner]:
-		"Sitios a los que vuelvo a menudo — herramientas de desarrollo, documentación y madrigueras de conejo.",
-	[Key.compassNoResults]: "Ningún sitio coincide con tu búsqueda",
-	[Key.compassCounts]: "sitios",
+		"Software, sitios y proyectos open-source seleccionados que vale la pena probar.",
+	[Key.compassNoResults]: "Ningún elemento coincide con tu búsqueda",
+	[Key.compassCounts]: "elementos",
+	[Key.compassViewSource]: "Ver en GitHub",
+	[Key.compassViewSite]: "Visitar sitio",
 
 	[Key.skills]: "Habilidades",
 	[Key.skillsBanner]:

@@ -47,11 +47,13 @@ export const vi: Translation = {
 	[Key.animeConfigMissingBilibili]: "Chưa cấu hình UID Bilibili",
 	[Key.animeSyncEmpty]: "Không tìm thấy anime nào trong nguồn dữ liệu này",
 
-	[Key.compass]: "La bàn",
+	[Key.compass]: "Phần mềm gợi ý",
 	[Key.compassBanner]:
-		"Các trang tôi hay ghé — công cụ lập trình, tài liệu và những hố thỏ.",
-	[Key.compassNoResults]: "Không có trang nào khớp với tìm kiếm",
-	[Key.compassCounts]: "trang",
+		"Phần mềm, trang web và dự án mã nguồn mở được tuyển chọn, đáng để thử.",
+	[Key.compassNoResults]: "Không có mục nào khớp với tìm kiếm",
+	[Key.compassCounts]: "mục",
+	[Key.compassViewSource]: "Xem trên GitHub",
+	[Key.compassViewSite]: "Truy cập trang",
 
 	[Key.skills]: "Kỹ năng",
 	[Key.skillsBanner]:

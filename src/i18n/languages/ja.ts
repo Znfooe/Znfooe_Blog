@@ -47,11 +47,13 @@ export const ja: Translation = {
 	[Key.animeConfigMissingBilibili]: "Bilibili UIDが未設定です",
 	[Key.animeSyncEmpty]: "このデータソースにはアニメがありません",
 
-	[Key.compass]: "サイト羅針盤",
+	[Key.compass]: "おすすめソフト",
 	[Key.compassBanner]:
-		"よく使うサイト —— 開発ツール、ドキュメント、そして迷宮の奥へ。",
-	[Key.compassNoResults]: "検索条件に一致するサイトがありません",
-	[Key.compassCounts]: "個のサイト",
+		"試す価値のあるソフト・サイト・オープンソース作品を厳選しました。",
+	[Key.compassNoResults]: "検索条件に一致する項目がありません",
+	[Key.compassCounts]: "件",
+	[Key.compassViewSource]: "GitHub で見る",
+	[Key.compassViewSite]: "サイトを見る",
 
 	[Key.skills]: "スキル",
 	[Key.skillsBanner]:

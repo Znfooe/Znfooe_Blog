@@ -1,98 +1,83 @@
 <script lang="ts">
 /**
- * 站点罗盘页主体（有机体）：页头 + 搜索/分组筛选 + 分组陈列。
+ * 软件安利页主体（有机体）：页头 + 搜索/标签筛选 + 扁平列表 + 详情弹窗。
  * 数据由页面层构建期传入（本地数据源，零运行时请求）。
- * 筛选与站内 friends/moments/anime 同一交互语言：
- * - 分组 chips 单选过滤（再点取消恢复全部）：切换时走站内同款 LoadingIndicator
- *   三段过渡（loading → 淡出 → 列表 stagger 揭幕）；搜索即时过滤（label/note/域名），
- *   每键直接收放、不闪加载器（与 MomentSection 的搜索/标签分工一致）；
- * - 状态同步 URL（?q= / ?group=），刷新/分享/回退保留；
- * - 分组筛选与搜索可叠加。
- * 分组标题用站内 SectionTitle 语言（归档/日历同款），不引入额外装置。
+ * - 搜索对 name/summary/tags/description 做模糊包含匹配，即时过滤；
+ * - 标签 chips 单选过滤（再点取消恢复全部），与搜索可叠加；
+ * - 列表项为「主页文章般的文字列表」：图标 + 标题 + 摘要 + 标签徽章；
+ * - 点击某项展开 Dialog 详情：完整描述 + 外链（GitHub / 网站）+ 底部致谢。
  */
 import Chips from "@components/atoms/action/Chips.svelte";
 import Card from "@components/atoms/display/Card.svelte";
-import LoadingIndicator from "@components/atoms/feedback/LoadingIndicator.svelte";
+import Dialog from "@components/atoms/overlay/Dialog.svelte";
 import TextField from "@components/atoms/input/TextField.svelte";
-import CompassTile from "@components/molecules/CompassTile.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
-import SectionTitle from "@components/molecules/SectionTitle.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
+import { reveal } from "@utils/motion";
 import { onMount } from "svelte";
-import type { CompassShelf } from "../../data/compass";
+import type { SoftwareEntry } from "../../data/compass";
 
-let { shelves = [] as CompassShelf[] }: { shelves?: CompassShelf[] } = $props();
+let { items = [] as SoftwareEntry[] }: { items?: SoftwareEntry[] } = $props();
 
 let query = $state("");
-let selectedGroup = $state("");
+let selectedTag = $state("");
 let initialized = false;
-/** 分组筛选过渡三段态（站内同款）：loading 展示指示器 → out 指示器淡出 → idle 列表 stagger 揭幕 */
-type FilterPhase = "idle" | "loading" | "out";
-let phase = $state<FilterPhase>("idle");
-let phaseTimers: ReturnType<typeof setTimeout>[] = [];
+let activeItem = $state<SoftwareEntry | null>(null);
+let detailOpen = $state(false);
 
-/** 分组筛选 chips（filter 单选，再点取消；分组图标作前置） */
-const groupItems = $derived(
-	shelves.map((shelf) => ({
-		value: shelf.key,
-		label: shelf.name,
-		leadingIcon: shelf.icon ?? "",
-	})),
-);
-
-function hostOf(href: string): string {
-	try {
-		return new URL(href).hostname;
-	} catch {
-		return href;
-	}
+function openDetail(item: SoftwareEntry) {
+	activeItem = item;
+	detailOpen = true;
 }
 
-/** 过滤：分组命中 + 搜索命中（label/note/域名）；整组无命中则组不渲染 */
-const filteredShelves = $derived.by(() => {
-	const normalizedQuery = query.trim().toLowerCase();
-	return shelves
-		.filter((shelf) => !selectedGroup || shelf.key === selectedGroup)
-		.map((shelf) => ({
-			...shelf,
-			entries: normalizedQuery
-				? shelf.entries.filter((entry) =>
-						[entry.label, entry.note ?? "", hostOf(entry.href)]
-							.join(" ")
-							.toLowerCase()
-							.includes(normalizedQuery),
-					)
-				: shelf.entries,
-		}))
-		.filter((shelf) => shelf.entries.length > 0);
+/** 从所有条目聚合去重的标签列表（数组顺序即 chips 顺序） */
+const allTags = $derived.by(() => {
+	const seen = new Set<string>();
+	const tags: string[] = [];
+	for (const item of items) {
+		for (const tag of item.tags) {
+			if (!seen.has(tag)) {
+				seen.add(tag);
+				tags.push(tag);
+			}
+		}
+	}
+	return tags;
 });
 
-const totalCount = $derived(
-	filteredShelves.reduce((sum, shelf) => sum + shelf.entries.length, 0),
+const tagItems = $derived(
+	allTags.map((tag) => ({ value: tag, label: tag })),
 );
 
-/** 分组筛选：指示器展示 → 淡出 → 列表 stagger 揭幕（MomentSection 同款三段） */
-function onGroupChange() {
-	phaseTimers.forEach(clearTimeout);
-	phase = "loading";
-	phaseTimers = [
-		setTimeout(() => (phase = "out"), 300),
-		setTimeout(() => (phase = "idle"), 300 + 150),
-	];
+/** 模糊包含匹配：搜索词可命中名称 / 摘要 / 标签 / 详情 */
+function matchesQuery(item: SoftwareEntry, q: string): boolean {
+	return [item.name, item.summary, ...item.tags, item.description]
+		.join(" ")
+		.toLowerCase()
+		.includes(q);
 }
 
-// 筛选状态同步到 URL（?q= / ?group=），刷新/分享/回退保留
+const filteredItems = $derived.by(() => {
+	const q = query.trim().toLowerCase();
+	return items.filter((item) => {
+		if (selectedTag && !item.tags.includes(selectedTag)) return false;
+		if (q && !matchesQuery(item, q)) return false;
+		return true;
+	});
+});
+
+// 筛选状态同步到 URL（?q= / ?tag=），刷新/分享/回退保留
 $effect(() => {
 	const q = query;
-	const g = selectedGroup;
+	const t = selectedTag;
 	if (!initialized) return;
 	const params = new URLSearchParams(window.location.search);
 	params.delete("q");
-	params.delete("group");
+	params.delete("tag");
 	if (q) params.set("q", q);
-	if (g) params.set("group", g);
+	if (t) params.set("tag", t);
 	const qs = params.toString();
 	history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
 });
@@ -100,20 +85,24 @@ $effect(() => {
 onMount(() => {
 	const params = new URLSearchParams(window.location.search);
 	query = params.get("q") || "";
-	selectedGroup = params.get("group") || "";
+	selectedTag = params.get("tag") || "";
 	initialized = true;
-	return () => phaseTimers.forEach(clearTimeout);
 });
+
+/** 描述按 \n 分段，供详情弹窗逐段渲染 */
+function paragraphs(text: string): string[] {
+	return text.split(/\n+/).filter((s) => s.trim().length > 0);
+}
 </script>
 
 <Card color="var(--card-bg)" radius="l" class="compass-section px-8 py-6">
 	<PageHeader
-		icon="material-symbols:explore-rounded"
+		icon="material-symbols:rocket-launch-outline-rounded"
 		title={i18n(I18nKey.compass)}
 		subtitle={i18n(I18nKey.compassBanner)}
 	/>
 
-	{#if shelves.length > 0}
+	{#if items.length > 0}
 		<div class="compass-section__tools">
 			<div class="compass-section__search">
 				<TextField
@@ -139,43 +128,49 @@ onMount(() => {
 				{/if}
 			</div>
 
-			{#if groupItems.length > 1}
+			{#if allTags.length > 1}
 				<div class="compass-section__chips">
 					<Chips
-						items={groupItems}
+						items={tagItems}
 						variant="filter"
-						bind:value={selectedGroup}
-						onchange={onGroupChange}
+						bind:value={selectedTag}
 					/>
 				</div>
 			{/if}
-			{#if totalCount > 1}
-				<p class="compass-section__count">{totalCount} {i18n(I18nKey.compassCounts)}</p>
+			{#if filteredItems.length > 0}
+				<p class="compass-section__count">{filteredItems.length} {i18n(I18nKey.compassCounts)}</p>
 			{/if}
 		</div>
 	{/if}
 
-	{#if phase !== "idle"}
-		<!-- 分组筛选过渡：contained 指示器展示后淡出，再由列表 stagger 揭幕 -->
-		<div
-			class="compass-section__loading"
-			class:compass-section__loading--out={phase === "out"}
-		>
-			<LoadingIndicator contained size={64} />
-		</div>
-	{:else if filteredShelves.length > 0}
-		{#key `${selectedGroup}|${query}`}
-			{#each filteredShelves as shelf (shelf.key)}
-				<section class="compass-shelf" data-shelf={shelf.key}>
-					<SectionTitle title={shelf.name} subtitle={shelf.blurb} icon={shelf.icon} />
-					<div class="compass-shelf__grid">
-						{#each shelf.entries as entry, i (entry.href)}
-							<CompassTile {entry} delay={Math.min(i, 7) * 45} />
-						{/each}
-					</div>
-				</section>
+	{#if filteredItems.length > 0}
+		<ul class="compass-list">
+			{#each filteredItems as item, i (item.id)}
+				<li class="compass-list__item" use:reveal={{ delay: Math.min(i, 7) * 45 }}>
+					<button
+						type="button"
+						class="compass-list__btn"
+						onclick={() => openDetail(item)}
+					>
+						<span class="compass-list__icon" aria-hidden="true">
+							<Icon icon={item.icon ?? "material-symbols:extension-rounded"} />
+						</span>
+						<span class="compass-list__body">
+							<span class="compass-list__title">{item.name}</span>
+							<span class="compass-list__summary">{item.summary}</span>
+							{#if item.tags.length > 0}
+								<span class="compass-list__tags">
+									{#each item.tags as tag}
+										<span class="compass-list__tag">{tag}</span>
+									{/each}
+								</span>
+							{/if}
+						</span>
+						<Icon class="compass-list__chevron" icon="material-symbols:chevron-right-rounded" aria-hidden="true" />
+					</button>
+				</li>
 			{/each}
-		{/key}
+		</ul>
 	{:else}
 		<div class="compass-section__empty">
 			<Icon icon="material-symbols:search-off-outline-rounded" aria-hidden="true" />
@@ -184,10 +179,58 @@ onMount(() => {
 	{/if}
 </Card>
 
+{#if activeItem}
+	<Dialog bind:open={detailOpen} title={activeItem.name}>
+		<div class="compass-detail">
+			<div class="compass-detail__head">
+				<span class="compass-detail__icon" aria-hidden="true">
+					<Icon icon={activeItem.icon ?? "material-symbols:extension-rounded"} />
+				</span>
+				{#if activeItem.tags.length > 0}
+					<div class="compass-detail__tags">
+						{#each activeItem.tags as tag}
+							<span class="compass-detail__tag">{tag}</span>
+						{/each}
+					</div>
+				{/if}
+			</div>
+
+			<div class="compass-detail__desc">
+				{#each paragraphs(activeItem.description) as para}
+					{#if para.startsWith("·")}
+						<p class="compass-detail__bullet">{para}</p>
+					{:else}
+						<p>{para}</p>
+					{/if}
+				{/each}
+			</div>
+
+			<div class="compass-detail__links">
+				{#if activeItem.github}
+					<a class="compass-detail__link" href={activeItem.github} target="_blank" rel="noopener noreferrer">
+						<Icon icon="fa6-brands:github" aria-hidden="true" />
+						{i18n(I18nKey.compassViewSource)}
+					</a>
+				{/if}
+				<a class="compass-detail__link" href={activeItem.href} target="_blank" rel="noopener noreferrer">
+					<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
+					{i18n(I18nKey.compassViewSite)}
+				</a>
+			</div>
+
+			{#if activeItem.thanks}
+				<p class="compass-detail__thanks">
+					<Icon icon="material-symbols:favorite-rounded" aria-hidden="true" />
+					{activeItem.thanks}
+				</p>
+			{/if}
+		</div>
+	</Dialog>
+{/if}
+
 <style lang="stylus">
 @import "../../styles/breakpoints.styl"
 
-/* 卡片容器（Card 原子根）移动端收窄内边距（同 anime/moment 风格） */
 .compass-section
 	display: block
 
@@ -240,17 +283,6 @@ onMount(() => {
 		color: var(--on-surface-variant)
 		font: var(--m3e-type-body-small)
 
-	/* 分组筛选过渡：区块位置的大号 contained LoadingIndicator（out = 淡出退场） */
-	&__loading
-		display: flex
-		align-items: center
-		justify-content: center
-		min-height: 11rem
-		padding-top: 1.5rem
-
-		&--out
-			animation: compass-loading-out var(--m3e-duration-short) var(--m3e-easing-emphasized-accelerate) both
-
 	&__empty
 		display: flex
 		flex-direction: column
@@ -265,24 +297,176 @@ onMount(() => {
 			width: 2.5rem
 			height: 2.5rem
 
-/* 分组：间距 + 站内 SectionTitle 标题行（自带 margin-bottom） */
-.compass-shelf
-	margin-top: 1.75rem
+/* 列表：主页文章般的一行行文字条目 */
+.compass-list
+	display: flex
+	flex-direction: column
+	margin: 1.25rem 0 0
+	padding: 0
+	list-style: none
 
-.compass-shelf__grid
-	display: grid
-	grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr))
-	gap: 0.75rem
+	&__item
+		border-bottom: 1px solid var(--outline-variant)
+		&:last-child
+			border-bottom: none
 
-	@media (max-width: bp-sm - 1px)
+	&__btn
+		display: flex
+		align-items: center
+		gap: 0.875rem
+		width: 100%
+		padding: 0.875rem 0.25rem
+		border: none
+		background: none
+		text-align: left
+		cursor: pointer
+		border-radius: var(--shape-corner-s)
+		transition: background-color var(--m3e-duration-short) var(--m3e-easing-standard)
+
+		&:hover
+			background: unquote("color-mix(in oklab, var(--on-surface) 5%, transparent)")
+
+	&__icon
+		display: flex
+		align-items: center
+		justify-content: center
+		width: 2.5rem
+		height: 2.5rem
+		flex-shrink: 0
+		border-radius: var(--shape-corner-m)
+		background: unquote("color-mix(in oklab, var(--primary) 12%, var(--surface-container-high))")
+		color: var(--primary)
+		> :global(svg)
+			width: 1.375rem
+			height: 1.375rem
+
+	&__body
+		display: flex
+		flex-direction: column
+		gap: 0.3125rem
+		flex: 1
+		min-width: 0
+
+	&__title
+		color: var(--on-surface)
+		font: var(--m3e-type-title-small)
+		font-weight: 700
+		line-height: 1.3
+
+	&__summary
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-small)
+		line-height: 1.5
+
+	&__tags
+		display: flex
+		flex-wrap: wrap
+		gap: 0.375rem
+
+	&__tag
+		padding: 0.0625rem 0.5rem
+		border-radius: var(--shape-corner-full)
+		background: var(--surface-container-high)
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-label-small)
+
+	&__chevron
+		flex-shrink: 0
+		color: var(--outline)
+		width: 1.25rem
+		height: 1.25rem
+
+/* 详情弹窗 */
+.compass-detail
+	display: flex
+	flex-direction: column
+	gap: 1rem
+	min-width: 0
+
+	&__head
+		display: flex
+		flex-direction: column
 		gap: 0.625rem
 
-/* 指示器退场：淡出 + 轻微收拢（reduced-motion 由全局规则压至终态） */
-@keyframes compass-loading-out
-	from
-		opacity: 1
-		transform: none
-	to
-		opacity: 0
-		transform: scale(0.96)
+	&__icon
+		display: flex
+		align-items: center
+		justify-content: center
+		width: 3rem
+		height: 3rem
+		border-radius: var(--shape-corner-m)
+		background: unquote("color-mix(in oklab, var(--primary) 14%, var(--surface-container-high))")
+		color: var(--primary)
+		> :global(svg)
+			width: 1.75rem
+			height: 1.75rem
+
+	&__tags
+		display: flex
+		flex-wrap: wrap
+		gap: 0.375rem
+
+	&__tag
+		padding: 0.125rem 0.5625rem
+		border-radius: var(--shape-corner-full)
+		background: var(--surface-container-high)
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-label-small)
+
+	&__desc
+		display: flex
+		flex-direction: column
+		gap: 0.5rem
+		p
+			margin: 0
+			color: var(--on-surface-variant)
+			font: var(--m3e-type-body-small)
+			line-height: 1.6
+
+		.compass-detail__bullet
+			padding-left: 0.5rem
+
+	&__links
+		display: flex
+		flex-wrap: wrap
+		gap: 0.5rem
+		padding-top: 0.25rem
+
+	&__link
+		display: inline-flex
+		align-items: center
+		gap: 0.375rem
+		padding: 0.375rem 0.75rem
+		border-radius: var(--shape-corner-m)
+		background: unquote("color-mix(in oklab, var(--primary) 8%, transparent)")
+		color: var(--primary)
+		font: var(--m3e-type-label-medium)
+		font-weight: 600
+		text-decoration: none
+		border: 1px solid unquote("color-mix(in oklab, var(--primary) 16%, transparent)")
+		transition: background-color var(--m3e-duration-short) var(--m3e-easing-standard)
+
+		&:hover
+			background: unquote("color-mix(in oklab, var(--primary) 16%, transparent)")
+
+		> :global(svg)
+			width: 1rem
+			height: 1rem
+
+	&__thanks
+		display: flex
+		align-items: center
+		justify-content: center
+		gap: 0.375rem
+		margin: 0.25rem 0 0
+		padding-top: 0.875rem
+		border-top: 1px solid var(--outline-variant)
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-small)
+		font-weight: 600
+
+		> :global(svg)
+			width: 1rem
+			height: 1rem
+			color: #e57373
 </style>

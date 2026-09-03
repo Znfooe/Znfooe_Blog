@@ -44,10 +44,12 @@ export const zh_CN: Translation = {
 	[Key.animeConfigMissingBilibili]: "未配置哔哩哔哩 UID",
 	[Key.animeSyncEmpty]: "当前数据源中暂无番剧条目",
 
-	[Key.compass]: "站点罗盘",
-	[Key.compassBanner]: "常去的站点 —— 开发工具、文档与各种兔子洞。",
-	[Key.compassNoResults]: "没有符合条件的站点",
-	[Key.compassCounts]: "个站点",
+	[Key.compass]: "软件安利",
+	[Key.compassBanner]: "精心挑选的软件、网站与开源项目，值得一试。",
+	[Key.compassNoResults]: "没有符合条件的项目",
+	[Key.compassCounts]: "个项目",
+	[Key.compassViewSource]: "查看源码",
+	[Key.compassViewSite]: "访问网站",
 
 	[Key.skills]: "技能",
 	[Key.skillsBanner]: "用来把想法落地为可维护产品的技术与工具。",

@@ -44,10 +44,12 @@ export const zh_TW: Translation = {
 	[Key.animeConfigMissingBilibili]: "未設定嗶哩嗶哩 UID",
 	[Key.animeSyncEmpty]: "目前資料來源中暫無動畫條目",
 
-	[Key.compass]: "站點羅盤",
-	[Key.compassBanner]: "常去的站點 —— 開發工具、文件與各種兔子洞。",
-	[Key.compassNoResults]: "沒有符合條件的站點",
-	[Key.compassCounts]: "個站點",
+	[Key.compass]: "軟體推薦",
+	[Key.compassBanner]: "精心挑選的軟體、網站與開源專案，值得一試。",
+	[Key.compassNoResults]: "沒有符合條件的項目",
+	[Key.compassCounts]: "個項目",
+	[Key.compassViewSource]: "查看原始碼",
+	[Key.compassViewSite]: "訪問網站",
 
 	[Key.skills]: "技能",
 	[Key.skillsBanner]: "用來把想法落地為可維護產品的技術與工具。",

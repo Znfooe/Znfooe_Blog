@@ -46,6 +46,8 @@ enum I18nKey {
 	compassBanner = "compassBanner",
 	compassNoResults = "compassNoResults",
 	compassCounts = "compassCounts",
+	compassViewSource = "compassViewSource",
+	compassViewSite = "compassViewSite",
 
 	skills = "skills",
 	skillsBanner = "skillsBanner",
