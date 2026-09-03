@@ -92,16 +92,10 @@ onMount(() => {
 
 function openDetail(item: SoftwareEntry) {
 	selectedId = item.id;
-	if (typeof window !== "undefined") {
-		window.scrollTo({ top: 0, behavior: "smooth" });
-	}
 }
 
 function closeDetail() {
 	selectedId = null;
-	if (typeof window !== "undefined") {
-		window.scrollTo({ top: 0, behavior: "smooth" });
-	}
 }
 
 /** 描述按 \n 分段，供详情页逐段渲染 */
