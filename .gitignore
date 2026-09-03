@@ -23,6 +23,12 @@ pnpm-debug.log*
 .env
 .env.production
 
+# local secrets (SSH keys / tokens)
+key.txt
+*.pem
+id_ed25519
+id_ed25519.pub
+
 # macOS-specific files
 .DS_Store
 
