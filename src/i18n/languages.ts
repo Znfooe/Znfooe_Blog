@@ -2,7 +2,7 @@
  * 站点支持的语言元数据（单一事实来源）。
  *
  * - `code`：语言代码，与 `src/i18n/languages/*.ts` 的导出键及
- *   `siteConfig.lang` 取值一致（默认语言为 `en`）。
+ *   `siteConfig.lang` 取值一致（默认语言为 `zh_CN`）。
  * - `prefix`：URL 路径前缀（小写、连字符分隔）。默认语言无前缀；
  *   其余语言为 `/zh-CN/` 这类目录段。
  * - `name`：英文名（供无障碍/回退展示）。
@@ -19,8 +19,9 @@ export interface LanguageMeta {
 }
 
 export const LANGUAGES: LanguageMeta[] = [
-	{ code: "en", prefix: "", name: "English", nativeName: "English" },
-	{ code: "zh_CN", prefix: "zh-cn", name: "Chinese (Simplified)", nativeName: "简体中文" },
+	// 数组首位即默认语言（prefix 为空串，根路由渲染）。
+	{ code: "zh_CN", prefix: "", name: "Chinese (Simplified)", nativeName: "简体中文" },
+	{ code: "en", prefix: "en", name: "English", nativeName: "English" },
 	{ code: "zh_TW", prefix: "zh-tw", name: "Chinese (Traditional)", nativeName: "繁體中文" },
 	{ code: "ja", prefix: "ja", name: "Japanese", nativeName: "日本語" },
 	{ code: "ko", prefix: "ko", name: "Korean", nativeName: "한국어" },
@@ -32,7 +33,27 @@ export const LANGUAGES: LanguageMeta[] = [
 ];
 
 /** 默认语言（无路径前缀）。与 siteConfig.lang 的默认值保持一致。 */
-export const DEFAULT_LANGUAGE = "en";
+export const DEFAULT_LANGUAGE = "zh_CN";
+
+/**
+ * 实际生成路由的非默认语言（语言代码列表）。默认语言不在此列。
+ * 只有「默认语言 + 此列表」中的语言拥有可访问页面；语言切换器据此渲染，
+ * 避免列出未生成路由的语言导致点击后 404。
+ */
+export const ENABLED_LOCALES = ["en"];
+
+/**
+ * 拥有实际路由的语言列表（默认语言在前，其余按 LANGUAGES 声明顺序）。
+ * 语言切换器等客户端组件应使用本函数，而不是直接遍历 LANGUAGES。
+ */
+export function availableLanguages(): LanguageMeta[] {
+	return [DEFAULT_LANGUAGE, ...ENABLED_LOCALES]
+		.map((code) => resolveLanguage(code))
+		.filter(
+			(meta, index, all) =>
+				all.findIndex((m) => m.code === meta.code) === index,
+		);
+}
 
 /** 语言代码 → 元数据映射（含常见别名，如 en_us → en）。 */
 const CODE_TO_META = new Map<string, LanguageMeta>();
@@ -57,19 +78,21 @@ const ALIASES: Record<string, string> = {
 export function resolveLanguage(code: string): LanguageMeta {
 	const key = code.toLowerCase();
 	const resolved = ALIASES[key] ?? key;
-	return CODE_TO_META.get(resolved.toLowerCase()) ?? CODE_TO_META.get(DEFAULT_LANGUAGE)!;
+	return CODE_TO_META.get(resolved.toLowerCase()) ??
+		CODE_TO_META.get(DEFAULT_LANGUAGE.toLowerCase())!;
 }
 
 /** 语言前缀 → 元数据；未知前缀返回默认语言。 */
 export function languageByPrefix(prefix: string): LanguageMeta {
 	const p = prefix.toLowerCase();
-	return LANGUAGES.find((m) => m.prefix === p) ?? CODE_TO_META.get(DEFAULT_LANGUAGE)!;
+	return LANGUAGES.find((m) => m.prefix === p) ??
+		CODE_TO_META.get(DEFAULT_LANGUAGE.toLowerCase())!;
 }
 
 /** 从路径首段识别语言前缀（无匹配返回默认语言）。 */
 export function languageFromPath(pathname: string): LanguageMeta {
 	const first = pathname.replace(/^\/+/, "").split("/")[0] ?? "";
-	if (!first) return CODE_TO_META.get(DEFAULT_LANGUAGE)!;
+	if (!first) return CODE_TO_META.get(DEFAULT_LANGUAGE.toLowerCase())!;
 	return languageByPrefix(first);
 }
 

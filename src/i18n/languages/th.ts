@@ -153,6 +153,8 @@ export const th: Translation = {
 	[Key.untitled]: "ไม่ได้ตั้งชื่อ",
 	[Key.uncategorized]: "ไม่ได้จัดหมวดหมู่",
 	[Key.noTags]: "ไม่มีป้ายกำกับ",
+	[Key.postsInCategory]: "โพสต์ทั้งหมดในหมวดหมู่ {category}",
+	[Key.postsWithTag]: "โพสต์ทั้งหมดที่มีป้ายกำกับ {tag}",
 
 	[Key.wordCount]: "คำ",
 	[Key.wordsCount]: "คำ",
@@ -179,6 +181,8 @@ export const th: Translation = {
 	[Key.calendarBackToday]: "กลับไปวันนี้",
 	[Key.calendarPrevMonth]: "เดือนก่อน",
 	[Key.calendarNextMonth]: "เดือนถัดไป",
+	[Key.calendarMonthBackToday]: "{month} ({action})",
+	[Key.calendarDayLabel]: "{date}, {posts}",
 
 	[Key.mermaidControls]: "ตัวควบคุมแผนภาพ",
 	[Key.mermaidZoomIn]: "ขยาย",

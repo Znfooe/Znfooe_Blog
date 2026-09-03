@@ -1,18 +1,18 @@
 ---
-title: Mermaid Diagram Gallery
+title: Mermaid 图表集锦
 published: 2024-05-02
-description: A gallery of Mermaid diagrams for processes, interactions, data models, schedules, and project history.
-tags: [Demo, Example, Markdown, Mermaid]
-category: Examples
-lang: en
+description: 汇集流程、交互、数据模型、计划与项目历史等多种 Mermaid 图表演示。
+tags: [演示, 示例, Markdown, Mermaid]
+category: 示例
+lang: zh_CN
 draft: false
 ---
 
-Mermaid turns text descriptions in Markdown into diagrams. The examples below use Shirone's content workflow to demonstrate diagram types commonly used in technical articles and project notes.
+Mermaid 能将 Markdown 中的文字描述转换为图表。下面的示例借助 Shirone 的内容工作流，展示了技术文章和项目笔记中常见的各类图表。
 
-## Flowchart
+## 流程图
 
-Flowcharts describe a process, including decisions and paths that return to an earlier step.
+流程图用于描述某个过程，包括判断分支，以及回到上一步的路径。
 
 ```mermaid
 flowchart TD
@@ -26,9 +26,9 @@ flowchart TD
     Build --> Publish[Publish]
 ```
 
-## Sequence Diagram
+## 时序图
 
-Sequence diagrams present collaboration between participants in chronological order. This example follows a Swup navigation from request to Mermaid rendering.
+时序图按时间顺序展示参与者之间的协作。本示例跟踪了一次 Swup 页面导航，从发起请求到最终由 Mermaid 完成渲染。
 
 ```mermaid
 sequenceDiagram
@@ -47,9 +47,9 @@ sequenceDiagram
     Renderer-->>Browser: Insert themed SVGs
 ```
 
-## Entity Relationship Diagram
+## 实体关系图
 
-Entity relationship diagrams model structured data and the connections between authors, posts, tags, and comments.
+实体关系图用于为结构化数据建模，展示作者、文章、标签与评论之间的关联关系。
 
 ```mermaid
 erDiagram
@@ -84,9 +84,9 @@ erDiagram
     }
 ```
 
-## Class Diagram
+## 类图
 
-Class diagrams communicate responsibilities, public methods, and dependency directions in a software design.
+类图用于表达软件设计中各类的职责、公开方法以及依赖方向。
 
 ```mermaid
 classDiagram
@@ -115,9 +115,9 @@ classDiagram
     DiagramRenderer --> ThemeTokens : reads
 ```
 
-## State Diagram
+## 状态图
 
-State diagrams show the lifecycle of an object and the events that move it between states.
+状态图用于呈现对象的生命周期，以及驱动它在不同状态间流转的事件。
 
 ```mermaid
 stateDiagram-v2
@@ -132,9 +132,9 @@ stateDiagram-v2
     Archived --> [*]
 ```
 
-## XY Chart
+## XY 图表
 
-XY charts combine bars and lines to compare values and trends over a shared axis.
+XY 图表将柱状图与折线图结合在同一坐标轴上，便于比较数值与趋势。
 
 ```mermaid
 xychart-beta
@@ -147,9 +147,9 @@ xychart-beta
     line [48, 55, 62, 61, 73, 81]
 ```
 
-## Pie Chart
+## 饼图
 
-Pie charts provide a compact comparison of how categories contribute to a whole.
+饼图以紧凑的方式直观比较各分类在整体中的占比。
 
 ```mermaid
 pie showData
@@ -162,9 +162,9 @@ pie showData
     "Essays" : 15
 ```
 
-## Gantt Chart
+## 甘特图
 
-Gantt charts arrange tasks, dependencies, and milestones along a calendar timeline.
+甘特图将任务、依赖关系和里程碑沿日历时间线排列展示。
 
 ```mermaid
 gantt
@@ -184,9 +184,9 @@ gantt
     Release :milestone, release, after tests, 0d
 ```
 
-## Mind Map
+## 思维导图
 
-Mind maps expand a central topic into related areas and supporting concepts.
+思维导图围绕一个中心主题展开，扩展出相关的领域与支撑性概念。
 
 ```mermaid
 mindmap
@@ -205,9 +205,9 @@ mindmap
       Accessibility
 ```
 
-## Timeline
+## 时间线
 
-Timelines summarize significant events or phases without requiring exact calendar durations.
+时间线用于概述重要的事件或阶段，无需提供精确的日历时长。
 
 ```mermaid
 timeline
@@ -220,9 +220,9 @@ timeline
                 : Verify responsive and accessible output
 ```
 
-## User Journey
+## 用户旅程图
 
-User journey diagrams combine actions, participants, and experience scores across the stages of a task.
+用户旅程图将某个任务各阶段中的操作、参与方与体验评分整合在一起。
 
 ```mermaid
 journey
@@ -240,9 +240,9 @@ journey
       Bookmark the page: 3: Reader
 ```
 
-## Git Graph
+## Git 图
 
-Git graphs show how work progresses on a feature branch before it merges into the main line.
+Git 图展示一个功能分支在被合并回主干之前，工作是如何逐步推进的。
 
 ```mermaid
 gitGraph
@@ -258,9 +258,9 @@ gitGraph
     commit id: "release"
 ```
 
-## Kanban Board
+## 看板
 
-Kanban boards group tasks by workflow state to make current progress easy to scan.
+看板按工作流状态对任务进行分组，让当前进度一目了然。
 
 ```mermaid
 kanban
@@ -274,9 +274,9 @@ kanban
     rendering[Client rendering]
 ```
 
-## Sankey Diagram
+## 桑基图
 
-Sankey diagrams use link width to show how traffic or another quantity flows between nodes.
+桑基图通过连线的宽度来表现流量或其他数值在各节点之间的流动。
 
 ```mermaid
 sankey-beta
@@ -287,4 +287,4 @@ Reading,Topics,210
 Reading,Outbound,140
 ```
 
-Each example uses a standard `mermaid` code fence. The server preserves readable source markup, and the browser enhances it into an SVG that follows the active theme. Diagrams render again when the theme changes or when Swup navigates to this article.
+以上每个示例都使用标准的 `mermaid` 代码围栏。服务端会保留可读的源代码标记，浏览器再将其增强为跟随当前主题的 SVG。当主题切换，或通过 Swup 导航回到本文时，图表都会重新渲染。

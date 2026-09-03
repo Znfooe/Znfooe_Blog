@@ -162,6 +162,8 @@ export const en: Translation = {
 	[Key.untitled]: "Untitled",
 	[Key.uncategorized]: "Uncategorized",
 	[Key.noTags]: "No Tags",
+	[Key.postsInCategory]: "View all posts in the {category} category",
+	[Key.postsWithTag]: "View all posts with the {tag} tag",
 
 	[Key.wordCount]: "word",
 	[Key.wordsCount]: "words",
@@ -188,6 +190,8 @@ export const en: Translation = {
 	[Key.calendarBackToday]: "Back to today",
 	[Key.calendarPrevMonth]: "Previous month",
 	[Key.calendarNextMonth]: "Next month",
+	[Key.calendarMonthBackToday]: "{month} ({action})",
+	[Key.calendarDayLabel]: "{date}, {posts}",
 
 	[Key.mermaidControls]: "Diagram controls",
 	[Key.mermaidZoomIn]: "Zoom in",

@@ -154,6 +154,8 @@ export const zh_TW: Translation = {
 	[Key.untitled]: "無標題",
 	[Key.uncategorized]: "未分類",
 	[Key.noTags]: "無標籤",
+	[Key.postsInCategory]: "{category} 分類下的全部文章",
+	[Key.postsWithTag]: "{tag} 標籤下的全部文章",
 
 	[Key.wordCount]: "字",
 	[Key.wordsCount]: "字",
@@ -180,6 +182,8 @@ export const zh_TW: Translation = {
 	[Key.calendarBackToday]: "回到今天",
 	[Key.calendarPrevMonth]: "上一月",
 	[Key.calendarNextMonth]: "下一月",
+	[Key.calendarMonthBackToday]: "{month}（{action}）",
+	[Key.calendarDayLabel]: "{date}，{posts}",
 
 	[Key.mermaidControls]: "圖表控制項",
 	[Key.mermaidZoomIn]: "放大",

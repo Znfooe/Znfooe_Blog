@@ -1,6 +1,6 @@
 ---
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { currentLanguage, i18n } from "@i18n/translation";
 import { getCalendarData } from "@utils/calendar-data";
 import { siteConfig } from "@/config/siteConfig";
 import type { CalendarWidget } from "@/types/sidebarConfig";
@@ -24,8 +24,20 @@ const style = Astro.props.style;
 
 const startOfWeek = Astro.props.widget?.startOfWeek ?? "mon";
 
-// siteConfig.lang 形如 zh_CN / en：替换为 BCP47 供 Intl 使用
-const locale = siteConfig.lang.replace("_", "-");
+// 用「当前页面语言」而非站点默认语言：/en/ 下的日历同样要显示英文月份与星期。
+// currentLanguage() 返回 zh_CN / en 形式，替换为 BCP47 供 Intl 使用。
+// Intl 严格要求 BCP47（连字符），所以做一个带 Intl 兜底的兜底函数：locale 不合法
+// 时回退到默认语言（也是连字符格式），避免 SSR 抛 RangeError 把整个日历 widget 吞掉。
+function safeLocale(raw: string): string {
+	const candidate = raw.replace(/_/g, "-");
+	try {
+		new Intl.DateTimeFormat(candidate);
+		return candidate;
+	} catch {
+		return siteConfig.lang.replace("_", "-");
+	}
+}
+const locale = safeLocale(currentLanguage());
 
 const { postsByDate, activeMonths } = await getCalendarData();
 ---

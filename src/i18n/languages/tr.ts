@@ -163,6 +163,8 @@ export const tr: Translation = {
 	[Key.untitled]: "Başlıksız",
 	[Key.uncategorized]: "Katagorisiz",
 	[Key.noTags]: "Tag Bulunamadı",
+	[Key.postsInCategory]: "{category} kategorisindeki tüm gönderiler",
+	[Key.postsWithTag]: "{tag} etiketli tüm gönderiler",
 
 	[Key.wordCount]: "kelime",
 	[Key.wordsCount]: "kelime",
@@ -189,6 +191,8 @@ export const tr: Translation = {
 	[Key.calendarBackToday]: "Bugüne dön",
 	[Key.calendarPrevMonth]: "Önceki ay",
 	[Key.calendarNextMonth]: "Sonraki ay",
+	[Key.calendarMonthBackToday]: "{month} ({action})",
+	[Key.calendarDayLabel]: "{date}, {posts}",
 
 	[Key.mermaidControls]: "Diyagram denetimleri",
 	[Key.mermaidZoomIn]: "Yakınlaştır",

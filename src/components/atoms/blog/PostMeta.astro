@@ -5,6 +5,8 @@
  * 每个元信息项 = display/MetaIcon 图标徽标（32px tonal 圆角方块）+
  * body-medium 文字；链接 hover 变 primary。
  */
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
 import MetaIcon from "@components/atoms/display/MetaIcon.astro";
 
 export interface BlogMetaLink {
@@ -41,8 +43,8 @@ const {
 	wordCount,
 	hideTags = false,
 	hideUpdate = false,
-	uncategorizedLabel = "未分类",
-	noTagsLabel = "无标签",
+	uncategorizedLabel = i18n(I18nKey.uncategorized),
+	noTagsLabel = i18n(I18nKey.noTags),
 } = Astro.props;
 ---
 
@@ -67,7 +69,7 @@ const {
 			<a
 				class="m3-blog-postmeta__link"
 				href={category.href}
-				aria-label={`View all posts in the ${category.name} category`}
+				aria-label={i18n(I18nKey.postsInCategory).replace("{category}", category.name)}
 			>{category.name}</a>
 		) : (
 			<span class="m3-blog-postmeta__text">{uncategorizedLabel}</span>
@@ -92,7 +94,7 @@ const {
 							<a
 								class="m3-blog-postmeta__link"
 								href={t.href}
-								aria-label={`View all posts with the ${t.name} tag`}
+								aria-label={i18n(I18nKey.postsWithTag).replace("{tag}", t.name)}
 							>{t.name}</a>
 						</Fragment>
 					))}

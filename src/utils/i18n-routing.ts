@@ -2,16 +2,17 @@
  * 多语言路由工具：语言前缀路径的生成与解析。
  *
  * 结构约定（Astro 文件路由，prefixDefaultLocale=false 语义）：
- * - 默认语言（en）页面在 `src/pages/` 根目录，URL 无前缀（如 `/about/`）；
- * - 非默认语言页面在 `src/pages/[locale]/` 目录，URL 带前缀（如 `/zh-CN/about/`）。
+ * - 默认语言（zh_CN）页面在 `src/pages/` 根目录，URL 无前缀（如 `/about/`）；
+ * - 非默认语言页面在 `src/pages/[locale]/` 目录，URL 带前缀（如 `/en/about/`）。
  *
- * POC 阶段仅启用 zh_CN（`ENABLED_LOCALES`），扩展其余语言时在此数组追加即可。
+ * 当前仅启用英文为非默认语言（`ENABLED_LOCALES`）；追加数组项即可扩展更多语言，
+ * 但需同步在 `src/i18n/languages/` 提供对应翻译模块。
  */
-import { DEFAULT_LANGUAGE, resolveLanguage } from "@i18n/languages";
+import { DEFAULT_LANGUAGE, ENABLED_LOCALES, resolveLanguage } from "@i18n/languages";
 import { enterLanguage } from "@i18n/translation";
 
-/** 当前启用的非默认语言（语言代码列表）。默认语言不在此列。 */
-export const ENABLED_LOCALES = ["zh_CN"];
+// 单一事实来源在 @i18n/languages（纯数据模块，客户端 Safe）；此处再导出以保留既有导入路径。
+export { ENABLED_LOCALES };
 
 /**
  * 生成非默认语言的 `getStaticPaths` 参数数组（locale 段 + props.lang）。

@@ -7,6 +7,32 @@
 /** 设备生命周期状态 */
 export type DeviceStatus = "active" | "backup" | "archived" | "wishlist";
 
+/**
+ * 本地化文本：键为语言代码（如 `zh_CN` / `en`）。
+ * 由 `resolveDevicesData` 按当前渲染语言解析为普通字符串，
+ * 因此消费层（DeviceCard / DeviceSection）拿到的仍是 string，无需改动。
+ */
+export type LocalizedText = Record<string, string>;
+
+/** 单个设备详细规格属性（多语言原始形态） */
+export interface DeviceSpecItemSource {
+	key: string;
+	label: LocalizedText;
+	value: LocalizedText;
+}
+
+/**
+ * 设备条目的原始（多语言）形态：数据层按此编写。
+ * 与 DeviceItem 的差异仅在需要翻译的文案字段上。
+ */
+export interface DeviceItemSource
+	extends Omit<DeviceItem, "name" | "brand" | "description" | "specDetails"> {
+	name: LocalizedText;
+	brand: LocalizedText;
+	description: LocalizedText;
+	specDetails?: DeviceSpecItemSource[];
+}
+
 /** 场景分类定义（数组顺序即筛选 Chips 渲染顺序） */
 export interface DeviceCategory {
 	/** 稳定标识，供设备引用与筛选。 */

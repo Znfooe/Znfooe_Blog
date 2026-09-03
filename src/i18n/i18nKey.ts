@@ -150,6 +150,10 @@ enum I18nKey {
 	untitled = "untitled",
 	uncategorized = "uncategorized",
 	noTags = "noTags",
+	/** 分类链接 aria-label：{category} 为分类名 */
+	postsInCategory = "postsInCategory",
+	/** 标签链接 aria-label：{tag} 为标签名 */
+	postsWithTag = "postsWithTag",
 
 	wordCount = "wordCount",
 	wordsCount = "wordsCount",
@@ -176,6 +180,10 @@ enum I18nKey {
 	calendarBackToday = "calendarBackToday",
 	calendarPrevMonth = "calendarPrevMonth",
 	calendarNextMonth = "calendarNextMonth",
+	/** 非当前月时月份按钮的 aria-label：{month}=月份标题，{action}=「回到本月」文案 */
+	calendarMonthBackToday = "calendarMonthBackToday",
+	/** 有文章日期格的 aria-label：{date}=日期，{posts}=已本地化的篇数（如「3 篇文章」） */
+	calendarDayLabel = "calendarDayLabel",
 
 	mermaidControls = "mermaidControls",
 	mermaidZoomIn = "mermaidZoomIn",

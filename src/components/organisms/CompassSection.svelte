@@ -14,7 +14,7 @@ import TextField from "@components/atoms/input/TextField.svelte";
 import PageHeader from "@components/molecules/PageHeader.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
-import Icon from "@iconify/svelte";
+import Icon from "@components/atoms/display/Icon.svelte";
 import { reveal } from "@utils/motion";
 import { onMount } from "svelte";
 import type { SoftwareEntry } from "../../data/compass";

@@ -8,7 +8,14 @@ import { devicesData } from "../data/devices.ts";
 import { projectsData } from "../data/projects.ts";
 import { skillsData } from "../data/skills.ts";
 import { timelineData } from "../data/timeline.ts";
-import type { DeviceItem, DevicesConfig } from "../types/devicesConfig.ts";
+import { DEFAULT_LANGUAGE, resolveLanguage } from "../i18n/languages.ts";
+import { currentLanguage } from "../i18n/translation.ts";
+import type {
+	DeviceItem,
+	DeviceItemSource,
+	DevicesConfig,
+	LocalizedText,
+} from "../types/devicesConfig.ts";
 import type { ProjectItem, ProjectsConfig } from "../types/projectsConfig.ts";
 import type { SkillItem, SkillsConfig } from "../types/skillsConfig.ts";
 import type { TimelineConfig, TimelineItem } from "../types/timelineConfig.ts";
@@ -115,17 +122,50 @@ export function resolveTimelineData(
 }
 
 /**
- * 解析设备页展示数据。
+ * 依当前渲染语言从本地化文本取值；回退顺序：当前语言 → 默认语言 → 首个可用值。
+ * 普通字符串直接原样返回（兼容以单语言编写的自定义数据）。
+ */
+function pickLocalized(value: string | LocalizedText, lang: string): string {
+	if (typeof value === "string") return value;
+	const code = resolveLanguage(lang).code;
+	return value[code] ?? value[DEFAULT_LANGUAGE] ?? Object.values(value)[0] ?? "";
+}
+
+/** 把单条设备原始数据解析为消费层使用的普通字符串形态（按当前语言）。 */
+function resolveDeviceItem(
+	item: DeviceItem | DeviceItemSource,
+	lang: string,
+): DeviceItem {
+	const specDetails = item.specDetails?.map((spec) => ({
+		key: spec.key,
+		label: pickLocalized(spec.label, lang),
+		value: pickLocalized(spec.value, lang),
+	}));
+	return {
+		...item,
+		name: pickLocalized(item.name, lang),
+		brand: pickLocalized(item.brand, lang),
+		description: pickLocalized(item.description, lang),
+		specDetails,
+	};
+}
+
+/**
+ * 解析设备页展示数据：过滤禁用项后，按当前页面语言展开本地化字段。
+ * 默认数据（devicesData）为多语言形态；自定义 items 若使用普通字符串亦兼容。
  */
 export function resolveDevicesData(
 	config: DevicesConfig,
-	customItems?: readonly DeviceItem[],
+	customItems?: readonly (DeviceItem | DeviceItemSource)[],
 ): DeviceItem[] {
-	const source = customItems ?? config.items ?? devicesData;
+	const source = (
+		customItems ?? config.items ?? devicesData
+	) as readonly (DeviceItem | DeviceItemSource)[];
+	const lang = currentLanguage();
 	const enabledItems = source.filter((item) => item.enable !== false);
 	return filterByDisabledKeys(
 		enabledItems,
 		config.disabledIds ?? config.disabledKeys,
 		(item) => item.id,
-	);
+	).map((item) => resolveDeviceItem(item, lang));
 }

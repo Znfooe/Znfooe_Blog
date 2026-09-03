@@ -164,6 +164,8 @@ export const id: Translation = {
 	[Key.untitled]: "Tanpa Judul",
 	[Key.uncategorized]: "Tanpa Kategori",
 	[Key.noTags]: "Tanpa Tag",
+	[Key.postsInCategory]: "Semua postingan dalam kategori {category}",
+	[Key.postsWithTag]: "Semua postingan dengan tag {tag}",
 
 	[Key.wordCount]: "kata",
 	[Key.wordsCount]: "kata",
@@ -190,6 +192,8 @@ export const id: Translation = {
 	[Key.calendarBackToday]: "Kembali ke hari ini",
 	[Key.calendarPrevMonth]: "Bulan sebelumnya",
 	[Key.calendarNextMonth]: "Bulan berikutnya",
+	[Key.calendarMonthBackToday]: "{month} ({action})",
+	[Key.calendarDayLabel]: "{date}, {posts}",
 
 	[Key.mermaidControls]: "Kontrol diagram",
 	[Key.mermaidZoomIn]: "Perbesar",

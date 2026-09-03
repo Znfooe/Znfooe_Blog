@@ -163,6 +163,8 @@ export const vi: Translation = {
 	[Key.untitled]: "Không tiêu đề",
 	[Key.uncategorized]: "Chưa phân loại",
 	[Key.noTags]: "Chưa có thẻ",
+	[Key.postsInCategory]: "Tất cả bài viết trong chuyên mục {category}",
+	[Key.postsWithTag]: "Tất cả bài viết có thẻ {tag}",
 
 	[Key.wordCount]: "từ",
 	[Key.wordsCount]: "từ",
@@ -189,6 +191,8 @@ export const vi: Translation = {
 	[Key.calendarBackToday]: "Về hôm nay",
 	[Key.calendarPrevMonth]: "Tháng trước",
 	[Key.calendarNextMonth]: "Tháng sau",
+	[Key.calendarMonthBackToday]: "{month} ({action})",
+	[Key.calendarDayLabel]: "{date}, {posts}",
 
 	[Key.mermaidControls]: "Điều khiển sơ đồ",
 	[Key.mermaidZoomIn]: "Phóng to",

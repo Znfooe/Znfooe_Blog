@@ -161,6 +161,8 @@ export const ja: Translation = {
 	[Key.untitled]: "タイトルなし",
 	[Key.uncategorized]: "カテゴリなし",
 	[Key.noTags]: "タグなし",
+	[Key.postsInCategory]: "{category} カテゴリのすべての投稿",
+	[Key.postsWithTag]: "{tag} タグのすべての投稿",
 
 	[Key.wordCount]: "文字",
 	[Key.wordsCount]: "文字",
@@ -187,6 +189,8 @@ export const ja: Translation = {
 	[Key.calendarBackToday]: "今日に戻る",
 	[Key.calendarPrevMonth]: "前の月",
 	[Key.calendarNextMonth]: "次の月",
+	[Key.calendarMonthBackToday]: "{month}（{action}）",
+	[Key.calendarDayLabel]: "{date}、{posts}",
 
 	[Key.mermaidControls]: "図のコントロール",
 	[Key.mermaidZoomIn]: "拡大",

@@ -160,6 +160,8 @@ export const ko: Translation = {
 	[Key.untitled]: "제목 없음",
 	[Key.uncategorized]: "분류되지 않음",
 	[Key.noTags]: "태그 없음",
+	[Key.postsInCategory]: "{category} 카테고리의 모든 게시물",
+	[Key.postsWithTag]: "{tag} 태그의 모든 게시물",
 
 	[Key.wordCount]: "단어",
 	[Key.wordsCount]: "단어",
@@ -186,6 +188,8 @@ export const ko: Translation = {
 	[Key.calendarBackToday]: "오늘로 돌아가기",
 	[Key.calendarPrevMonth]: "이전 달",
 	[Key.calendarNextMonth]: "다음 달",
+	[Key.calendarMonthBackToday]: "{month} ({action})",
+	[Key.calendarDayLabel]: "{date}, {posts}",
 
 	[Key.mermaidControls]: "다이어그램 컨트롤",
 	[Key.mermaidZoomIn]: "확대",

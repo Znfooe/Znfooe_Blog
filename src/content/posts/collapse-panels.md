@@ -1,59 +1,59 @@
 ---
-title: Markdown Collapse Panels
+title: Markdown 折叠面板
 published: 2026-08-28
-description: Group optional Markdown content into compact, accessible M3E disclosure panels.
-tags: [Demo, Markdown, Collapse, Shirone]
-category: Guides
-lang: en
+description: 将可选的 Markdown 内容归入紧凑、可访问的 M3E 折叠面板中。
+tags: [演示, Markdown, 折叠, Shirone]
+category: 指南
+lang: zh_CN
 draft: false
 ---
 
-Collapse panels keep related optional details in one compact group. Titles and bodies retain inline and block Markdown, while native disclosure semantics make every panel usable without client JavaScript.
+折叠面板把彼此相关的可选细节收拢在一个紧凑的分组里。标题与正文均支持行内及块级 Markdown，而原生的展开/收起（disclosure）语义让每个面板无需客户端 JavaScript 即可使用。
 
-## Independent panels
+## 独立面板
 
-Items open independently by default. Prefix a title with `:+` to open that item initially or `:-` to keep it closed when the group uses `expand`.
+默认情况下，各条目彼此独立展开。在标题前加 `:+` 前缀可让该项默认展开，加 `:-` 前缀则可在分组使用 `expand` 时保持该项收起。
 
 ::: collapse
-- **Package requirements**
+- **环境要求**
 
-  Use Node.js 22 or newer and enable Corepack before installing packages.
+  在安装软件包之前，请使用 Node.js 22 或更高版本，并启用 Corepack。
 
-- :+ Install dependencies
+- :+ 安装依赖
 
-  Run the workspace package command from the repository root.
+  在仓库根目录运行工作区软件包命令。
 
   ```powershell
   pnpm.cmd install
   ```
 
-- Validation commands
+- 校验命令
 
-  Check the content pipeline before building the production output.
+  在构建生产产物之前，先检查内容流水线。
 
   - `pnpm.cmd check:manifest`
   - `npx.cmd astro check`
 :::
 
-## Accordion mode
+## 手风琴模式
 
-Add `accordion` when only one answer should remain open. The browser groups the native disclosures directly, so opening another item closes the previous one without hydration.
+当只希望同时展开一个答案时，可以添加 `accordion`。浏览器会直接把原生 disclosure 分组，因此展开另一项时会自动收起前一项，全程无需水合。
 
 ::: collapse accordion expand
-- What does `expand` do here?
+- 这里的 `expand` 有什么作用？
 
-  It opens the first item initially when no item has a `:+` marker.
+  当没有任何条目带 `:+` 标记时，它会默认展开第一项。
 
-- Can a title contain Markdown?
+- 标题里可以包含 Markdown 吗？
 
-  Yes. Titles support inline **emphasis** and `code`, while panel bodies support full block Markdown.
+  可以。标题支持行内**强调**与 `代码`，而面板正文则支持完整的块级 Markdown。
 
-- What happens on a narrow screen?
+- 在窄屏上会怎样？
 
-  Content padding becomes compact, long text wraps, and embedded code keeps its own horizontal scrolling area.
+  内容内边距会变得紧凑，长文本自动换行，内嵌代码则保留自身的横向滚动区域。
 :::
 
-## Author syntax
+## 写作语法
 
 ````markdown
 ::: collapse accordion
@@ -67,4 +67,4 @@ Add `accordion` when only one answer should remain open. The browser groups the 
 :::
 ````
 
-The container must contain exactly one top-level unordered list. Every item needs a title paragraph, a blank line, and body content. Invalid or mixed input remains an ordinary readable Markdown list.
+容器内必须恰好包含一个顶层无序列表。每个条目都需要一个标题段落、一个空行和正文内容。无效或混合的输入会退化为普通、可读的 Markdown 列表。

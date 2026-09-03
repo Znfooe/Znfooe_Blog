@@ -6,6 +6,8 @@
  * 动效：切月网格 reveal 淡入、文章列表 collapse 展开（motion.ts
  * 原语，reduced-motion 自动瞬切）。
  */
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
 import IconButton from "@components/atoms/action/IconButton.svelte";
 import type { CalendarPost } from "@utils/calendar-data";
 import { collapse, reveal } from "@utils/motion";
@@ -32,6 +34,11 @@ let {
 	prevMonthLabel,
 	nextMonthLabel,
 }: Props = $props();
+
+/** 「3 篇文章 / 3 posts」：单复数复用既有 postCount / postsCount key */
+function postCountLabel(count: number): string {
+	return `${count} ${i18n(count === 1 ? I18nKey.postCount : I18nKey.postsCount)}`;
+}
 
 const today = new Date();
 let year = $state(today.getFullYear());
@@ -160,7 +167,11 @@ function toggleDay(cell: DayCell) {
 			class="m3-calendar__title"
 			class:m3-calendar__title--clickable={!isCurrentMonth}
 			title={isCurrentMonth ? undefined : backTodayLabel}
-			aria-label={isCurrentMonth ? monthTitle : `${monthTitle}（${backTodayLabel}）`}
+			aria-label={isCurrentMonth
+				? monthTitle
+				: i18n(I18nKey.calendarMonthBackToday)
+						.replace("{month}", monthTitle)
+						.replace("{action}", backTodayLabel)}
 			onclick={() => {
 				if (!isCurrentMonth) backToToday();
 			}}
@@ -194,7 +205,11 @@ function toggleDay(cell: DayCell) {
 						class={`m3-calendar__day${cell.posts.length > 0 ? " m3-calendar__day--has-posts" : ""}${isTodayCell(cell) ? " m3-calendar__day--today" : ""}${cell.key === selectedDate ? " m3-calendar__day--selected" : ""}`}
 						disabled={cell.posts.length === 0}
 						aria-current={isTodayCell(cell) ? "date" : undefined}
-						aria-label={`${cell.key}${cell.posts.length > 0 ? `，${cell.posts.length} 篇文章` : ""}`}
+						aria-label={cell.posts.length > 0
+							? i18n(I18nKey.calendarDayLabel)
+									.replace("{date}", cell.key)
+									.replace("{posts}", postCountLabel(cell.posts.length))
+							: cell.key}
 						onclick={() => toggleDay(cell)}
 					>
 						{cell.day}

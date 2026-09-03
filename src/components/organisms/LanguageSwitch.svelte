@@ -1,6 +1,10 @@
 <script lang="ts">
 import Menu from "@components/atoms/navigation/Menu.svelte";
-import { LANGUAGES, resolveLanguage } from "@i18n/languages";
+import {
+	DEFAULT_LANGUAGE,
+	availableLanguages,
+	resolveLanguage,
+} from "@i18n/languages";
 import Icon from "@iconify/svelte";
 import { onMount } from "svelte";
 
@@ -12,17 +16,17 @@ import { onMount } from "svelte";
  */
 
 let menuOpen = $state(false);
-let currentLang = $state("en");
+let currentLang = $state(DEFAULT_LANGUAGE);
 let rootPath = $state("/");
 
 onMount(() => {
 	// 从 <html lang> 读取当前语言（Layout 在 SSR 时按语言写入）
 	const htmlLang = document.documentElement.lang?.toLowerCase() ?? "";
-	// html lang 形如 "zh-cn"/"ja"，映射回语言代码（前缀用连字符）
-	const meta = LANGUAGES.find(
+	// html lang 形如 "zh-cn"/"en"，映射回语言代码（前缀用连字符）
+	const meta = availableLanguages().find(
 		(l) => l.prefix.toLowerCase() === htmlLang || l.code.toLowerCase() === htmlLang,
 	);
-	currentLang = meta?.code ?? "en";
+	currentLang = meta?.code ?? DEFAULT_LANGUAGE;
 
 	// 计算当前语言的「站点根路径」：默认语言为 /，其余为 /zh-CN/
 	const rootMeta = resolveLanguage(currentLang);
@@ -81,7 +85,7 @@ function switchLanguage(code: string) {
 	</button>
 
 	<Menu bind:open={menuOpen} label="Language" class="absolute top-11 right-0 hidden lg:block">
-		{#each LANGUAGES as lang (lang.code)}
+		{#each availableLanguages() as lang (lang.code)}
 			<button
 				class="m3-menu-item"
 				class:selected={currentLang === lang.code}

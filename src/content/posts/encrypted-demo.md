@@ -1,57 +1,57 @@
 ---
-title: Password Protection and Post Encryption Demo
+title: 密码保护与文章加密演示
 published: 2026-08-20
 pinned: true
-description: A demonstration of client-side authenticated decryption, memory session persistence, and M3E design tokens in Shirone.
-tags: [Demo, Security, Encryption, Markdown]
-category: Examples
-lang: en
+description: 在 Shirone 中演示基于客户端的认证解密、会话内存持久化，以及 M3E 设计令牌的运用。
+tags: [演示, 安全, 加密, Markdown]
+category: 示例
+lang: zh_CN
 encrypted: true
 password: "shirone-secret"
-passwordHint: "Hint: the demo unlock password is shirone-secret"
+passwordHint: "提示：本演示文章的解锁密码是 shirone-secret"
 hideHomeContent: true
 ---
 
-# Password Protected Article
+# 受密码保护的文章
 
-Congratulations! You have successfully unlocked this encrypted post. The browser decrypted this pre-compiled content locally using the **Web Crypto API (AES-256-GCM + PBKDF2)**.
-
----
-
-## 1. Security Architecture and Core Features
-
-Shirone's post encryption system shares a unified security foundation with protected albums, providing enterprise-grade security for static publishing:
-
-1. **Zero Plaintext in Static HTML Build**  
-   During the Astro SSG build pipeline, post Markdown is compiled to HTML and immediately encrypted with AES-256-GCM before emitting pages. The published static HTML contains **zero plaintext** of the protected body or outline.
-
-2. **Authenticated Encryption with AAD Scope Binding**  
-   - Key derivation follows OWASP recommendations with **310,000 PBKDF2 iterations** (SHA-256) and a cryptographically random 16-byte salt;
-   - Every encryption payload generates an independent 12-byte random IV;
-   - An **Additional Authenticated Data (AAD)** binding `shirone-protected-content:1:post:${slug}` guarantees that ciphertexts cannot be replayed across different posts or albums.
-
-3. **Session Persistence and Zero Disk Password Storage**  
-   - Decrypted content is cached in ephemeral browser session storage with a 30-minute expiration;
-   - Plaintext passwords are never written to disk or storage;
-   - Decrypted states persist seamlessly across Swup client-side navigations and page reloads in the same session.
-
-4. **Full-Site Leakage Prevention**  
-   - **Search Indexing**: Static pages contain no plaintext, preventing search engines and Pagefind from indexing private content;
-   - **RSS Feed**: Protected articles emit localized placeholders in feeds, preventing RSS aggregators from pulling sensitive text;
-   - **Card Summaries & Word Counts**: When `hideHomeContent: true` is configured, descriptions and word counts are masked on index and archive cards;
-   - **Table of Contents (TOC)**: Heading hierarchies remain hidden until unlock, and are dynamically rebuilt and synchronized with M3E styling upon decryption.
-
-> 💡 **Demo Note**: The default unlock password for this demo post is `shirone-secret`.
+恭喜！你已成功解锁这篇加密文章。浏览器通过 **Web Crypto API（AES-256-GCM + PBKDF2）** 在本地解密了这份预编译内容。
 
 ---
 
-## 2. Interactive Rich Content Demonstration
+## 1. 安全架构与核心特性
 
-Post decryption coordinates with runtime helpers to dynamically mount syntax highlighting, code collapse, interactive Mermaid diagrams, LaTeX formulas, and image lightboxes.
+Shirone 的文章加密系统与受保护的相册共享同一套安全底座，为静态发布提供企业级安全保障：
 
-### 2.1 Code Blocks and Syntax Highlighting
+1. **静态 HTML 构建零明文**  
+   在 Astro SSG 构建流水线中，文章 Markdown 会被编译为 HTML，并在产出页面之前立即使用 AES-256-GCM 加密。最终发布的静态 HTML 中，受保护的正文与大纲**不含任何明文**。
 
-The code block below tests Expressive Code syntax highlighting, copy actions, and line decorations:
+2. **带 AAD 作用域绑定的认证加密**  
+   - 密钥派生遵循 OWASP 建议，采用 **310,000 次 PBKDF2 迭代**（SHA-256），并搭配加密安全的随机 16 字节盐值；
+   - 每次加密载荷都会生成独立的 12 字节随机 IV；
+   - 绑定作用域的**附加认证数据（AAD）** `shirone-protected-content:1:post:${slug}` 可确保密文无法在不同的文章或相册之间重放。
+
+3. **会话持久化与密码零落盘**  
+   - 解密内容缓存在临时的浏览器会话存储中，30 分钟后过期；
+   - 明文密码绝不会写入磁盘或任何存储；
+   - 在同一会话内，解密状态可无缝延续到 Swup 客户端导航与页面刷新之后。
+
+4. **全站防泄露**  
+   - **搜索收录**：静态页面不含明文，可防止搜索引擎与 Pagefind 收录私密内容；
+   - **RSS 订阅**：受保护文章会在订阅源中输出本地化占位内容，防止 RSS 聚合器抓取敏感文字；
+   - **卡片摘要与字数统计**：配置 `hideHomeContent: true` 后，主页与归档卡片上的描述和字数统计会被隐藏；
+   - **目录（TOC）**：标题层级在解锁前保持隐藏，解密后会动态重建，并同步应用 M3E 样式。
+
+> 💡 **演示说明**：本演示文章的默认解锁密码是 `shirone-secret`。
+
+---
+
+## 2. 交互式富内容演示
+
+文章解密后，会与运行时辅助模块协作，动态挂载语法高亮、代码折叠、交互式 Mermaid 图表、LaTeX 公式与图片灯箱。
+
+### 2.1 代码块与语法高亮
+
+下面的代码块用于测试 Expressive Code 的语法高亮、复制操作与行装饰：
 
 ```typescript
 import { decryptProtectedContent, type ProtectedPayload } from "@/utils/password-protection";
@@ -77,9 +77,9 @@ pnpm.cmd type-check
 pnpm.cmd test
 ```
 
-### 2.2 Mermaid Architecture Diagram
+### 2.2 Mermaid 架构图
 
-The flowchart below is rendered via Mermaid and dynamically bound upon decryption:
+下面的流程图由 Mermaid 渲染，并在解密时动态绑定：
 
 ```mermaid
 flowchart TD
@@ -105,11 +105,11 @@ flowchart TD
     end
 ```
 
-### 2.3 LaTeX Mathematical Formulas
+### 2.3 LaTeX 数学公式
 
-Inline formulas: Euler's identity $e^{i\pi} + 1 = 0$ and Gaussian integral $\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$.
+行内公式：欧拉恒等式 $e^{i\pi} + 1 = 0$ 与高斯积分 $\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$。
 
-Display mathematical formulas with horizontal scroll containers:
+展示型公式支持横向滚动容器：
 
 $$
 f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)
@@ -119,41 +119,41 @@ $$
 \mathcal{L}_{\text{AES-GCM}} = \text{GHASH}_H(A \parallel C \parallel L) \oplus \text{AES}_K(J_0)
 $$
 
-### 2.4 Admonitions
+### 2.4 提示块
 
-:::note Architecture Note
-This encryption system adheres to atomic design principles and minimal patch conventions without compromising SSR stability.
+:::note 架构说明
+该加密系统遵循原子设计原则与最小化补丁约定，同时不会影响 SSR 稳定性。
 :::
 
-:::tip Theme Integration
-After unlocking, try switching between light and dark modes or changing the primary hue; decrypted components adapt dynamically to active design tokens.
+:::tip 主题联动
+解锁后，可以试试切换浅色/深色模式或更改主色调；解密后的组件会动态适配当前的设计令牌。
 :::
 
-:::important Security Scope
-Static client-side encryption is designed to prevent unauthorized browsing and automated indexing. For mission-critical commercial secrets, server-side authentication is recommended.
+:::important 安全边界
+静态客户端加密旨在防止未经授权的浏览与自动化收录。对于至关重要的商业机密，建议采用服务端认证方案。
 :::
 
-:::warning Password Recovery
-Static encryption has no centralized server database. If a password is forgotten, the encrypted content cannot be recovered.
+:::warning 密码找回
+静态加密没有集中的服务端数据库。一旦忘记密码，加密内容将无法恢复。
 :::
 
-### 2.5 GitHub Repository Card
+### 2.5 GitHub 仓库卡片
 
 ::github{repo="withastro/astro"}
 
 ---
 
-## 3. Configuration Reference
+## 3. 配置参考
 
-| Parameter | Type | Required | Default | Description |
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
 | :--- | :--- | :--- | :--- | :--- |
-| `encrypted` | `boolean` | No | `false` | Explicitly marks the post as encrypted. Implicitly `true` if `password` is set. |
-| `password` | `string` | Yes | None | Plaintext password used to encrypt at build time and unlock at runtime. |
-| `passwordHint` | `string` | No | `""` | Optional hint displayed under the password input field. |
-| `hideHomeContent` | `boolean` | No | `true` | Hides post description and word count metrics in index cards, archive, and RSS feeds. |
+| `encrypted` | `boolean` | 否 | `false` | 明确将文章标记为加密。若设置了 `password`，则隐式为 `true`。 |
+| `password` | `string` | 是 | 无 | 用于构建时加密与运行时解锁的明文密码。 |
+| `passwordHint` | `string` | 否 | `""` | 显示在密码输入框下方的可选提示文字。 |
+| `hideHomeContent` | `boolean` | 否 | `true` | 在主页卡片、归档与 RSS 订阅源中隐藏文章描述与字数统计。 |
 
 ---
 
-## 4. Summary
+## 4. 总结
 
-This demo verifies the entire encryption lifecycle in Shirone: zero plaintext in static output, robust cryptographic verification, session persistence across navigation and page reloads, and dynamic runtime rehydration.
+本演示覆盖了 Shirone 中加密的完整生命周期：静态产物零明文、可靠的密码学校验、跨导航与刷新的会话持久化，以及运行时的动态水合。
