@@ -291,6 +291,8 @@ export const ja: Translation = {
 	[Key.wallpaperMode]: "ページ背景",
 	[Key.wallpaperModeBanner]: "バナー",
 	[Key.wallpaperModeNone]: "単色",
+	[Key.wallpaperModeVideo]: "動画",
+	[Key.backgroundVideoFps]: "フレームレート",
 	[Key.texturePreset]: "背景テクスチャ",
 	[Key.texturePresetNone]: "なし",
 	[Key.texturePresetStarlight]: "星空・キラキラ",
@@ -324,6 +326,7 @@ export const ja: Translation = {
 	[Key.openingDevDisclaimer]:
 		"このサイトは現在開発中です。不具合があるかもしれませんが、ご了承ください。",
 	[Key.openingAcknowledge]: "確認しました（{seconds}s）",
+	[Key.openingWallpaperCredit]: "ライブ壁紙は Bilibili の {up}（UID: {uid}）より",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

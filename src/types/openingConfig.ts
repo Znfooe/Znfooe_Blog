@@ -18,4 +18,15 @@ export interface OpeningConfig {
 	acknowledgeDelay: number;
 	/** 是否只出现一次（localStorage 持久化；false 则每次整页加载都出现）。 */
 	once: boolean;
+	/** 动态壁纸来源声明（可选，未配置则不渲染该行）。 */
+	wallpaperCredit?: {
+		/** 壁纸作者 / UP 主名称。 */
+		up: string;
+		/** 作者 UID。 */
+		uid: string;
+		/** 壁纸宣传视频标题（展示为链接文本）。 */
+		videoText: string;
+		/** 壁纸宣传视频链接。 */
+		videoUrl: string;
+	};
 }

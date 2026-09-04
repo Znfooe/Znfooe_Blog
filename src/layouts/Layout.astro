@@ -1,6 +1,7 @@
 ---
 import { Font } from "astro:assets";
 import Snackbar from "@components/atoms/overlay/Snackbar.svelte";
+import BackgroundVideo from "@components/organisms/BackgroundVideo.astro";
 import IntroSplash from "@components/organisms/IntroSplash.astro";
 import OpeningNotice from "@components/organisms/OpeningNotice.astro";
 import ConfigCarrier from "@components/system/ConfigCarrier.astro";
@@ -197,7 +198,7 @@ const hasMonoFont =
 				document.documentElement.classList.add('motion-reduced');
 			}
 			const storedWallpaperMode = localStorage.getItem('wallpaper-mode');
-			const wallpaperMode = storedWallpaperMode === 'banner' || storedWallpaperMode === 'none'
+			const wallpaperMode = storedWallpaperMode === 'banner' || storedWallpaperMode === 'none' || storedWallpaperMode === 'video'
 				? storedWallpaperMode
 				: defaultWallpaperMode;
 			document.documentElement.dataset.wallpaperMode = wallpaperMode;
@@ -260,6 +261,7 @@ const hasMonoFont =
 		{introConfig.enable && introConfig.src && <IntroSplash />}
 		{openingConfig.enable && <OpeningNotice />}
 		{umamiOptions && <UmamiRuntime />}
+		{siteConfig.backgroundVideo && <BackgroundVideo />}
 		{textureEnabled && (
 			<div
 				id="m3e-texture-canvas"

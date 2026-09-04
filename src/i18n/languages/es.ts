@@ -293,6 +293,8 @@ export const es: Translation = {
 	[Key.wallpaperMode]: "Fondo de página",
 	[Key.wallpaperModeBanner]: "Banner",
 	[Key.wallpaperModeNone]: "Color sólido",
+	[Key.wallpaperModeVideo]: "Vídeo",
+	[Key.backgroundVideoFps]: "Fotogramas",
 	[Key.texturePreset]: "Textura de fondo",
 	[Key.texturePresetNone]: "Ninguno",
 	[Key.texturePresetStarlight]: "Luz estelar",
@@ -327,6 +329,7 @@ export const es: Translation = {
 	[Key.openingDevDisclaimer]:
 		"Este sitio sigue en desarrollo y puede tener algunos fallos. Gracias por tu comprensión.",
 	[Key.openingAcknowledge]: "He leído esto（{seconds}s）",
+	[Key.openingWallpaperCredit]: "Fondo animado del creador de Bilibili {up} (UID: {uid})",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

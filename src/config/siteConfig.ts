@@ -40,10 +40,24 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		// 差异仅在调色板派生（库的 colorSpec 静态为 2025 委托）
 		spec: "2025",
 	},
-	// 默认页面背景模式："banner" 使用壁纸横幅，"none" 使用主题纯色。
+	// 默认页面背景模式："banner" 使用壁纸横幅，"none" 使用主题纯色，"video" 使用动态视频背景。
 	// 访客在“显示设置”中的选择会保存在浏览器中，并覆盖这里的默认值。
 	wallpaperMode: {
 		defaultMode: "banner",
+	},
+	// 动态视频背景（仅当 wallpaperMode.defaultMode 或访客选择为 "video" 时生效）。
+	backgroundVideo: {
+		// 不同帧率的视频源；"60" 为默认档，也提供 "120" 高帧率档。
+		src: {
+			"60": "/assets/video/background-video-60fps.mp4",
+			"120": "/assets/video/background-video-120fps.mp4",
+		},
+		defaultFps: "60",
+		position: "center",
+		dim: {
+			enable: true,
+			opacity: 0.3,
+		},
 	},
 	// 页面背景纹理系统配置（5 大精美预设 + 零开销 HCT 动态取色）
 	texture: {

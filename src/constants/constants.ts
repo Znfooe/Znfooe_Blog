@@ -5,7 +5,7 @@ export const DEFAULT_THEME = AUTO_MODE;
 
 export const WALLPAPER_MODE_KEY = "wallpaper-mode";
 export const WALLPAPER_MODE_CHANGE_EVENT = "wallpaper-mode:change";
-export const WALLPAPER_MODE_OPTIONS = ["none", "banner"] as const;
+export const WALLPAPER_MODE_OPTIONS = ["none", "banner", "video"] as const;
 
 export const TEXTURE_PRESET_KEY = "texture-preset";
 export const TEXTURE_OPACITY_KEY = "texture-opacity";

@@ -281,6 +281,8 @@ export const zh_TW: Translation = {
 	[Key.wallpaperMode]: "頁面背景",
 	[Key.wallpaperModeBanner]: "橫幅",
 	[Key.wallpaperModeNone]: "純色",
+	[Key.wallpaperModeVideo]: "影片",
+	[Key.backgroundVideoFps]: "幀率",
 	[Key.texturePreset]: "背景紋理",
 	[Key.texturePresetNone]: "無紋理",
 	[Key.texturePresetStarlight]: "星芒光斑",
@@ -314,6 +316,7 @@ export const zh_TW: Translation = {
 	[Key.openingDevDisclaimer]:
 		"本站正在開發完善中，可能存在一些瑕疵，敬請見諒。",
 	[Key.openingAcknowledge]: "我已閱讀（{seconds}s）",
+	[Key.openingWallpaperCredit]: "動態壁紙來源於 B站UP：{up}（UID：{uid}）",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "雨替天空，記下落下的字句。",

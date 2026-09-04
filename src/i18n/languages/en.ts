@@ -290,6 +290,8 @@ export const en: Translation = {
 	[Key.wallpaperMode]: "Page background",
 	[Key.wallpaperModeBanner]: "Banner",
 	[Key.wallpaperModeNone]: "Solid",
+	[Key.wallpaperModeVideo]: "Video",
+	[Key.backgroundVideoFps]: "Frame rate",
 	[Key.texturePreset]: "Background Texture",
 	[Key.texturePresetNone]: "None",
 	[Key.texturePresetStarlight]: "Starlight",
@@ -325,6 +327,7 @@ export const en: Translation = {
 	[Key.openingDevDisclaimer]:
 		"This site is still under development and may have some rough edges. Thanks for your understanding.",
 	[Key.openingAcknowledge]: "I have read this ({seconds}s)",
+	[Key.openingWallpaperCredit]: "Live wallpaper by Bilibili creator {up} (UID: {uid})",
 
 	// 诗意 bio：保留原文
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

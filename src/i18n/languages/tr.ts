@@ -293,6 +293,8 @@ export const tr: Translation = {
 	[Key.wallpaperMode]: "Sayfa arka planı",
 	[Key.wallpaperModeBanner]: "Afiş",
 	[Key.wallpaperModeNone]: "Düz renk",
+	[Key.wallpaperModeVideo]: "Video",
+	[Key.backgroundVideoFps]: "Kare hızı",
 	[Key.texturePreset]: "Arka Plan Dokusu",
 	[Key.texturePresetNone]: "Yok",
 	[Key.texturePresetStarlight]: "Yıldız Işığı",
@@ -327,6 +329,7 @@ export const tr: Translation = {
 	[Key.openingDevDisclaimer]:
 		"Bu site hâlâ geliştirme aşamasındadır ve bazı kusurlar içerebilir. Anlayışınız için teşekkürler.",
 	[Key.openingAcknowledge]: "Bunu okudum（{seconds}s）",
+	[Key.openingWallpaperCredit]: "Canlı duvar kağıdı: Bilibili yaratıcısı {up}（UID: {uid}）",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

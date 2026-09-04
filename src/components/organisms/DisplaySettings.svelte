@@ -8,6 +8,11 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import {
+	BACKGROUND_VIDEO_FPS_CHANGE_EVENT,
+	getStoredVideoFps,
+	setVideoFps,
+} from "@utils/background-video";
+import {
 	defaultMode,
 	flipToMode,
 	getStoredMode,
@@ -72,6 +77,12 @@ let lastAppliedMode = postListMode;
 const defaultWallpaperMode = siteConfig.wallpaperMode.defaultMode;
 let wallpaperMode = $state<WallpaperMode>(getStoredWallpaperMode());
 let lastAppliedWallpaperMode = wallpaperMode;
+
+// 动态视频背景帧率档位（60 / 120），仅当视频背景可用时展示
+const videoFpsOptions = Object.keys(siteConfig.backgroundVideo?.src ?? {});
+const defaultVideoFps =
+	siteConfig.backgroundVideo?.defaultFps ?? videoFpsOptions[0] ?? "60";
+let videoFps = $state<string>(getStoredVideoFps(defaultVideoFps));
 
 // 背景纹理预设与浓度
 const defaultTexturePreset = getDefaultTexturePreset();
@@ -139,6 +150,7 @@ function confirmReset() {
 	wallpaperMode = defaultWallpaperMode;
 	texturePreset = defaultTexturePreset;
 	textureOpacity = defaultTextureOpacity;
+	videoFps = defaultVideoFps;
 }
 
 /** 是否有可重置的偏离（控制 Reset 按钮可见性） */
@@ -168,6 +180,9 @@ $effect(() => {
 	if (wallpaperMode === lastAppliedWallpaperMode) return;
 	lastAppliedWallpaperMode = wallpaperMode;
 	setWallpaperMode(wallpaperMode);
+});
+$effect(() => {
+	setVideoFps(videoFps);
 });
 $effect(() => {
 	if (texturePreset === lastAppliedTexturePreset) return;
@@ -317,10 +332,24 @@ const stylePreviews = $derived(
                             options={[
                                 { value: "none", label: i18n(I18nKey.wallpaperModeNone) },
                                 { value: "banner", label: i18n(I18nKey.wallpaperModeBanner) },
+                                { value: "video", label: i18n(I18nKey.wallpaperModeVideo) },
                             ]}
                             bind:value={wallpaperMode}
                             label={i18n(I18nKey.wallpaperMode)}
                         />
+                        {#if wallpaperMode === "video" && videoFpsOptions.length > 1}
+                            <div class="flex flex-col gap-1.5 mt-1">
+                                <span class="text-sm font-bold text-[var(--on-surface-variant)] ml-1">{i18n(I18nKey.backgroundVideoFps)}</span>
+                                <SegmentedButton
+                                    options={videoFpsOptions.map((fps) => ({
+                                        value: fps,
+                                        label: `${fps} FPS`,
+                                    }))}
+                                    bind:value={videoFps}
+                                    label={i18n(I18nKey.backgroundVideoFps)}
+                                />
+                            </div>
+                        {/if}
                     </div>
                 {/if}
 

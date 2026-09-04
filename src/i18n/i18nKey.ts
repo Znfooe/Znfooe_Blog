@@ -244,6 +244,9 @@ enum I18nKey {
 	wallpaperMode = "wallpaperMode",
 	wallpaperModeBanner = "wallpaperModeBanner",
 	wallpaperModeNone = "wallpaperModeNone",
+	wallpaperModeVideo = "wallpaperModeVideo",
+	/** 动态视频背景的帧率档位标签 */
+	backgroundVideoFps = "backgroundVideoFps",
 
 	texturePreset = "texturePreset",
 	texturePresetNone = "texturePresetNone",
@@ -327,6 +330,8 @@ enum I18nKey {
 	openingDevDisclaimer = "openingDevDisclaimer",
 	/** 「我已阅读」确认按钮（未解锁时展示剩余秒数 {seconds}） */
 	openingAcknowledge = "openingAcknowledge",
+	/** 动态壁纸来源声明：{up} 为 UP 主名，{uid} 为 UID */
+	openingWallpaperCredit = "openingWallpaperCredit",
 
 	/** Profile 卡片个人简介的诗意文案（bio） */
 	profileBio = "profileBio",

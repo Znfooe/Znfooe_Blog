@@ -985,7 +985,8 @@ const initialMobileBanner = page === "home";
 			display: flex
 
 
-	:global(html[data-wallpaper-mode="none"]) .banner-stage
+	:global(html[data-wallpaper-mode="none"]) .banner-stage,
+	:global(html[data-wallpaper-mode="video"]) .banner-stage
 		display: none
 
 	@media (max-width: 1023.98px)

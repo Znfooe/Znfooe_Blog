@@ -86,3 +86,6 @@ artifacts/shirone-ai-*
 /Logo.mp4
 /Logo_ai2x.mp4
 /.video_enhance_temp/
+
+# 动态背景视频源文件（原始 98MB，只提交 public/assets/video/ 下压缩后的成品）
+/精灵公主-星雨120fps.mp4

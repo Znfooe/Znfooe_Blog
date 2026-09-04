@@ -280,6 +280,8 @@ export const th: Translation = {
 	[Key.wallpaperMode]: "พื้นหลังหน้า",
 	[Key.wallpaperModeBanner]: "แบนเนอร์",
 	[Key.wallpaperModeNone]: "สีพื้น",
+	[Key.wallpaperModeVideo]: "วิดีโอ",
+	[Key.backgroundVideoFps]: "อัตราเฟรม",
 	[Key.texturePreset]: "พื้นผิวพื้นหลัง",
 	[Key.texturePresetNone]: "ไม่มี",
 	[Key.texturePresetStarlight]: "ประกายดาว",
@@ -313,6 +315,7 @@ export const th: Translation = {
 	[Key.openingDevDisclaimer]:
 		"เว็บไซต์นี้ยังอยู่ระหว่างการพัฒนาและอาจมีข้อบกพร่องบางประการ ขออภัยในความไม่สะดวก",
 	[Key.openingAcknowledge]: "ฉันได้อ่านแล้ว（{seconds}s）",
+	[Key.openingWallpaperCredit]: "วอลเปเปอร์เคลื่อนไหวจากครีเอเตอร์ Bilibili {up}（UID: {uid}）",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

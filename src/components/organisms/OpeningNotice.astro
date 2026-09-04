@@ -27,6 +27,14 @@ const forkNotice = i18n(I18nKey.openingForkNotice)
 
 const disclaimer = i18n(I18nKey.openingDevDisclaimer);
 
+// 动态壁纸来源声明（可选）：{up} / {uid} 由配置注入
+const wallpaperCredit = openingConfig.wallpaperCredit;
+const wallpaperCreditLine = wallpaperCredit
+	? i18n(I18nKey.openingWallpaperCredit)
+			.replace("{up}", wallpaperCredit.up)
+			.replace("{uid}", wallpaperCredit.uid)
+	: "";
+
 // 按钮初始文案（无秒数），运行时由 initOpeningNotice 覆盖为「我已阅读（Ns）」倒计时
 const acknowledgeBase = i18n(I18nKey.openingAcknowledge)
 	.replace("（{seconds}s）", "")
@@ -51,6 +59,18 @@ const acknowledgeBase = i18n(I18nKey.openingAcknowledge)
 			<span>{forkNotice}</span>
 		</p>
 		<p class="opening-notice__text">{disclaimer}</p>
+		{wallpaperCredit && (
+			<p class="opening-notice__text">
+				<span>{wallpaperCreditLine}</span>
+				<a
+					href={wallpaperCredit.videoUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					{wallpaperCredit.videoText}
+				</a>
+			</p>
+		)}
 		<div class="opening-notice__actions">
 			<button
 				type="button"

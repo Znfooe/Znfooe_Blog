@@ -294,6 +294,8 @@ export const id: Translation = {
 	[Key.wallpaperMode]: "Latar halaman",
 	[Key.wallpaperModeBanner]: "Banner",
 	[Key.wallpaperModeNone]: "Warna solid",
+	[Key.wallpaperModeVideo]: "Video",
+	[Key.backgroundVideoFps]: "Kecepatan bingkai",
 	[Key.layoutMode]: "Tata letak",
 	[Key.layoutList]: "Daftar",
 	[Key.layoutGrid]: "Kisi",
@@ -328,6 +330,7 @@ export const id: Translation = {
 	[Key.openingDevDisclaimer]:
 		"Situs ini masih dalam pengembangan dan mungkin memiliki beberapa kekurangan. Terima kasih atas pengertiannya.",
 	[Key.openingAcknowledge]: "Saya telah membaca ini（{seconds}s）",
+	[Key.openingWallpaperCredit]: "Wallpaper hidup dari kreator Bilibili {up} (UID: {uid})",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

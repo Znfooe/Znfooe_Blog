@@ -87,7 +87,7 @@ export function setTextureOpacity(opacity: number): void {
 }
 
 export function isWallpaperMode(value: unknown): value is WallpaperMode {
-	return value === "banner" || value === "none";
+	return value === "banner" || value === "none" || value === "video";
 }
 
 export function getDefaultWallpaperMode(): WallpaperMode {

@@ -3,7 +3,7 @@ export type { PermalinkConfig } from "./permalinkConfig.ts";
 import type { AUTO_MODE, DARK_MODE, LIGHT_MODE } from "@constants/constants";
 import type { TextureConfig } from "./textureConfig";
 
-export type WallpaperMode = "banner" | "none";
+export type WallpaperMode = "banner" | "none" | "video";
 
 export type TopAppBarContentAlign = "left" | "center";
 
@@ -58,6 +58,20 @@ export type SiteConfig = {
 	};
 	wallpaperMode: {
 		defaultMode: WallpaperMode;
+	};
+	/** 动态视频背景（wallpaperMode === "video" 时使用）。 */
+	backgroundVideo?: {
+		/** 视频源：不同帧率的地址，key 为帧率档位（如 "60"、"120"）。 */
+		src: Record<string, string>;
+		/** 默认帧率档位（对应 src 的 key）。 */
+		defaultFps?: string;
+		/** 视频裁切焦点位置："top"、"center" 或 "bottom"。 */
+		position?: "top" | "center" | "bottom";
+		/** 是否在视频上覆盖黑色遮罩提高文字对比度。 */
+		dim?: {
+			enable: boolean;
+			opacity: number;
+		};
 	};
 	/** 页面背景纹理系统配置，支持布尔值直接开关或详细配置对象 */
 	texture?: boolean | TextureConfig;

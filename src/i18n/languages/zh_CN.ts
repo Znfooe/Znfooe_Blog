@@ -281,6 +281,8 @@ export const zh_CN: Translation = {
 	[Key.wallpaperMode]: "页面背景",
 	[Key.wallpaperModeBanner]: "横幅",
 	[Key.wallpaperModeNone]: "纯色",
+	[Key.wallpaperModeVideo]: "视频",
+	[Key.backgroundVideoFps]: "帧率",
 	[Key.texturePreset]: "背景纹理",
 	[Key.texturePresetNone]: "无纹理",
 	[Key.texturePresetStarlight]: "星芒光斑",
@@ -315,6 +317,7 @@ export const zh_CN: Translation = {
 	[Key.openingDevDisclaimer]:
 		"本站正在开发完善中，可能存在一些瑕疵，敬请谅解。",
 	[Key.openingAcknowledge]: "我已阅读（{seconds}s）",
+	[Key.openingWallpaperCredit]: "动态壁纸来源于 B站UP：{up}（UID：{uid}）",
 
 	// 诗意 bio：取「雨替天空记下落下的字句」之意，跳脱直译、贴近原文情绪。
 	[Key.profileBio]: "雨替天空，记下落下的字句。",
