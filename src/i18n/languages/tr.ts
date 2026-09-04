@@ -330,6 +330,7 @@ export const tr: Translation = {
 		"Bu site hâlâ geliştirme aşamasındadır ve bazı kusurlar içerebilir. Anlayışınız için teşekkürler.",
 	[Key.openingAcknowledge]: "Bunu okudum（{seconds}s）",
 	[Key.openingWallpaperCredit]: "Canlı duvar kağıdı: Bilibili yaratıcısı {up}（UID: {uid}）",
+	[Key.openingWallpaperHint]: "Sağ üstteki Görüntü Ayarları'ndan Video veya Görsel arka planı değiştirebilirsiniz.",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

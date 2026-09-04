@@ -23,12 +23,12 @@ export interface BannerState {
 	transparentTopAppBar: boolean;
 	contentLayout: BannerContentLayout;
 }
-
 export function resolveBannerState(input: BannerStateInput): BannerState {
 	const isHome = input.page === "home";
+	// banner（图片）需有图片；video（视频）无需图片。none 不渲染。
 	const visible =
-		input.mode === "banner" &&
-		input.imageCount > 0 &&
+		(input.mode === "banner" || input.mode === "video") &&
+		(input.mode === "video" || input.imageCount > 0) &&
 		(input.viewport === "desktop" || isHome);
 	const copyMode: BannerCopyMode = !visible
 		? null

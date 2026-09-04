@@ -328,6 +328,7 @@ export const en: Translation = {
 		"This site is still under development and may have some rough edges. Thanks for your understanding.",
 	[Key.openingAcknowledge]: "I have read this ({seconds}s)",
 	[Key.openingWallpaperCredit]: "Live wallpaper by Bilibili creator {up} (UID: {uid})",
+	[Key.openingWallpaperHint]: "You can switch between Video and Image backgrounds in the Display Settings at the top-right.",
 
 	// 诗意 bio：保留原文
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

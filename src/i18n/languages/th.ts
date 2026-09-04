@@ -316,6 +316,7 @@ export const th: Translation = {
 		"เว็บไซต์นี้ยังอยู่ระหว่างการพัฒนาและอาจมีข้อบกพร่องบางประการ ขออภัยในความไม่สะดวก",
 	[Key.openingAcknowledge]: "ฉันได้อ่านแล้ว（{seconds}s）",
 	[Key.openingWallpaperCredit]: "วอลเปเปอร์เคลื่อนไหวจากครีเอเตอร์ Bilibili {up}（UID: {uid}）",
+	[Key.openingWallpaperHint]: "สลับพื้นหลัง 'วิดีโอ' หรือ 'รูปภาพ' ได้ที่การตั้งค่าการแสดงผล (มุมขวาบน)",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

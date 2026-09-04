@@ -329,6 +329,7 @@ export const vi: Translation = {
 		"Trang web này đang trong quá trình phát triển và có thể còn một số lỗi. Xin cảm ơn sự thông cảm của bạn.",
 	[Key.openingAcknowledge]: "Tôi đã đọc（{seconds}s）",
 	[Key.openingWallpaperCredit]: "Hình nền động từ nhà sáng tạo Bilibili {up}（UID: {uid}）",
+	[Key.openingWallpaperHint]: "Bạn có thể chuyển đổi giữa nền Video và Hình ảnh trong Cài đặt hiển thị (góc trên bên phải).",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

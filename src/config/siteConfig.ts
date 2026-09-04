@@ -43,7 +43,7 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 	// 默认页面背景模式："banner" 使用壁纸横幅，"none" 使用主题纯色，"video" 使用动态视频背景。
 	// 访客在“显示设置”中的选择会保存在浏览器中，并覆盖这里的默认值。
 	wallpaperMode: {
-		defaultMode: "banner",
+		defaultMode: "video",
 	},
 	// 动态视频背景（仅当 wallpaperMode.defaultMode 或访客选择为 "video" 时生效）。
 	backgroundVideo: {

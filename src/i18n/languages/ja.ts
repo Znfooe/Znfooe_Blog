@@ -327,6 +327,7 @@ export const ja: Translation = {
 		"このサイトは現在開発中です。不具合があるかもしれませんが、ご了承ください。",
 	[Key.openingAcknowledge]: "確認しました（{seconds}s）",
 	[Key.openingWallpaperCredit]: "ライブ壁紙は Bilibili の {up}（UID: {uid}）より",
+	[Key.openingWallpaperHint]: "右上の「表示設定」で「動画」または「画像」の背景を切り替えられます。",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

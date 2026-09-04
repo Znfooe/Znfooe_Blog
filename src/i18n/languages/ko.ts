@@ -326,6 +326,7 @@ export const ko: Translation = {
 		"이 사이트는 현재 개발 중이며 일부 오류가 있을 수 있습니다. 양해 부탁드립니다.",
 	[Key.openingAcknowledge]: "확인했습니다（{seconds}s）",
 	[Key.openingWallpaperCredit]: "라이브 배경화면 출처: Bilibili {up}（UID: {uid}）",
+	[Key.openingWallpaperHint]: "오른쪽 위 '표시 설정'에서 '비디오' 또는 '이미지' 배경으로 전환할 수 있습니다.",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

@@ -332,6 +332,8 @@ enum I18nKey {
 	openingAcknowledge = "openingAcknowledge",
 	/** 动态壁纸来源声明：{up} 为 UP 主名，{uid} 为 UID */
 	openingWallpaperCredit = "openingWallpaperCredit",
+	/** 提示可在右上角设置切换背景模式（视频 / 图片） */
+	openingWallpaperHint = "openingWallpaperHint",
 
 	/** Profile 卡片个人简介的诗意文案（bio） */
 	profileBio = "profileBio",
