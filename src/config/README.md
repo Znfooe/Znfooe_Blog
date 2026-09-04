@@ -104,6 +104,8 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 | `siteConfig.ts` | 站点部署 URL / base 路径 / 标题标识 / 语言 / IANA 时区 / HCT 主题色 / 背景纹理系统 / 显示设置浮层开关 / 横幅 / TOC 深度 / 进度条 / favicon（含 `getDefaultStyle` / `getDefaultSpec` / `resolveDisplaySettings` 回退值） |
 | `profileConfig.ts` | 博主资料：头像 / 名称 / 简介 / 社交链接 |
 | `licenseConfig.ts` | 文章版权声明 |
+| `introConfig.ts` | 开场加载动画（IntroSplash）：总开关（`enable: false` 时零 DOM / 零视频请求 / 零客户端运行时）、视频地址（`public` 内路径或外链）、`contain`/`cover` 适配、幕布底色（建议与视频底色一致）、会话内只播一次、最长等待与收场淡出时长、跳过按钮；阶段契约（`pending → exiting → done`）见 `src/utils/intro-splash.ts` |
+| `openingConfig.ts` | 开场提示弹窗（OpeningNotice）：总开关、标题、上游仓库 URL 与作者名（二开出处声明 + 感谢开源）、「我已阅读」按钮解锁前的倒计时（`acknowledgeDelay`）、`once`（localStorage 持久化，确认一次后不再出现）；运行时契约见 `src/utils/opening-notice.ts` |
 | `expressiveCodeConfig.ts` | 代码块明暗主题 |
 | `navBarConfig.ts` | 导航栏链接（`LinkPresets` 预设表 + 组装） |
 | `sidebarConfig.ts` | 侧栏编排与 widget 清单（`arrangement` 单/双栏、`side` 主栏物理侧、widget `column` 分栏标签；判别联合类型见 `types/sidebarConfig.ts`；编排指导见 `docs/sidebar-system.md`，组件文档见 `docs/sidebar-widgets.md`，新增 widget checklist 见 `docs/common-components.md` §3.1） |

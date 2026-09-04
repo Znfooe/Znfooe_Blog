@@ -314,6 +314,20 @@ enum I18nKey {
 	feedOpenXml = "feedOpenXml",
 	feedRecentPosts = "feedRecentPosts",
 
+	// Intro splash（开场加载动画）
+	/** 开场动画幕布右下角的跳过按钮 */
+	introSkip = "introSkip",
+
+	// Opening notice（开场提示弹窗）
+	/** 弹窗标题 */
+	openingTitle = "openingTitle",
+	/** 二开出处声明：{repo} 为上游仓库名，{author} 为作者名 */
+	openingForkNotice = "openingForkNotice",
+	/** 站点开发中声明 */
+	openingDevDisclaimer = "openingDevDisclaimer",
+	/** 「我已阅读」确认按钮（未解锁时展示剩余秒数 {seconds}） */
+	openingAcknowledge = "openingAcknowledge",
+
 	/** Profile 卡片个人简介的诗意文案（bio） */
 	profileBio = "profileBio",
 }

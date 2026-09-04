@@ -316,6 +316,14 @@ export const ko: Translation = {
 		"위 주소를 선호하는 RSS/Atom 리더기(NetNewsWire, Feedly, Inoreader, Follow 등)에 등록하여 새 글 알림을 받아보세요.",
 	[Key.feedOpenXml]: "원본 XML 보기",
 	[Key.feedRecentPosts]: "피드 최신 글",
+	[Key.introSkip]: "건너뛰기",
+
+	[Key.openingTitle]: "환영합니다",
+	[Key.openingForkNotice]: "이 프로젝트는 {repo}를 기반으로 2차 개발되었습니다. 오픈소스로 공개해 주신 {author}님께 감사드립니다!",
+	[Key.openingDevDisclaimer]:
+		"이 사이트는 현재 개발 중이며 일부 오류가 있을 수 있습니다. 양해 부탁드립니다.",
+	[Key.openingAcknowledge]: "확인했습니다（{seconds}s）",
+
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",
 };

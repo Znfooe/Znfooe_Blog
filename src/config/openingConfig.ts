@@ -1,0 +1,19 @@
+import type { OpeningConfig } from "@/types/openingConfig";
+import { withUserConfig } from "../utils/config-overlay.ts";
+
+/**
+ * 开场提示弹窗（OpeningNotice）。
+ *
+ * 展示本项目二开出处（fork 自 Shirone）并感谢上游作者，同时声明站点仍在开发中。
+ * 「我已阅读」按钮在 `acknowledgeDelay`（默认 3000ms）后解锁；
+ * 用户确认一次后（`once: true`，localStorage 持久化）后续访问不再出现。
+ * `enable: false` 时零 DOM、零请求、零运行时。
+ */
+export const openingConfig: OpeningConfig = withUserConfig("opening", {
+	enable: true,
+	title: "欢迎",
+	repoUrl: "https://github.com/LyraVoid/Shirone",
+	repoAuthor: "LyraVoid",
+	acknowledgeDelay: 3000,
+	once: true,
+});

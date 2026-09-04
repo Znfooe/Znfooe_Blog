@@ -319,6 +319,14 @@ export const vi: Translation = {
 		"Thêm URL nguồn cấp ở trên vào trình đọc RSS/Atom yêu thích của bạn (như NetNewsWire, Feedly, Inoreader, Follow) để nhận thông báo bài viết mới.",
 	[Key.feedOpenXml]: "Xem XML gốc",
 	[Key.feedRecentPosts]: "Bài viết mới nhất trong nguồn cấp",
+	[Key.introSkip]: "Bỏ qua",
+
+	[Key.openingTitle]: "Chào mừng",
+	[Key.openingForkNotice]: "Dự án này được phát triển dựa trên {repo}. Cảm ơn {author} đã mở mã nguồn!",
+	[Key.openingDevDisclaimer]:
+		"Trang web này đang trong quá trình phát triển và có thể còn một số lỗi. Xin cảm ơn sự thông cảm của bạn.",
+	[Key.openingAcknowledge]: "Tôi đã đọc（{seconds}s）",
+
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",
 };

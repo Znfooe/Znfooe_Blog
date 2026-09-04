@@ -317,6 +317,14 @@ export const ja: Translation = {
 		"上記の購読 URL をお好みの RSS/Atom リーダー（NetNewsWire、Feedly、Inoreader、Follow など）に登録すると、最新記事が通知されます。",
 	[Key.feedOpenXml]: "XML を直接表示",
 	[Key.feedRecentPosts]: "最新の配信記事",
+	[Key.introSkip]: "スキップ",
+
+	[Key.openingTitle]: "ようこそ",
+	[Key.openingForkNotice]: "本プロジェクトは {repo} を二次開発したものです。{author} 様のオープンソースに感謝！",
+	[Key.openingDevDisclaimer]:
+		"このサイトは現在開発中です。不具合があるかもしれませんが、ご了承ください。",
+	[Key.openingAcknowledge]: "確認しました（{seconds}s）",
+
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",
 };

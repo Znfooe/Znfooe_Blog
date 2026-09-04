@@ -1,0 +1,127 @@
+---
+/**
+ * IntroSplash — 开场加载动画（organism）。
+ *
+ * 职责：渲染全屏幕布与开场视频，播放一次后缓出并释放主页入场。
+ * 运行时状态语义在 `@utils/intro-splash`（pending → exiting → done），
+ * `html[data-intro]` 同时被 `src/styles/transition.css` 消费来暂停/释放 `.onload-animation`。
+ *
+ * 零额外负担：
+ * - 由 Layout 在 `introConfig.enable && src` 时才渲染，关闭时不进入组件图；
+ * - `<video>` 不预置 src，仅在本会话真正播放时由运行时赋值，未播放 = 零请求；
+ * - 未播放/已结束的会话中，运行时会移除幕布节点，页面不留任何占位。
+ */
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import { url } from "@utils/url-utils";
+import { introConfig } from "@/config";
+
+const { src, fit, backdrop, skippable, maxWait, exitDuration } = introConfig;
+
+// 外链原样使用；站内路径补 base 前缀（与 favicon 的处理一致）。
+const videoSrc =
+	/^(https?:)?\/\//.test(src) || src.startsWith("data:") ? src : url(src);
+
+const backdropValue = backdrop.trim() || "var(--page-bg)";
+---
+
+<div
+	id="intro-splash"
+	class="intro-splash"
+	data-intro-fit={fit}
+	data-src={videoSrc}
+	data-max-wait={String(maxWait)}
+	data-exit-duration={String(exitDuration)}
+	style={`--intro-backdrop: ${backdropValue}; --intro-exit-duration: ${exitDuration}ms;`}
+>
+	<video
+		class="intro-splash__video"
+		muted
+		playsinline
+		preload="auto"
+		disablepictureinpicture
+		disableRemotePlayback
+		aria-hidden="true"
+	></video>
+	{skippable && (
+		<button type="button" class="intro-splash__skip m3-state-layer" data-intro-skip>
+			{i18n(I18nKey.introSkip)}
+		</button>
+	)}
+</div>
+
+<script>
+	import { getIntroPhase, initIntroSplash } from "@utils/intro-splash";
+
+	const splash = document.getElementById("intro-splash");
+
+	if (splash && getIntroPhase() === "pending") {
+		initIntroSplash(splash, {
+			src: splash.dataset.src ?? "",
+			maxWait: Number.parseInt(splash.dataset.maxWait ?? "6000", 10) || 6000,
+			exitDuration:
+				Number.parseInt(splash.dataset.exitDuration ?? "600", 10) || 600,
+		});
+	} else {
+		// 本会话不播放（已播过 / reduced-motion / 关闭）：移除幕布，保持零 DOM。
+		splash?.remove();
+	}
+</script>
+
+<style lang="stylus">
+	/* 幕布：fixed 全屏、最高层级；默认隐藏且不拦截交互，
+	   仅在 html[data-intro] 的 pending / exiting 阶段可见。 */
+	.intro-splash
+		position: fixed
+		inset: 0
+		z-index: 200
+		display: flex
+		align-items: center
+		justify-content: center
+		overflow: hidden
+		background: var(--intro-backdrop, var(--page-bg))
+		opacity: 0
+		visibility: hidden
+		pointer-events: none
+		transition: opacity var(--intro-exit-duration, 600ms) var(--m3e-easing-emphasized-decelerate)
+
+	:global(html[data-intro="pending"]) .intro-splash
+		opacity: 1
+		visibility: visible
+		pointer-events: auto
+
+	/* 收场：opacity 过渡（缓出曲线）与主页入场交叉进行 */
+	:global(html[data-intro="exiting"]) .intro-splash
+		opacity: 0
+		visibility: visible
+		pointer-events: none
+
+	/* 视频默认铺满；contain 时完整显示（配合同色 backdrop 无接缝） */
+	.intro-splash__video
+		width: 100%
+		height: 100%
+		object-fit: cover
+		transform: scale(1)
+		transition: transform var(--intro-exit-duration, 600ms) var(--m3e-easing-emphasized-decelerate)
+
+	.intro-splash[data-intro-fit="contain"] .intro-splash__video
+		object-fit: contain
+
+	/* 收场时给画面一个极轻的缓出推近，让「结束」有方向感而非硬切 */
+	:global(html[data-intro="exiting"]) .intro-splash__video
+		transform: scale(1.04)
+
+	/* 跳过按钮：主题化 chip（表面容器色 + on-surface），
+	   背景色由用户配置、不随主题，因此用不透明的主题表面保证任意底色下可读 */
+	.intro-splash__skip
+		position: absolute
+		right: var(--m3e-space-5)
+		bottom: var(--m3e-space-5)
+		padding: var(--m3e-space-2) var(--m3e-space-5)
+		border: none
+		border-radius: var(--shape-corner-full)
+		background: var(--surface-container-high)
+		color: var(--on-surface)
+		font: var(--m3e-type-label-large)
+		cursor: pointer
+</style>

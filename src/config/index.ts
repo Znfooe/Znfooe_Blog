@@ -41,6 +41,7 @@ export {
 	imageBloomConfig,
 	resolveImageBloomOptions,
 } from "./imageBloomConfig";
+export { introConfig } from "./introConfig";
 export { licenseConfig } from "./licenseConfig";
 export { llmsConfig } from "./llmsConfig";
 export {
@@ -50,6 +51,7 @@ export {
 	resolveMusicOptions,
 } from "./musicConfig";
 export { LinkPresets, navBarConfig } from "./navBarConfig";
+export { openingConfig } from "./openingConfig";
 export { permalinkConfig } from "./permalinkConfig";
 export { POST_CARD_MIN_WIDTH, postListConfig } from "./postListConfig";
 export { profileConfig } from "./profileConfig";

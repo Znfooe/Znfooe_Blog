@@ -306,6 +306,14 @@ export const th: Translation = {
 		"เพิ่ม URL ฟีดด้านบนลงในโปรแกรมอ่าน RSS/Atom (เช่น NetNewsWire, Feedly, Inoreader, Follow) เพื่อรับการแจ้งเตือนบทความใหม่",
 	[Key.feedOpenXml]: "ดู XML ต้นฉบับ",
 	[Key.feedRecentPosts]: "บทความล่าสุดในฟีด",
+	[Key.introSkip]: "ข้าม",
+
+	[Key.openingTitle]: "ยินดีต้อนรับ",
+	[Key.openingForkNotice]: "โปรเจกต์นี้พัฒนาต่อยอดจาก {repo} ขอบคุณ {author} ที่เปิดซอร์ส!",
+	[Key.openingDevDisclaimer]:
+		"เว็บไซต์นี้ยังอยู่ระหว่างการพัฒนาและอาจมีข้อบกพร่องบางประการ ขออภัยในความไม่สะดวก",
+	[Key.openingAcknowledge]: "ฉันได้อ่านแล้ว（{seconds}s）",
+
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",
 };

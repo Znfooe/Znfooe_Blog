@@ -163,7 +163,8 @@ export const es: Translation = {
 	[Key.untitled]: "Sin título",
 	[Key.uncategorized]: "Sin categoría",
 	[Key.noTags]: "Sin etiquetas",
-	[Key.postsInCategory]: "Ver todas las publicaciones en la categoría {category}",
+	[Key.postsInCategory]:
+		"Ver todas las publicaciones en la categoría {category}",
 	[Key.postsWithTag]: "Ver todas las publicaciones con la etiqueta {tag}",
 
 	[Key.wordCount]: "palabra",
@@ -319,6 +320,14 @@ export const es: Translation = {
 		"Añade esta URL a tu lector RSS/Atom favorito (como NetNewsWire, Feedly, Inoreader o Follow) para recibir actualizaciones.",
 	[Key.feedOpenXml]: "Ver XML original",
 	[Key.feedRecentPosts]: "Artículos recientes del canal",
+	[Key.introSkip]: "Saltar",
+
+	[Key.openingTitle]: "Bienvenido",
+	[Key.openingForkNotice]: "Este proyecto es una bifurcación de {repo}. ¡Gracias a {author} por abrir su código!",
+	[Key.openingDevDisclaimer]:
+		"Este sitio sigue en desarrollo y puede tener algunos fallos. Gracias por tu comprensión.",
+	[Key.openingAcknowledge]: "He leído esto（{seconds}s）",
+
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",
 };

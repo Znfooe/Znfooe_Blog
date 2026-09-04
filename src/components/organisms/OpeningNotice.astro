@@ -1,0 +1,169 @@
+---
+/**
+ * OpeningNotice — 开场提示弹窗（organism）。
+ *
+ * 职责：首次访问时弹出，声明本项目二开出处（fork 自 Shirone）并感谢上游作者，
+ * 同时声明站点仍在开发完善中。「我已阅读」按钮在倒计时结束后解锁，
+ * 用户确认一次后（localStorage 持久化）后续访问不再出现。
+ *
+ * 零额外负担：
+ * - 由 Layout 在 `openingConfig.enable` 时才渲染，关闭时不进入组件图；
+ * - 已确认过的会话中，运行时会直接移除弹窗节点，页面不留任何占位；
+ * - 弹窗内容全部为站点内文案，不产生任何外部请求。
+ */
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import { openingConfig } from "@/config";
+
+const { repoUrl, repoAuthor, acknowledgeDelay } = openingConfig;
+
+// 弹窗标题：优先配置值，留空回退 i18n 默认标题
+const title = openingConfig.title.trim() || i18n(I18nKey.openingTitle);
+
+// 二开出处文案：{repo} 用仓库 URL 的仓库名，{author} 用配置的作者名
+const forkNotice = i18n(I18nKey.openingForkNotice)
+	.replace("{repo}", repoUrl)
+	.replace("{author}", repoAuthor);
+
+const disclaimer = i18n(I18nKey.openingDevDisclaimer);
+
+// 按钮初始文案（无秒数），运行时由 initOpeningNotice 覆盖为「我已阅读（Ns）」倒计时
+const acknowledgeBase = i18n(I18nKey.openingAcknowledge)
+	.replace("（{seconds}s）", "")
+	.replace("（{seconds}s)", "")
+	.replace("({seconds}s)", "")
+	.replace("({seconds}s）", "");
+---
+
+<div
+	id="opening-notice"
+	class="opening-notice"
+	role="dialog"
+	aria-modal="true"
+	aria-labelledby="opening-notice-title"
+	data-acknowledge-delay={String(acknowledgeDelay)}
+>
+	<div class="opening-notice__scrim" data-opening-scrim></div>
+	<div class="opening-notice__panel">
+		<h2 id="opening-notice-title" class="opening-notice__title">{title}</h2>
+		<p class="opening-notice__text">
+			<a href={repoUrl} target="_blank" rel="noopener noreferrer">{repoUrl}</a>
+			<span>{forkNotice}</span>
+		</p>
+		<p class="opening-notice__text">{disclaimer}</p>
+		<div class="opening-notice__actions">
+			<button
+				type="button"
+				class="opening-notice__ack m3-state-layer"
+				data-opening-ack
+				data-base-label={acknowledgeBase}
+				disabled
+			>
+				{acknowledgeBase}
+			</button>
+		</div>
+	</div>
+</div>
+
+<script>
+	import {
+		hasOpeningAcknowledged,
+		initOpeningNotice,
+		markOpeningAcknowledged,
+	} from "@utils/opening-notice";
+
+	const root = document.getElementById("opening-notice");
+
+	if (root) {
+		// 已确认过 → 直接移除（零 DOM 残留）
+		if (hasOpeningAcknowledged()) {
+			root.remove();
+		} else {
+			const delay =
+				Number.parseInt(root.dataset.acknowledgeDelay ?? "3000", 10) || 3000;
+			// 倒计时文案：复用按钮的初始文案骨架，追加「（Ns）」
+			const base = (root.querySelector("[data-opening-ack]") as HTMLButtonElement)
+				?.dataset.baseLabel;
+			initOpeningNotice(
+				root,
+				delay,
+				(seconds) => `${base ?? ""}（${seconds}s）`,
+				markOpeningAcknowledged,
+			);
+		}
+	}
+</script>
+
+<style lang="stylus">
+	/* 弹窗：默认隐藏且不拦截交互，运行时加 .is-open 后淡入显示。
+	   使用语义 token，适配明暗主题。 */
+	.opening-notice
+		position: fixed
+		inset: 0
+		z-index: 210
+		display: flex
+		align-items: center
+		justify-content: center
+		opacity: 0
+		visibility: hidden
+		pointer-events: none
+		transition: opacity var(--m3e-duration-medium) var(--m3e-easing-emphasized-decelerate)
+
+		&.is-open
+			opacity: 1
+			visibility: visible
+			pointer-events: auto
+
+	.opening-notice__scrim
+		position: absolute
+		inset: 0
+		background: unquote("color-mix(in srgb, var(--mc-scrim, #000) 40%, transparent)")
+
+	.opening-notice__panel
+		position: relative
+		max-width: unquote("min(32rem, calc(100vw - var(--m3e-space-8)))")
+		width: 100%
+		padding: var(--m3e-space-6)
+		border-radius: var(--shape-corner-xl)
+		background: var(--surface-container-high)
+		color: var(--on-surface)
+		box-shadow: var(--m3e-elevation-3)
+
+	.opening-notice__title
+		font: var(--m3e-type-headline-small)
+		margin: 0 0 var(--m3e-space-4)
+
+	.opening-notice__text
+		font: var(--m3e-type-body-medium)
+		margin: 0 0 var(--m3e-space-4)
+		line-height: 1.6
+
+		&:last-of-type
+			margin-bottom: var(--m3e-space-6)
+
+		a
+			color: var(--primary)
+			word-break: break-all
+			text-decoration: none
+
+			&:hover
+				text-decoration: underline
+
+	.opening-notice__actions
+		display: flex
+		justify-content: flex-end
+
+	.opening-notice__ack
+		border: none
+		border-radius: var(--shape-corner-full)
+		padding: var(--m3e-space-2) var(--m3e-space-6)
+		background: var(--primary)
+		color: var(--on-primary)
+		font: var(--m3e-type-label-large)
+		cursor: pointer
+		transition: opacity var(--m3e-duration-short) var(--m3e-easing-standard)
+
+		&:disabled
+			opacity: 0.4
+			cursor: not-allowed
+</style>

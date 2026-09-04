@@ -81,3 +81,8 @@ artifacts/shirone-ai-*
 
 # 原始头像源图（项目根），只提交处理后的 src/assets/images/avatar.webp
 头像.jpg
+
+# 开场视频源文件与增强产物：只提交 public/assets/video/ 下的最终 web 资源
+/Logo.mp4
+/Logo_ai2x.mp4
+/.video_enhance_temp/

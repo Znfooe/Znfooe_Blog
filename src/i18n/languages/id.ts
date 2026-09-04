@@ -321,6 +321,14 @@ export const id: Translation = {
 		"Tambahkan URL umpan di atas ke pembaca RSS/Atom favorit Anda (seperti NetNewsWire, Feedly, Inoreader, Follow) untuk menerima pembaruan.",
 	[Key.feedOpenXml]: "Lihat XML Asli",
 	[Key.feedRecentPosts]: "Artikel Terbaru di Umpan",
+	[Key.introSkip]: "Lewati",
+
+	[Key.openingTitle]: "Selamat datang",
+	[Key.openingForkNotice]: "Proyek ini dikembangkan dari {repo}. Terima kasih kepada {author} yang telah membuka sumbernya!",
+	[Key.openingDevDisclaimer]:
+		"Situs ini masih dalam pengembangan dan mungkin memiliki beberapa kekurangan. Terima kasih atas pengertiannya.",
+	[Key.openingAcknowledge]: "Saya telah membaca ini（{seconds}s）",
+
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",
 };

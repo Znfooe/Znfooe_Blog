@@ -53,3 +53,21 @@ html.is-animating .transition-swup-fade {
 #post-container .onload-animation:nth-child(4) { animation-delay: calc(var(--content-delay) + 175ms) }
 #post-container .onload-animation:nth-child(5) { animation-delay: calc(var(--content-delay) + 250ms) }
 #post-container .onload-animation:nth-child(6) { animation-delay: calc(var(--content-delay) + 325ms) }
+
+/* ============================================================
+   开场动画（IntroSplash）与首屏入场的衔接
+   `html[data-intro]` 由 Layout 的 <head> 内联脚本在首次绘制前标记，
+   阶段流转 pending → exiting → done，语义见 src/utils/intro-splash.ts。
+   pending：幕布播放中，暂停所有 .onload-animation（含 delay 计时），
+            避免主页在幕布后面先播完入场；
+   exiting：幕布缓出淡出的同时释放入场，并把曲线换成
+            M3E emphasized-decelerate、时长拉到 long，与幕布收场交叉出顺滑感。
+   ============================================================ */
+html[data-intro="pending"] .onload-animation {
+    animation-play-state: paused;
+}
+
+html[data-intro="exiting"] .onload-animation {
+    animation-duration: var(--m3e-duration-long);
+    animation-timing-function: var(--m3e-easing-emphasized-decelerate);
+}

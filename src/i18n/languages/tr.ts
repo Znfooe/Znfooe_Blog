@@ -320,6 +320,14 @@ export const tr: Translation = {
 		"Yeni yazı bildirimleri almak için yukarıdaki bağlantıyı dilediğiniz RSS/Atom okuyucusuna (NetNewsWire, Feedly, Inoreader, Follow vb.) ekleyin.",
 	[Key.feedOpenXml]: "Ham XML'i Görüntüle",
 	[Key.feedRecentPosts]: "Akıştaki Son Yazılar",
+	[Key.introSkip]: "Atla",
+
+	[Key.openingTitle]: "Hoş geldiniz",
+	[Key.openingForkNotice]: "Bu proje {repo} projesinden çatallanmıştır. Kaynağını açtığı için {author}'a teşekkürler!",
+	[Key.openingDevDisclaimer]:
+		"Bu site hâlâ geliştirme aşamasındadır ve bazı kusurlar içerebilir. Anlayışınız için teşekkürler.",
+	[Key.openingAcknowledge]: "Bunu okudum（{seconds}s）",
+
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",
 };

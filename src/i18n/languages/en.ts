@@ -318,6 +318,14 @@ export const en: Translation = {
 	[Key.feedOpenXml]: "View Raw XML",
 	[Key.feedRecentPosts]: "Recent Posts in Feed",
 
+	[Key.introSkip]: "Skip",
+
+	[Key.openingTitle]: "Welcome",
+	[Key.openingForkNotice]: "This project is forked from {repo}. Thanks to {author} for open-sourcing it!",
+	[Key.openingDevDisclaimer]:
+		"This site is still under development and may have some rough edges. Thanks for your understanding.",
+	[Key.openingAcknowledge]: "I have read this ({seconds}s)",
+
 	// 诗意 bio：保留原文
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",
 };

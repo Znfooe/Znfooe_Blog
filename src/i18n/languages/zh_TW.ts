@@ -307,6 +307,14 @@ export const zh_TW: Translation = {
 		"將上方訂閱網址新增至任意 RSS/Atom 閱讀器（如 NetNewsWire、Feedly、Inoreader、Follow 等），即可即時接收新文章推送。",
 	[Key.feedOpenXml]: "檢視原始 XML",
 	[Key.feedRecentPosts]: "最新推送文章",
+	[Key.introSkip]: "跳過",
+
+	[Key.openingTitle]: "歡迎",
+	[Key.openingForkNotice]: "本專案二開於 {repo}，感謝 {author} 大佬開源！",
+	[Key.openingDevDisclaimer]:
+		"本站正在開發完善中，可能存在一些瑕疵，敬請見諒。",
+	[Key.openingAcknowledge]: "我已閱讀（{seconds}s）",
+
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "雨替天空，記下落下的字句。",
 };

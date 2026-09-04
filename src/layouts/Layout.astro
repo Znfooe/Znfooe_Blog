@@ -1,10 +1,14 @@
 ---
 import { Font } from "astro:assets";
 import Snackbar from "@components/atoms/overlay/Snackbar.svelte";
+import IntroSplash from "@components/organisms/IntroSplash.astro";
+import OpeningNotice from "@components/organisms/OpeningNotice.astro";
 import ConfigCarrier from "@components/system/ConfigCarrier.astro";
 import UmamiRuntime from "@components/system/UmamiRuntime.astro";
 import {
 	expressiveCodeConfig,
+	introConfig,
+	openingConfig,
 	profileConfig,
 	resolvedFontOptions,
 	resolveTextureOptions,
@@ -26,6 +30,7 @@ import {
 import { defaultFavicons } from "../constants/icon";
 import type { Favicon } from "../types/config";
 import { createFontRoleStyle } from "../utils/font-options";
+import { INTRO_ATTRIBUTE, INTRO_STORAGE_KEY } from "../utils/intro-splash";
 import { resolvePageWidth } from "../utils/responsive-utils";
 import { pathsEqual, url } from "../utils/url-utils";
 import { LANGUAGES, languageFromPath } from "../i18n/languages";
@@ -102,7 +107,8 @@ const hreflangLinks = LANGUAGES.map((meta) => {
 		? `/${meta.prefix}${canonicalPath === "/" ? "/" : canonicalPath}`
 		: canonicalPath;
 	// hreflang 采用 BCP 47 连字符格式（如 zh-CN），默认语言用 en。
-	const code = meta.code === "en" ? "en" : meta.code.replace("_", "-").toLowerCase();
+	const code =
+		meta.code === "en" ? "en" : meta.code.replace("_", "-").toLowerCase();
 	return { code, href };
 });
 const fontRoleStyle = createFontRoleStyle(resolvedFontOptions);
@@ -214,6 +220,24 @@ const hasMonoFont =
 			offset = offset - offset % 4;
 			document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
 		</script>
+		<script is:inline define:vars={{INTRO_ATTRIBUTE, INTRO_STORAGE_KEY, introEnabled: introConfig.enable, introOncePerSession: introConfig.oncePerSession}}>
+			// 开场动画阶段标记：必须在首次绘制前落到 <html> 上，
+			// 否则主页会先闪现、幕布再盖上（FOUC）。
+			// reduced-motion 用户直接跳过视频；会话内已播放过也不再出现。
+			(() => {
+				const root = document.documentElement;
+				const reduced =
+					root.classList.contains('motion-reduced') ||
+					window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+				let played = false;
+				try {
+					played = window.sessionStorage.getItem(INTRO_STORAGE_KEY) === '1';
+				} catch {}
+				const play =
+					introEnabled && !(introOncePerSession && played) && !reduced;
+				root.setAttribute(INTRO_ATTRIBUTE, play ? 'pending' : 'done');
+			})();
+		</script>
 		<style define:vars={{
 			configHue,
 			'page-width': resolvePageWidth(),
@@ -233,6 +257,8 @@ const hasMonoFont =
 		data-banner-has-mobile={String(hasMobileBanner)}
 	>
 		<ConfigCarrier></ConfigCarrier>
+		{introConfig.enable && introConfig.src && <IntroSplash />}
+		{openingConfig.enable && <OpeningNotice />}
 		{umamiOptions && <UmamiRuntime />}
 		{textureEnabled && (
 			<div

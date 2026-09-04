@@ -308,6 +308,14 @@ export const zh_CN: Translation = {
 	[Key.feedOpenXml]: "查看原始 XML",
 	[Key.feedRecentPosts]: "最新推送文章",
 
+	[Key.introSkip]: "跳过",
+
+	[Key.openingTitle]: "欢迎",
+	[Key.openingForkNotice]: "本项目二开于 {repo}，感谢 {author} 大佬开源！",
+	[Key.openingDevDisclaimer]:
+		"本站正在开发完善中，可能存在一些瑕疵，敬请谅解。",
+	[Key.openingAcknowledge]: "我已阅读（{seconds}s）",
+
 	// 诗意 bio：取「雨替天空记下落下的字句」之意，跳脱直译、贴近原文情绪。
 	[Key.profileBio]: "雨替天空，记下落下的字句。",
 };
