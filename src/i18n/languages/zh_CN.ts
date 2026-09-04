@@ -319,6 +319,7 @@ export const zh_CN: Translation = {
 	[Key.openingAcknowledge]: "我已阅读（{seconds}s）",
 	[Key.openingWallpaperCredit]: "动态壁纸来源于 B站UP：{up}（UID：{uid}）",
 	[Key.openingWallpaperHint]: "可在右上角「显示设置」中切换「视频」或「图片」背景。",
+	[Key.openingNeverShow]: "不再显示",
 
 	// 诗意 bio：取「雨替天空记下落下的字句」之意，跳脱直译、贴近原文情绪。
 	[Key.profileBio]: "雨替天空，记下落下的字句。",

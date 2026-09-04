@@ -334,6 +334,8 @@ enum I18nKey {
 	openingWallpaperCredit = "openingWallpaperCredit",
 	/** 提示可在右上角设置切换背景模式（视频 / 图片） */
 	openingWallpaperHint = "openingWallpaperHint",
+	/** 弹窗「不再显示」勾选项 */
+	openingNeverShow = "openingNeverShow",
 
 	/** Profile 卡片个人简介的诗意文案（bio） */
 	profileBio = "profileBio",

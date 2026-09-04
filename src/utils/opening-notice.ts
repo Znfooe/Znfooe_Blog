@@ -2,10 +2,11 @@
  * 开场提示弹窗运行时（OpeningNotice 专用）。
  *
  * 运行时契约（organism 只负责渲染，状态语义集中在这里）：
- * - 是否出现由 `localStorage` 持久化标记决定（`once: true` 时用户确认过即永不再现）；
+ * - 弹窗默认每次整页加载都出现；仅当访客勾选「不再显示」后，organism 才调用
+ *   `markOpeningAcknowledged()` 写入 localStorage 持久化标记，此后不再出现；
  * - 为避免与开场动画（IntroSplash）重叠，弹窗在 `html[data-intro]` 进入 `done` 后再显示；
  * - 「我已阅读」按钮在 `acknowledgeDelay` 倒计时结束后解锁，期间展示剩余秒数；
- * - 确认后写入标记、隐藏并移除节点（零 DOM 残留）。
+ * - 确认后隐藏并移除节点（零 DOM 残留）。
  */
 
 /** 弹窗根节点 id。 */

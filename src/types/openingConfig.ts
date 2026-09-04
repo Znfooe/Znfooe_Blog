@@ -2,8 +2,8 @@
  * 开场提示弹窗（OpeningNotice）配置。
  *
  * 关闭（`enable: false`）时满足零额外负担：零 DOM、零外部请求、零客户端运行时。
- * 确认状态由 `localStorage` 持久化记录，`once` 为 true 时用户确认过一次后，
- * 之后所有会话（含跨浏览器会话）都不再出现。
+ * 弹窗默认每次整页加载都出现；仅当访客勾选「不再显示」后才会写入 localStorage
+ * 持久化标记，此后不再出现。
  */
 export interface OpeningConfig {
 	/** 总开关。false 时零 DOM、零请求、零运行时。 */
@@ -16,8 +16,6 @@ export interface OpeningConfig {
 	repoAuthor: string;
 	/** 「我已阅读」按钮解锁前的等待时长（ms）。 */
 	acknowledgeDelay: number;
-	/** 是否只出现一次（localStorage 持久化；false 则每次整页加载都出现）。 */
-	once: boolean;
 	/** 动态壁纸来源声明（可选，未配置则不渲染该行）。 */
 	wallpaperCredit?: {
 		/** 壁纸作者 / UP 主名称。 */

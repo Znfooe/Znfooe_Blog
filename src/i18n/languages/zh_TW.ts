@@ -318,6 +318,7 @@ export const zh_TW: Translation = {
 	[Key.openingAcknowledge]: "我已閱讀（{seconds}s）",
 	[Key.openingWallpaperCredit]: "動態壁紙來源於 B站UP：{up}（UID：{uid}）",
 	[Key.openingWallpaperHint]: "可在右上角「顯示設定」中切換「影片」或「圖片」背景。",
+	[Key.openingNeverShow]: "不再顯示",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "雨替天空，記下落下的字句。",

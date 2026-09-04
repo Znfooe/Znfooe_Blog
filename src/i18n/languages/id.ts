@@ -332,6 +332,7 @@ export const id: Translation = {
 	[Key.openingAcknowledge]: "Saya telah membaca ini（{seconds}s）",
 	[Key.openingWallpaperCredit]: "Wallpaper hidup dari kreator Bilibili {up} (UID: {uid})",
 	[Key.openingWallpaperHint]: "Anda dapat beralih antara latar Video dan Gambar di Pengaturan Tampilan (kanan atas).",
+	[Key.openingNeverShow]: "Jangan tampilkan lagi",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",

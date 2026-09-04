@@ -76,6 +76,14 @@ const acknowledgeBase = i18n(I18nKey.openingAcknowledge)
 		)}
 		<p class="opening-notice__text">{wallpaperHint}</p>
 		<div class="opening-notice__actions">
+			<label class="opening-notice__never">
+				<input
+					type="checkbox"
+					data-opening-never
+					aria-label={i18n(I18nKey.openingNeverShow)}
+				/>
+				<span>{i18n(I18nKey.openingNeverShow)}</span>
+			</label>
 			<button
 				type="button"
 				class="opening-notice__ack m3-state-layer"
@@ -99,7 +107,7 @@ const acknowledgeBase = i18n(I18nKey.openingAcknowledge)
 	const root = document.getElementById("opening-notice");
 
 	if (root) {
-		// 已确认过 → 直接移除（零 DOM 残留）
+		// 已勾选「不再显示」→ 直接移除（零 DOM 残留）
 		if (hasOpeningAcknowledged()) {
 			root.remove();
 		} else {
@@ -108,11 +116,17 @@ const acknowledgeBase = i18n(I18nKey.openingAcknowledge)
 			// 倒计时文案：复用按钮的初始文案骨架，追加「（Ns）」
 			const base = (root.querySelector("[data-opening-ack]") as HTMLButtonElement)
 				?.dataset.baseLabel;
+			const neverCheckbox = root.querySelector<HTMLInputElement>(
+				"[data-opening-never]",
+			);
 			initOpeningNotice(
 				root,
 				delay,
 				(seconds) => `${base ?? ""}（${seconds}s）`,
-				markOpeningAcknowledged,
+				() => {
+					// 仅当勾选「不再显示」时才永久关闭；否则下次整页加载仍会出现
+					if (neverCheckbox?.checked) markOpeningAcknowledged();
+				},
 			);
 		}
 	}
@@ -175,7 +189,24 @@ const acknowledgeBase = i18n(I18nKey.openingAcknowledge)
 
 	.opening-notice__actions
 		display: flex
-		justify-content: flex-end
+		align-items: center
+		justify-content: space-between
+		gap: var(--m3e-space-4)
+
+	.opening-notice__never
+		display: inline-flex
+		align-items: center
+		gap: var(--m3e-space-2)
+		font: var(--m3e-type-body-small)
+		color: var(--on-surface-variant)
+		cursor: pointer
+		user-select: none
+
+		input
+			accent-color: var(--primary)
+			width: 1rem
+			height: 1rem
+			cursor: pointer
 
 	.opening-notice__ack
 		border: none

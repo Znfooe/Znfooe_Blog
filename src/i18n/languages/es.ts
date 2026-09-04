@@ -331,6 +331,7 @@ export const es: Translation = {
 	[Key.openingAcknowledge]: "He leído esto（{seconds}s）",
 	[Key.openingWallpaperCredit]: "Fondo animado del creador de Bilibili {up} (UID: {uid})",
 	[Key.openingWallpaperHint]: "Puedes alternar entre fondo de Vídeo e Imagen en Ajustes de pantalla (arriba a la derecha).",
+	[Key.openingNeverShow]: "No mostrar de nuevo",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。
 	[Key.profileBio]: "The rain remembers what the sky forgot to say.",
