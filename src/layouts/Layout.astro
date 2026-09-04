@@ -220,10 +220,11 @@ const hasMonoFont =
 			offset = offset - offset % 4;
 			document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
 		</script>
-		<script is:inline define:vars={{INTRO_ATTRIBUTE, INTRO_STORAGE_KEY, introEnabled: introConfig.enable, introOncePerSession: introConfig.oncePerSession}}>
+		<script is:inline define:vars={{INTRO_ATTRIBUTE, INTRO_STORAGE_KEY, introEnabled: introConfig.enable, introOncePerSession: introConfig.oncePerSession, introIsHome: initialPage === "home"}}>
 			// 开场动画阶段标记：必须在首次绘制前落到 <html> 上，
 			// 否则主页会先闪现、幕布再盖上（FOUC）。
-			// reduced-motion 用户直接跳过视频；会话内已播放过也不再出现。
+			// 仅在首页播放（用于掩盖背景视频加载空白、拖延缓冲时间）；
+			// reduced-motion 用户直接跳过；oncePerSession 为 true 时会话内不重播。
 			(() => {
 				const root = document.documentElement;
 				const reduced =
@@ -234,7 +235,10 @@ const hasMonoFont =
 					played = window.sessionStorage.getItem(INTRO_STORAGE_KEY) === '1';
 				} catch {}
 				const play =
-					introEnabled && !(introOncePerSession && played) && !reduced;
+					introEnabled &&
+					introIsHome &&
+					!(introOncePerSession && played) &&
+					!reduced;
 				root.setAttribute(INTRO_ATTRIBUTE, play ? 'pending' : 'done');
 			})();
 		</script>

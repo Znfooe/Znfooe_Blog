@@ -2,9 +2,10 @@ import { expect, test } from "@playwright/test";
 
 /**
  * 开场加载动画（IntroSplash）回归锁定：
- * - 首次进入（会话内未播放、非 reduced-motion）：幕布可见、html[data-intro]="pending"，
+ * - 首页整页加载（非 reduced-motion）：幕布可见、html[data-intro]="pending"，
  *   入场动画在播放期间被暂停；点击「跳过」或视频自然结束 → 收场 → "done" 并移除节点；
- * - 同一会话整页刷新不再出现（sessionStorage 标记，oncePerSession）；
+ * - 每次整页加载首页都重播（oncePerSession=false，用于掩盖背景视频加载空白）；
+ * - 非首页整页加载不播放开场动画；
  * - reduced-motion 用户直接跳过，幕布不渲染（零 DOM 残留）；
  * - 零额外负担：被跳过的会话（reduced-motion）从不给 <video> 赋 src，
  *   因此不发生任何 logo.mp4 网络请求。
@@ -48,20 +49,26 @@ test.describe("Intro splash", () => {
 		expect(requests.some((u) => u.includes("logo.mp4"))).toBe(true);
 	});
 
-	test("does not replay within the same session after first play", async ({
-		page,
-	}) => {
+	test("replays on every full home page load", async ({ page }) => {
 		await page.goto("/", { waitUntil: "load" });
 		await expect(page.locator("html")).toHaveAttribute("data-intro", "pending");
 
-		// 结束首次播放（标记 sessionStorage）
+		// 结束首次播放
 		await page.locator("[data-intro-skip]").click();
 		await expect(page.locator("#intro-splash")).toHaveCount(0, {
 			timeout: 5000,
 		});
 
-		// 整页刷新：会话内已播放 → 不再出现幕布
+		// 整页刷新首页：仍会再次播放
 		await page.reload({ waitUntil: "load" });
+		await expect(page.locator("html")).toHaveAttribute("data-intro", "pending");
+		await expect(page.locator("#intro-splash")).toBeVisible();
+	});
+
+	test("does not play on non-home pages", async ({ page }) => {
+		await page.goto("/archive/", { waitUntil: "load" });
+
+		// 非首页：阶段直接 done，无幕布
 		await expect(page.locator("html")).toHaveAttribute("data-intro", "done");
 		await expect(page.locator("#intro-splash")).toHaveCount(0, {
 			timeout: 5000,

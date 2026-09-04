@@ -13,7 +13,7 @@ export const introConfig: IntroConfig = withUserConfig("intro", {
 	src: "/assets/video/logo.mp4",
 	fit: "contain",
 	backdrop: "#f7b7ea",
-	oncePerSession: true,
+	oncePerSession: false,
 	maxWait: 6000,
 	exitDuration: 600,
 	skippable: true,
