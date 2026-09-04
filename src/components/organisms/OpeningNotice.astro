@@ -57,10 +57,7 @@ const acknowledgeBase = i18n(I18nKey.openingAcknowledge)
 	<div class="opening-notice__scrim" data-opening-scrim></div>
 	<div class="opening-notice__panel">
 		<h2 id="opening-notice-title" class="opening-notice__title">{title}</h2>
-		<p class="opening-notice__text">
-			<a href={repoUrl} target="_blank" rel="noopener noreferrer">{repoUrl}</a>
-			<span>{forkNotice}</span>
-		</p>
+		<p class="opening-notice__text">{forkNotice}</p>
 		<p class="opening-notice__text">{disclaimer}</p>
 		{wallpaperCredit && (
 			<p class="opening-notice__text">
