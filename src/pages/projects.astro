@@ -1,5 +1,6 @@
 ---
 /** 项目页：配置层规则在构建期结合数据层传入交互岛，路由负责开关与编排。 */
+import ProjectDetailPanel from "@components/organisms/ProjectDetailPanel.astro";
 import ProjectSection from "@components/organisms/ProjectSection.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
@@ -24,4 +25,19 @@ const items = resolveProjectsData(projectsConfig);
 		items={items}
 		client:visible
 	/>
+	<ProjectDetailPanel items={items} />
 </MainGridLayout>
+
+<script>
+	// 选中卡片 → 切换对应详情面板显隐（面板由 ProjectDetailPanel 预渲染）
+	const panel = document.getElementById("project-detail-panel");
+	if (panel) {
+		const details = panel.querySelectorAll<HTMLElement>("[data-project-detail]");
+		window.addEventListener("project:select", (event: Event) => {
+			const key = (event as CustomEvent<{ key: string }>).detail?.key ?? "";
+			details.forEach((detail) => {
+				detail.hidden = detail.dataset.projectDetail !== key;
+			});
+		});
+	}
+</script>

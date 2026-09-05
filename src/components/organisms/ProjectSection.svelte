@@ -23,6 +23,9 @@ let selectedCategory = $state("");
 let initialized = false;
 let gridEl: HTMLElement | undefined = $state();
 
+// 当前选中的项目 key（驱动详情面板显隐）
+let selectedKey = $state("");
+
 /** 筛选过渡三段态：loading 展示指示器 → out 指示器淡出 → idle 列表 stagger 揭幕 */
 type FilterPhase = "idle" | "loading" | "out";
 let phase = $state<FilterPhase>("idle");
@@ -66,6 +69,14 @@ function onCategoryChange() {
 		setTimeout(() => (phase = "out"), 300),
 		setTimeout(() => (phase = "idle"), 300 + 150),
 	];
+}
+
+/** 选中/取消选中项目：广播事件驱动详情面板显隐 */
+function selectProject(key: string) {
+	selectedKey = selectedKey === key ? "" : key;
+	window.dispatchEvent(
+		new CustomEvent("project:select", { detail: { key: selectedKey } }),
+	);
 }
 
 // URL 参数同步（?category= / ?q=）
@@ -182,7 +193,22 @@ $effect(() => {
 				bind:this={gridEl}
 			>
 				{#each filteredItems as project, index (project.key)}
-					<ProjectCard {project} delay={Math.min(index, 7) * 45} />
+					<div
+						class="projects-section__cell"
+						class:projects-section__cell--selected={selectedKey === project.key}
+						role="button"
+						tabindex="0"
+						aria-pressed={selectedKey === project.key}
+						onclick={() => selectProject(project.key)}
+						onkeydown={(event) => {
+							if (event.key === "Enter" || event.key === " ") {
+								event.preventDefault();
+								selectProject(project.key);
+							}
+						}}
+					>
+						<ProjectCard {project} delay={Math.min(index, 7) * 45} />
+					</div>
 				{/each}
 			</div>
 		{/key}
@@ -310,6 +336,19 @@ $effect(() => {
 			grid-auto-rows: 8px
 			row-gap: 0
 			column-gap: var(--m3e-space-4)
+
+	&__cell
+		cursor: pointer
+		outline: none
+		border-radius: var(--shape-corner-l)
+
+		&:focus-visible
+			box-shadow: 0 0 0 2px var(--primary)
+
+		&--selected
+			:global(.project-card)
+				border-color: var(--primary)
+				box-shadow: var(--m3e-elevation-2)
 
 /* 指示器退场：淡出 + 轻微收拢（reduced-motion 由全局规则压至终态） */
 @keyframes project-loading-out

@@ -1,0 +1,102 @@
+---
+import { getEntry, render } from "astro:content";
+/**
+ * ProjectDetailPanel — 项目详情面板（organism）。
+ *
+ * 在项目页中间，把每个「有 post 文章」的项目详情以 Markdown 正文就地渲染，
+ * 通过 CSS 显隐切换选中项（选中逻辑由 ProjectSection 的卡片点击驱动）。
+ *
+ * 与博客文章页复用同一渲染管线：`render(entry)` + `<Content />`，
+ * 因此代码高亮、提示框、表格、折叠面板等 Markdown 能力完全一致。
+ * 未选中任何项目时，面板隐藏；选中后仅显示对应条目。
+ */
+import Markdown from "@components/content/Markdown.astro";
+import { formatDateToYYYYMMDD } from "@utils/date-utils";
+import { getPostUrl } from "@utils/url-utils";
+import type { ProjectItem } from "@/types/projectsConfig";
+
+interface Props {
+	items: ProjectItem[];
+}
+
+const { items } = Astro.props;
+
+// 构建期预渲染每个项目的文章 markdown
+const details = (
+	await Promise.all(
+		items
+			.filter((item) => Boolean(item.post))
+			.map(async (item) => {
+				const entry = await getEntry("posts", item.post as string);
+				if (!entry) return null;
+				const { Content } = await render(entry);
+				return {
+					key: item.key,
+					title: item.title,
+					description: entry.data.description || entry.data.title,
+					published: formatDateToYYYYMMDD(entry.data.published),
+					postUrl: getPostUrl(entry),
+					Content,
+				};
+			}),
+	)
+).filter((detail) => detail !== null);
+---
+
+{details.length > 0 && (
+	<div class="project-detail-panel" id="project-detail-panel">
+		{details.map((detail) => {
+			const Content = detail.Content;
+			return (
+				<article
+					class="project-detail"
+					data-project-detail={detail.key}
+					hidden
+				>
+					<div class="project-detail__head">
+						<h2 class="project-detail__title">{detail.title}</h2>
+						<time class="project-detail__date" datetime={detail.published}>
+							{detail.published}
+						</time>
+					</div>
+					<Markdown class="mb-6">
+						<Content />
+					</Markdown>
+				</article>
+			);
+		})}
+	</div>
+)}
+
+<style lang="stylus">
+	.project-detail-panel
+		margin-top: 1.25rem
+
+	.project-detail
+		background: var(--card-bg)
+		border: 1px solid var(--outline-variant)
+		border-radius: var(--shape-corner-l)
+		padding: 1.5rem
+
+		&[hidden]
+			display: none
+
+	.project-detail__head
+		display: flex
+		align-items: baseline
+		justify-content: space-between
+		gap: 1rem
+		margin-bottom: 1rem
+		padding-bottom: 1rem
+		border-bottom: 1px solid var(--outline-variant)
+
+	.project-detail__title
+		margin: 0
+		font: var(--m3e-type-headline-medium)
+		color: var(--on-surface)
+
+	.project-detail__date
+		font: var(--m3e-type-body-small)
+		color: var(--on-surface-variant)
+		white-space: nowrap
+</style>

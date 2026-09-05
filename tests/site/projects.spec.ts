@@ -17,7 +17,7 @@ test.describe("项目页", () => {
 		).toBeVisible();
 	});
 
-	test("渲染代表项目、阶段、技术栈、源码与详情链接", async ({ page }) => {
+	test("渲染代表项目、阶段、技术栈与源码链接", async ({ page }) => {
 		await expect(page.locator("#swup-container")).toHaveAttribute(
 			"data-current-page",
 			"projects",
@@ -38,7 +38,7 @@ test.describe("项目页", () => {
 			shirone.getByRole("link", { name: "查看源码" }),
 		).toHaveAttribute("href", "https://github.com/LyraVoid/Shirone");
 
-		// 三个新项目：无封面（图标瓷砖形态）+ 源码链接 + 阅读详情链接
+		// 三个新项目：无封面（图标瓷砖形态）+ 源码链接
 		const harness = page.locator('[data-project="project-harness-builder"]');
 		await expect(harness.locator(".project-card__icon")).toBeVisible();
 		await expect(
@@ -47,19 +47,47 @@ test.describe("项目页", () => {
 			"href",
 			"https://github.com/Znfooe/project-harness-builder",
 		);
-		await expect(
-			harness.getByRole("link", { name: "阅读详情" }),
-		).toHaveAttribute("href", "/posts/project-harness-builder/");
 
 		const reaction = page.locator('[data-project="reactionpro-client"]');
 		await expect(
-			reaction.getByRole("link", { name: "阅读详情" }),
-		).toHaveAttribute("href", "/posts/reactionpro-client/");
+			reaction.getByRole("link", { name: "查看源码" }),
+		).toHaveAttribute("href", "https://github.com/Znfooe/ReactionPro-Client");
 
 		const mathviz = page.locator('[data-project="mathviz"]');
 		await expect(
-			mathviz.getByRole("link", { name: "阅读详情" }),
-		).toHaveAttribute("href", "/posts/mathviz/");
+			mathviz.getByRole("link", { name: "查看源码" }),
+		).toHaveAttribute("href", "https://github.com/Znfooe/mathviz");
+	});
+
+	test("点击卡片就地展开对应项目详情，不跳转页面", async ({ page }) => {
+		// 初始：所有详情面板隐藏
+		await expect(page.locator(".project-detail")).toHaveCount(3);
+		await expect(
+			page.locator('[data-project-detail="project-harness-builder"]'),
+		).toBeHidden();
+
+		// 点击 project-harness-builder 卡片 → 对应详情展开
+		await page.locator('[data-project="project-harness-builder"]').click();
+		await expect(
+			page.locator('[data-project-detail="project-harness-builder"]'),
+		).toBeVisible();
+		await expect(page.locator('[data-project-detail="mathviz"]')).toBeHidden();
+
+		// 仍停留在项目页（未跳转）
+		await expect(page).toHaveURL(/\/projects\/$/);
+
+		// 详情正文包含 markdown 渲染内容（标题）
+		await expect(
+			page.locator(
+				'[data-project-detail="project-harness-builder"] .project-detail__title',
+			),
+		).toContainText("Project Harness Builder");
+
+		// 再点一次收起
+		await page.locator('[data-project="project-harness-builder"]').click();
+		await expect(
+			page.locator('[data-project-detail="project-harness-builder"]'),
+		).toBeHidden();
 	});
 
 	test("直接加载时导航高亮与侧栏页面过滤正确", async ({ page }) => {

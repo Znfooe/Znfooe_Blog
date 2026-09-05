@@ -20,14 +20,11 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import { reveal } from "@utils/motion";
-import { getPostUrlBySlug } from "@utils/url-utils";
 import type { ProjectItem, ProjectPhase } from "@/types/projectsConfig";
 
 let { project, delay = 0 }: { project: ProjectItem; delay?: number } = $props();
 
 let coverFailed = $state(false);
-
-const postUrl = $derived(project.post ? getPostUrlBySlug(project.post) : "");
 
 const phaseMeta: Record<
 	ProjectPhase,
@@ -130,14 +127,8 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 			</ul>
 		{/if}
 
-		{#if project.website || project.repository || project.post}
+		{#if project.website || project.repository}
 			<div class="project-card__actions">
-				{#if project.post}
-					<a href={postUrl}>
-						<Icon icon="material-symbols:menu-book-outline-rounded" aria-hidden="true" />
-						{i18n(I18nKey.projectReadMore)}
-					</a>
-				{/if}
 				{#if project.website}
 					<a href={project.website} target="_blank" rel="noopener noreferrer">
 						<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
