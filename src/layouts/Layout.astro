@@ -439,12 +439,37 @@ scrollFunction();
 <script>
 import { bindFancyboxRuntime } from "../utils/fancybox-runtime";
 import { applyStoredLayoutMode } from "../utils/layout-mode";
+import { INTRO_ATTRIBUTE, INTRO_STORAGE_KEY } from "../utils/intro-splash";
 
 bindFancyboxRuntime();
+
+// 解析当前路径是否为首页：swup content:replace 时直接读 swup 注入的目标 URL。
+function isHomePath(path: string): boolean {
+	const normalized = path.replace(/\/+$/, "") || "/";
+	return normalized === "/";
+}
 
 const setup = () => {
 	window.swup.hooks.on("content:replace", () => {
 		applyStoredLayoutMode(document.getElementById("post-list"));
+		// swup 在 head updateHead 时会把目标页的内联脚本重新执行一次，
+		// 其中 IntroSplash 阶段标记脚本会把 `data-intro` 重新置为 `pending`。
+		// 但 IntroSplash 节点不在 swup containers 内，不会被替换/重播，
+		// 导致首页的 .onload-animation 永远被 `animation-play-state: paused`
+		// 卡住、整页内容不可见。这里仅在 swup 导航到 home 时立即推到 `done`，
+		// 让首页入场动画放出来；非首页（无 onload-animation 暂停依赖）保持原值。
+		const targetPath = window.location.pathname;
+		if (isHomePath(targetPath)) {
+			document.documentElement.setAttribute(INTRO_ATTRIBUTE, "done");
+			// 同步移除可能还残留的幕布节点（之前播放过但 swup 替换后残留）。
+			document.getElementById("intro-splash")?.remove();
+			// 已「会话内播放过」的标记也补上，避免再次进入时误触发。
+			try {
+				window.sessionStorage.setItem(INTRO_STORAGE_KEY, "1");
+			} catch {
+				// 隐私模式等场景写入失败可忽略。
+			}
+		}
 	});
 };
 if (window.swup) setup();
