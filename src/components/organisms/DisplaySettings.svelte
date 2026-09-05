@@ -1,6 +1,7 @@
 <script lang="ts">
 import AccentBar from "@components/atoms/display/AccentBar.svelte";
 import PanelStack from "@components/atoms/display/PanelStack.svelte";
+import ProgressIndicator from "@components/atoms/feedback/ProgressIndicator.svelte";
 import SegmentedButton from "@components/atoms/selection/SegmentedButton.svelte";
 import Slider from "@components/atoms/selection/Slider.svelte";
 import Switch from "@components/atoms/selection/Switch.svelte";
@@ -8,9 +9,15 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import {
-	BACKGROUND_VIDEO_FPS_CHANGE_EVENT,
+	BACKGROUND_WALLPAPER_PROGRESS_EVENT,
+	ensureWallpaperReady,
 	getStoredVideoFps,
+	getStoredWallpaperId,
+	getWallpaperDownload,
+	hasStoredWallpaperId,
+	resolveMediaUrl,
 	setVideoFps,
+	setWallpaperId,
 } from "@utils/background-video";
 import {
 	defaultMode,
@@ -46,6 +53,8 @@ import { onMount } from "svelte";
 import {
 	getDefaultSpec,
 	getDefaultStyle,
+	getDefaultWallpaperId,
+	resolveBackgroundWallpapers,
 	resolveDisplaySettings,
 	siteConfig,
 } from "@/config";
@@ -78,11 +87,69 @@ const defaultWallpaperMode = siteConfig.wallpaperMode.defaultMode;
 let wallpaperMode = $state<WallpaperMode>(getStoredWallpaperMode());
 let lastAppliedWallpaperMode = wallpaperMode;
 
-// 动态视频背景帧率档位（60 / 120），仅当视频背景可用时展示
-const videoFpsOptions = Object.keys(siteConfig.backgroundVideo?.src ?? {});
-const defaultVideoFps =
-	siteConfig.backgroundVideo?.defaultFps ?? videoFpsOptions[0] ?? "60";
-let videoFps = $state<string>(getStoredVideoFps(defaultVideoFps));
+// 动态视频壁纸：可选列表（legacy backgroundVideo 为 id="default" 首项），
+// 仅多于一条时渲染选择器；点选延迟壁纸（deferLoad）即开始带进度下载
+const defaultWallpaperId = getDefaultWallpaperId();
+const wallpapers = resolveBackgroundWallpapers().map((wallpaper) => ({
+	...wallpaper,
+	src: Object.fromEntries(
+		Object.entries(wallpaper.src ?? {}).map(([fps, src]) => [
+			fps,
+			resolveMediaUrl(src),
+		]),
+	),
+	thumb: wallpaper.thumb
+		? resolveMediaUrl(wallpaper.thumb)
+		: wallpaper.poster
+			? resolveMediaUrl(wallpaper.poster)
+			: "",
+}));
+const showWallpaperSelector = wallpapers.length > 1;
+let wallpaperId = $state(getStoredWallpaperId(defaultWallpaperId));
+let lastAppliedWallpaperId = wallpaperId;
+const currentWallpaper = $derived(
+	wallpapers.find((w) => w.id === wallpaperId) ??
+		wallpapers.find((w) => w.id === defaultWallpaperId) ??
+		wallpapers[0],
+);
+
+// 动态视频背景帧率档位（60 / 120），跟随当前壁纸的源档位
+const initialWallpaper = currentWallpaper;
+const initialFpsOptions = Object.keys(initialWallpaper?.src ?? {});
+let videoFps = $state(
+	getStoredVideoFps(
+		initialWallpaper?.defaultFps ?? initialFpsOptions[0] ?? "60",
+	),
+);
+if (initialFpsOptions.length > 0 && !initialFpsOptions.includes(videoFps)) {
+	videoFps = initialWallpaper?.defaultFps ?? initialFpsOptions[0];
+}
+const videoFpsOptions = $derived(Object.keys(currentWallpaper?.src ?? {}));
+let lastAppliedVideoFps = videoFps;
+
+// 延迟壁纸下载进度（模块级 Map 非响应式，经 downloadRefresh 触发重算）
+let downloadRefresh = $state(0);
+const wallpaperDownload = $derived.by(() => {
+	downloadRefresh;
+	const wallpaper = currentWallpaper;
+	if (!wallpaper?.deferLoad) return null;
+	const videoUrl =
+		wallpaper.src[videoFps] ?? Object.values(wallpaper.src ?? {})[0] ?? "";
+	if (!videoUrl) return null;
+	return getWallpaperDownload(videoUrl);
+});
+
+/** 指定壁纸的下载状态（模板内读取 downloadRefresh 建立响应依赖）。 */
+function wallpaperStatus(
+	wallpaper: (typeof wallpapers)[number],
+): string | null {
+	downloadRefresh;
+	if (!wallpaper.deferLoad) return null;
+	const videoUrl =
+		wallpaper.src[videoFps] ?? Object.values(wallpaper.src ?? {})[0] ?? "";
+	if (!videoUrl) return null;
+	return getWallpaperDownload(videoUrl).status;
+}
 
 // 背景纹理预设与浓度
 const defaultTexturePreset = getDefaultTexturePreset();
@@ -138,7 +205,16 @@ onMount(() => {
 		attributeFilter: ["class"],
 	});
 	motionReduced = getMotionPreference();
-	return () => observer.disconnect();
+	// 延迟壁纸下载进度事件 → 触发派生状态重算（下载在面板外也会推进）
+	const refreshDownload = () => (downloadRefresh += 1);
+	window.addEventListener(BACKGROUND_WALLPAPER_PROGRESS_EVENT, refreshDownload);
+	return () => {
+		observer.disconnect();
+		window.removeEventListener(
+			BACKGROUND_WALLPAPER_PROGRESS_EVENT,
+			refreshDownload,
+		);
+	};
 });
 
 /** 完整重置：色相 / 配色风格 / Color Spec / 列表布局 / 背景纹理 全部还原为站点默认（点击即生效，无确认弹窗） */
@@ -148,9 +224,12 @@ function confirmReset() {
 	spec = defaultSpec;
 	postListMode = defaultLayoutMode;
 	wallpaperMode = defaultWallpaperMode;
+	wallpaperId = defaultWallpaperId;
 	texturePreset = defaultTexturePreset;
 	textureOpacity = defaultTextureOpacity;
-	videoFps = defaultVideoFps;
+	const resetWallpaper = currentWallpaper;
+	const resetFpsOptions = Object.keys(resetWallpaper?.src ?? {});
+	videoFps = resetWallpaper?.defaultFps ?? resetFpsOptions[0] ?? "60";
 }
 
 /** 是否有可重置的偏离（控制 Reset 按钮可见性） */
@@ -160,6 +239,7 @@ const isDirty = $derived(
 		spec !== defaultSpec ||
 		postListMode !== defaultLayoutMode ||
 		wallpaperMode !== defaultWallpaperMode ||
+		wallpaperId !== defaultWallpaperId ||
 		texturePreset !== defaultTexturePreset ||
 		textureOpacity !== defaultTextureOpacity,
 );
@@ -182,8 +262,43 @@ $effect(() => {
 	setWallpaperMode(wallpaperMode);
 });
 $effect(() => {
+	if (wallpaperId === lastAppliedWallpaperId) return;
+	lastAppliedWallpaperId = wallpaperId;
+	setWallpaperId(wallpaperId);
+});
+$effect(() => {
+	// 仅在访客真正切换帧率时持久化并广播，避免挂载时触发下载
+	if (videoFps === lastAppliedVideoFps) return;
+	lastAppliedVideoFps = videoFps;
 	setVideoFps(videoFps);
 });
+
+/**
+ * 点选动态壁纸：选中即应用并隐含切换到 video 模式；帧率档不存在时跟随
+ * 新壁纸默认档；延迟壁纸（含失败重试与再点选）立即开始带进度下载。
+ */
+function selectWallpaper(id: string) {
+	wallpaperId = id;
+	if (wallpaperMode !== "video") wallpaperMode = "video";
+	const wallpaper = wallpapers.find((w) => w.id === id);
+	if (!wallpaper) return;
+	const fpsOptions = Object.keys(wallpaper.src ?? {});
+	if (!fpsOptions.includes(videoFps)) {
+		videoFps = wallpaper.defaultFps ?? fpsOptions[0] ?? "60";
+	}
+	if (wallpaper.deferLoad) {
+		const videoUrl =
+			wallpaper.src[videoFps] ??
+			Object.values(wallpaper.src ?? {})[0];
+		if (videoUrl) ensureWallpaperReady(videoUrl);
+	}
+	// 点选的选项恰好等于当前默认档（未持久化）时，$effect 的变更守卫会跳过；
+	// 但访客的点击即明确选择，需要落盘，否则延迟壁纸下次整页加载无法会话恢复。
+	if (id === lastAppliedWallpaperId && !hasStoredWallpaperId()) {
+		lastAppliedWallpaperId = id;
+		setWallpaperId(id);
+	}
+}
 $effect(() => {
 	if (texturePreset === lastAppliedTexturePreset) return;
 	lastAppliedTexturePreset = texturePreset;
@@ -337,6 +452,58 @@ const stylePreviews = $derived(
                             bind:value={wallpaperMode}
                             label={i18n(I18nKey.wallpaperMode)}
                         />
+                        {#if showWallpaperSelector}
+                            <div class="flex flex-col gap-1.5 mt-1">
+                                <span class="text-sm font-bold text-[var(--on-surface-variant)] ml-1">{i18n(I18nKey.backgroundWallpaper)}</span>
+                                <div class="flex flex-col gap-1" role="radiogroup" aria-label={i18n(I18nKey.backgroundWallpaper)}>
+                                    {#each wallpapers as wallpaper (wallpaper.id)}
+                                        {@const status = wallpaperStatus(wallpaper)}
+                                        {@const name = wallpaper.label ?? (wallpaper.id === "default" ? i18n(I18nKey.backgroundWallpaperDefault) : wallpaper.id)}
+                                        <button
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={wallpaperId === wallpaper.id}
+                                            title={status === "error" ? i18n(I18nKey.backgroundWallpaperFailed) : name}
+                                            class="wallpaper-option"
+                                            class:selected={wallpaperId === wallpaper.id}
+                                            onclick={() => selectWallpaper(wallpaper.id)}
+                                        >
+                                            {#if wallpaper.thumb}
+                                                <img class="wallpaper-option__thumb" src={wallpaper.thumb} alt="" loading="lazy" decoding="async" />
+                                            {/if}
+                                            <span class="wallpaper-option__name">{name}</span>
+                                            {#if status === "downloading"}
+                                                <span class="wallpaper-option__status" title={i18n(I18nKey.backgroundWallpaperLoading)} aria-hidden="true">
+                                                    <Icon icon="material-symbols:downloading-rounded" class="text-base" />
+                                                </span>
+                                            {:else if status === "ready"}
+                                                <span class="wallpaper-option__status" title={i18n(I18nKey.backgroundWallpaperReady)} aria-hidden="true">
+                                                    <Icon icon="material-symbols:check-circle-rounded" class="text-base" />
+                                                </span>
+                                            {:else if status === "error"}
+                                                <span class="wallpaper-option__status" title={i18n(I18nKey.backgroundWallpaperFailed)} aria-hidden="true">
+                                                    <Icon icon="material-symbols:error-outline-rounded" class="text-base" />
+                                                </span>
+                                            {/if}
+                                        </button>
+                                    {/each}
+                                </div>
+                                {#if wallpaperDownload?.status === "downloading"}
+                                    <div class="flex items-center gap-2 mt-0.5 px-1">
+                                        <ProgressIndicator
+                                            progress={wallpaperDownload.progress ?? undefined}
+                                            label={i18n(I18nKey.backgroundWallpaperLoading)}
+                                            class="flex-1"
+                                        />
+                                        {#if wallpaperDownload.progress !== null}
+                                            <span class="text-xs font-bold text-[var(--on-surface-variant)] tabular-nums">
+                                                {Math.round(wallpaperDownload.progress * 100)}%
+                                            </span>
+                                        {/if}
+                                    </div>
+                                {/if}
+                            </div>
+                        {/if}
                         {#if wallpaperMode === "video" && videoFpsOptions.length > 1}
                             <div class="flex flex-col gap-1.5 mt-1">
                                 <span class="text-sm font-bold text-[var(--on-surface-variant)] ml-1">{i18n(I18nKey.backgroundVideoFps)}</span>
@@ -443,5 +610,46 @@ const stylePreviews = $derived(
             overflow: hidden
             text-overflow: ellipsis
             white-space: nowrap
+
+/* 动态壁纸选择条目：缩略图 + 名称 + 延迟加载状态 */
+.wallpaper-option
+    display: flex
+    align-items: center
+    gap: 0.625rem
+    padding: 0.375rem 0.5rem
+    border: none
+    border-radius: var(--shape-corner-m)
+    background: transparent
+    color: var(--on-surface-variant)
+    font: var(--m3e-type-label-large)
+    cursor: pointer
+    user-select: none
+    text-align: left
+    transition: background-color var(--m3e-duration-short) var(--m3e-easing-standard), color var(--m3e-duration-short) var(--m3e-easing-standard)
+    &:hover
+        background: unquote("color-mix(in oklab, var(--on-surface) 6%, transparent)")
+    &.selected
+        background: var(--secondary-container)
+        color: var(--on-secondary-container)
+
+.wallpaper-option__thumb
+    width: 4rem
+    height: 2.25rem
+    flex: none
+    object-fit: cover
+    border-radius: var(--shape-corner-s)
+    box-shadow: unquote("inset 0 0 0 1px color-mix(in oklab, var(--on-surface) 15%, transparent)")
+
+.wallpaper-option__name
+    flex: 1
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.wallpaper-option__status
+    display: flex
+    align-items: center
+    flex: none
 
 </style>

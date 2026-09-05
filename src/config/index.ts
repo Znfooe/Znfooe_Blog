@@ -60,6 +60,8 @@ export { sidebarConfig } from "./sidebarConfig";
 export {
 	getDefaultSpec,
 	getDefaultStyle,
+	getDefaultWallpaperId,
+	resolveBackgroundWallpapers,
 	resolveDisplaySettings,
 	resolveTextureOptions,
 	siteConfig,

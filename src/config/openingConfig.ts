@@ -16,11 +16,20 @@ export const openingConfig: OpeningConfig = withUserConfig("opening", {
 	repoUrl: "https://github.com/LyraVoid/Shirone",
 	repoAuthor: "LyraVoid",
 	acknowledgeDelay: 3000,
-	wallpaperCredit: {
-		up: "星雨布丁channel",
-		uid: "286441820",
-		videoText: "【动态壁纸】愿星空与花海长存~",
-		videoUrl:
-			"https://www.bilibili.com/video/BV1PaQHBaEsg?vd_source=283e195a935ac84c1f35e592f68dda71",
-	},
+	// 动态壁纸来源声明（每款壁纸一条；旧版单条 wallpaperCredit 字段仍兼容，合并去重）
+	wallpaperCredits: [
+		{
+			up: "星雨布丁channel",
+			uid: "286441820",
+			videoText: "【动态壁纸】愿星空与花海长存~",
+			videoUrl:
+				"https://www.bilibili.com/video/BV1PaQHBaEsg?vd_source=283e195a935ac84c1f35e592f68dda71",
+		},
+		{
+			up: "某一夏莱的纸鸢kite",
+			videoText: "【『蔚蓝档案』动态壁纸——(๑•̀ω•́๑)白洲梓的注视呦(ゝω・★)】",
+			videoUrl:
+				"https://www.bilibili.com/video/BV1s7RFBVEY1?vd_source=283e195a935ac84c1f35e592f68dda71",
+		},
+	],
 });

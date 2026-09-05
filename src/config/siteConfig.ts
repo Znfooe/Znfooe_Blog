@@ -1,4 +1,7 @@
-import type { SiteConfig } from "@/types/config";
+import type {
+	BackgroundWallpaperConfig,
+	SiteConfig,
+} from "@/types/config";
 import type {
 	ResolvedTextureOptions,
 	TextureConfig,
@@ -46,6 +49,7 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		defaultMode: "video",
 	},
 	// 动态视频背景（仅当 wallpaperMode.defaultMode 或访客选择为 "video" 时生效）。
+	// 合并进壁纸列表时作为 id="default" 的首项。
 	backgroundVideo: {
 		// 不同帧率的视频源；"60" 为默认档，也提供 "120" 高帧率档。
 		src: {
@@ -54,11 +58,35 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		},
 		defaultFps: "60",
 		position: "center",
+		thumb: "/assets/video/background-video-thumb.webp",
 		dim: {
 			enable: true,
 			opacity: 0.3,
 		},
 	},
+	// 额外可选动态壁纸：显示设置面板「动态壁纸」选择器的条目。
+	// deferLoad 为 true 的壁纸不会自动挂载，由访客点选后才带进度下载，
+	// 首次成功后经 Cache API 跨会话复用（免二次下载）。
+	backgroundVideos: [
+		{
+			// 壁纸唯一标识（访客选择持久化的值，发布后不要变更）
+			id: "zi",
+			label: "梓 · AI 超分",
+			src: {
+				"60": "/assets/video/background-video-zi-60fps.mp4",
+				"120": "/assets/video/background-video-zi-120fps.mp4",
+			},
+			defaultFps: "60",
+			position: "center",
+			// 延迟加载未就绪时的 Banner 占位静帧（2K 原片封面）
+			poster: "/assets/video/background-video-zi-poster.webp",
+			thumb: "/assets/video/background-video-zi-thumb.webp",
+			// 大文件（2K 60/120fps 约 22~27MB）：访客点选后再下载，防止首屏渲染过慢
+			deferLoad: true,
+		},
+	],
+	// 新访客未做选择时的默认壁纸 id（须在合并列表中）
+	defaultWallpaperId: "zi",
 	// 页面背景纹理系统配置（5 大精美预设 + 零开销 HCT 动态取色）
 	texture: {
 		enable: true, // 是否启用背景纹理系统
@@ -187,6 +215,34 @@ export function resolveTextureOptions(
 /** 站点默认配色风格（访客未做选择时的回退值） */
 export function getDefaultStyle(): string {
 	return siteConfig.themeColor.style;
+}
+
+/**
+ * 解析可选动态壁纸列表：legacy backgroundVideo 合并为 id="default" 的首项，
+ * 再追加 backgroundVideos（id 重复或缺失的条目跳过）；均未配置时返回空数组。
+ */
+export function resolveBackgroundWallpapers(): BackgroundWallpaperConfig[] {
+	const list: BackgroundWallpaperConfig[] = [];
+	if (siteConfig.backgroundVideo) {
+		const { src, defaultFps, position, poster, thumb } =
+			siteConfig.backgroundVideo;
+		list.push({ id: "default", src, defaultFps, position, poster, thumb });
+	}
+	for (const wallpaper of siteConfig.backgroundVideos ?? []) {
+		if (!wallpaper?.id || list.some((w) => w.id === wallpaper.id)) continue;
+		list.push(wallpaper);
+	}
+	return list;
+}
+
+/** 站点默认壁纸 id（访客未做选择时的回退值；无效配置回退列表第一项） */
+export function getDefaultWallpaperId(): string {
+	const wallpapers = resolveBackgroundWallpapers();
+	const explicit = siteConfig.defaultWallpaperId;
+	if (explicit && wallpapers.some((w) => w.id === explicit)) {
+		return explicit;
+	}
+	return wallpapers[0]?.id ?? "default";
 }
 
 /** 站点默认 Color Spec（2021 / 2025） */

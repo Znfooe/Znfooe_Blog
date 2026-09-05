@@ -2,9 +2,14 @@
 import { getImage } from "astro:assets";
 import BannerWaves from "@components/molecules/BannerWaves.astro";
 import { resolveImageAsset } from "@utils/asset-utils";
+import { resolveMediaUrl } from "@utils/background-video";
 import { url } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
-import { siteConfig } from "@/config";
+import {
+	getDefaultWallpaperId,
+	resolveBackgroundWallpapers,
+	siteConfig,
+} from "@/config";
 import type { SidebarPage } from "@/types/sidebarConfig";
 
 interface Props {
@@ -111,21 +116,29 @@ const initialMobileImage = mobileResponsiveImages[0];
 const initialImage = initialDesktopImage ?? initialMobileImage;
 const initialMobileBanner = page === "home";
 
-// 动态视频背景：站内路径补 base，外链/data URL 原样使用
-const videoConfig = siteConfig.backgroundVideo;
-const videoSourcesJson = videoConfig
-	? JSON.stringify(
-			Object.fromEntries(
-				Object.entries(videoConfig.src ?? {}).map(([fps, src]) => [
-					fps,
-					/^(https?:)?\/\//.test(src) || src.startsWith("data:")
-						? src
-						: url(src),
-				]),
-			),
-		)
-	: "{}";
-const videoDefaultFps = videoConfig?.defaultFps ?? "60";
+// 动态视频背景：解析可选壁纸列表（legacy backgroundVideo 合并为 id="default" 首项），
+// 站内路径补 base，外链/data URL 原样使用
+const videoWallpapers = resolveBackgroundWallpapers();
+const videoDefaultWallpaperId = getDefaultWallpaperId();
+const videoWallpapersJson = JSON.stringify(
+	videoWallpapers.map((wallpaper) => ({
+		id: wallpaper.id,
+		src: Object.fromEntries(
+			Object.entries(wallpaper.src ?? {}).map(([fps, src]) => [
+				fps,
+				resolveMediaUrl(src),
+			]),
+		),
+		defaultFps:
+			wallpaper.defaultFps ?? Object.keys(wallpaper.src ?? {})[0] ?? "60",
+		position: wallpaper.position ?? "center",
+		poster: wallpaper.poster ? resolveMediaUrl(wallpaper.poster) : "",
+		deferLoad: wallpaper.deferLoad === true,
+	})),
+);
+const initialVideoWallpaper =
+	videoWallpapers.find((w) => w.id === videoDefaultWallpaperId) ??
+	videoWallpapers[0];
 ---
 
 <section
@@ -149,8 +162,8 @@ const videoDefaultFps = videoConfig?.defaultFps ?? "60";
 	data-subtitle-typewriter-speed={String(Math.max(typewriter.speed, 1))}
 	data-subtitle-typewriter-delete-speed={String(Math.max(typewriter.deleteSpeed ?? 50, 1))}
 	data-subtitle-typewriter-pause-time={String(Math.max(typewriter.pauseTime ?? 2000, 0))}
-	data-video-sources={videoSourcesJson}
-	data-video-default-fps={videoDefaultFps}
+	data-video-wallpapers={videoWallpapersJson}
+	data-video-wallpaper-default={videoDefaultWallpaperId}
 >
 	<div class="banner-stage__media" aria-hidden="true">
 		<picture>
@@ -185,7 +198,7 @@ const videoDefaultFps = videoConfig?.defaultFps ?? "60";
 			/>
 		</picture>
 		<img class="banner-stage__image banner-stage__image--back" alt="" />
-		{siteConfig.backgroundVideo && (
+		{initialVideoWallpaper && (
 			<video
 				class="banner-stage__video"
 				muted
@@ -195,7 +208,7 @@ const videoDefaultFps = videoConfig?.defaultFps ?? "60";
 				preload="auto"
 				disablepictureinpicture
 				disableRemotePlayback
-				style={`object-position: ${siteConfig.backgroundVideo.position ?? "center"};`}
+				style={`object-position: ${initialVideoWallpaper.position ?? "center"};`}
 			></video>
 		)}
 	</div>
@@ -250,7 +263,14 @@ const videoDefaultFps = videoConfig?.defaultFps ?? "60";
 	import { getStoredWallpaperMode } from "@utils/setting-utils";
 	import {
 		BACKGROUND_VIDEO_FPS_CHANGE_EVENT,
+		BACKGROUND_WALLPAPER_CHANGE_EVENT,
+		BACKGROUND_WALLPAPER_PROGRESS_EVENT,
+		ensureWallpaperReady,
 		getStoredVideoFps,
+		getStoredWallpaperId,
+		getWallpaperReadyUrl,
+		hasStoredWallpaperId,
+		resolveWallpaperVideoUrl,
 	} from "@utils/background-video";
 	import { WALLPAPER_MODE_CHANGE_EVENT } from "@constants/constants";
 	import type { SidebarPage } from "@/types/sidebarConfig";
@@ -284,14 +304,37 @@ const videoDefaultFps = videoConfig?.defaultFps ?? "60";
 		? [...stage.querySelectorAll<HTMLImageElement>(".banner-stage__image")]
 		: [];
 	const videoLayer = stage?.querySelector<HTMLVideoElement>(".banner-stage__video") ?? null;
-	const videoSources = (() => {
+	interface RuntimeVideoWallpaper {
+		id: string;
+		src: Record<string, string>;
+		defaultFps: string;
+		position: string;
+		poster: string;
+		deferLoad: boolean;
+	}
+	const videoWallpapers = (() => {
 		try {
-			return JSON.parse(stage?.dataset.videoSources ?? "{}") as Record<string, string>;
+			const parsed = JSON.parse(stage?.dataset.videoWallpapers ?? "[]");
+			return Array.isArray(parsed)
+				? (parsed as RuntimeVideoWallpaper[])
+				: ([] as RuntimeVideoWallpaper[]);
 		} catch {
-			return {} as Record<string, string>;
+			return [] as RuntimeVideoWallpaper[];
 		}
 	})();
-	const videoDefaultFps = stage?.dataset.videoDefaultFps ?? "60";
+	const videoDefaultWallpaperId =
+		stage?.dataset.videoWallpaperDefault ??
+		videoWallpapers[0]?.id ??
+		"default";
+
+	function currentVideoWallpaper(): RuntimeVideoWallpaper | undefined {
+		const storedId = getStoredWallpaperId(videoDefaultWallpaperId);
+		return (
+			videoWallpapers.find((w) => w.id === storedId) ??
+			videoWallpapers.find((w) => w.id === videoDefaultWallpaperId) ??
+			videoWallpapers[0]
+		);
+	}
 	const subtitle = stage?.querySelector<HTMLParagraphElement>(
 		"[data-banner-home-copy] p",
 	);
@@ -784,19 +827,47 @@ const videoDefaultFps = videoConfig?.defaultFps ?? "60";
 	}
 
 	// 动态视频背景：video 模式显示视频、隐藏图片；否则隐藏视频、显示图片。
-	// 视频不预置 src，仅 video 模式时按帧率档赋值并播放，其余模式零请求。
+	// 视频不预置 src，仅 video 模式时按壁纸 + 帧率档赋值并播放，其余模式零请求。
+	// 延迟加载（deferLoad）壁纸在下载就绪前显示封面静帧（无封面则继续用
+	// 图片层避免空白），就绪后挂载 blob 源淡入播放。
 	function syncVideo(mode: string) {
 		if (!videoLayer) return;
-		const isVideo = mode === "video";
-		stage?.classList.toggle("banner-stage--video", isVideo);
-		if (!isVideo) {
+		const wallpaper = currentVideoWallpaper();
+		const isVideo = mode === "video" && Boolean(wallpaper);
+		if (!isVideo || !wallpaper) {
+			stage?.classList.remove("banner-stage--video");
 			videoLayer.pause();
 			return;
 		}
-		const fps = getStoredVideoFps(videoDefaultFps);
-		const src = videoSources[fps] ?? videoSources[videoDefaultFps];
-		if (src && videoLayer.getAttribute("src") !== src) {
-			videoLayer.src = src;
+		videoLayer.style.objectPosition = wallpaper.position || "center";
+		const fps = getStoredVideoFps(wallpaper.defaultFps || "60");
+		const videoUrl = resolveWallpaperVideoUrl(wallpaper, fps) ?? "";
+		const readyUrl = wallpaper.deferLoad
+			? getWallpaperReadyUrl(videoUrl)
+			: null;
+
+		if (wallpaper.deferLoad && !readyUrl) {
+			// 延迟壁纸未就绪：清空视频源并显示封面静帧（无封面保持图片层）。
+			if (videoLayer.getAttribute("src")) {
+				videoLayer.removeAttribute("src");
+				videoLayer.load();
+			}
+			if (wallpaper.poster) {
+				videoLayer.setAttribute("poster", wallpaper.poster);
+				stage?.classList.add("banner-stage--video");
+			} else {
+				videoLayer.removeAttribute("poster");
+				stage?.classList.remove("banner-stage--video");
+			}
+			videoLayer.pause();
+			return;
+		}
+
+		stage?.classList.add("banner-stage--video");
+		videoLayer.removeAttribute("poster");
+		const nextSrc = wallpaper.deferLoad ? readyUrl : videoUrl;
+		if (nextSrc && videoLayer.getAttribute("src") !== nextSrc) {
+			videoLayer.src = nextSrc;
 		}
 		const reduced =
 			document.documentElement.classList.contains("motion-reduced") ||
@@ -874,10 +945,40 @@ const videoDefaultFps = videoConfig?.defaultFps ?? "60";
 
 	if (stage) {
 		syncBanner();
+		// 延迟壁纸会话恢复：访客明确存储过选择（上一次点选即本次同意）则后台
+		// 恢复下载（Cache API 命中免网络）；新访客默认档仅显示封面，待设置
+		// 面板点选后再下载。
+		const initWallpaper = currentVideoWallpaper();
+		if (initWallpaper?.deferLoad && hasStoredWallpaperId()) {
+			const initFps = getStoredVideoFps(initWallpaper.defaultFps || "60");
+			const initUrl = resolveWallpaperVideoUrl(initWallpaper, initFps);
+			if (initUrl) ensureWallpaperReady(initUrl);
+		}
 		if (!window.__shironeBannerBound) {
 			window.__shironeBannerBound = true;
 			window.addEventListener(WALLPAPER_MODE_CHANGE_EVENT, () => syncBanner());
 			window.addEventListener(BACKGROUND_VIDEO_FPS_CHANGE_EVENT, () => {
+				// 帧率切换是访客主动操作：延迟壁纸按新档位立即开始下载。
+				const wallpaper = currentVideoWallpaper();
+				if (wallpaper?.deferLoad) {
+					const fps = getStoredVideoFps(wallpaper.defaultFps || "60");
+					const videoUrl = resolveWallpaperVideoUrl(wallpaper, fps);
+					if (videoUrl) ensureWallpaperReady(videoUrl);
+				}
+				syncVideo(getStoredWallpaperMode());
+			});
+			window.addEventListener(BACKGROUND_WALLPAPER_CHANGE_EVENT, () => {
+				// 访客点选了新壁纸：延迟壁纸立即开始下载（带进度）。
+				const wallpaper = currentVideoWallpaper();
+				if (wallpaper?.deferLoad) {
+					const fps = getStoredVideoFps(wallpaper.defaultFps || "60");
+					const videoUrl = resolveWallpaperVideoUrl(wallpaper, fps);
+					if (videoUrl) ensureWallpaperReady(videoUrl);
+				}
+				syncVideo(getStoredWallpaperMode());
+			});
+			window.addEventListener(BACKGROUND_WALLPAPER_PROGRESS_EVENT, () => {
+				// 下载完成（或失败）后重新同步视频层。
 				syncVideo(getStoredWallpaperMode());
 			});
 			window.addEventListener("resize", () => {

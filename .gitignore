@@ -89,3 +89,6 @@ artifacts/shirone-ai-*
 
 # 动态背景视频源文件（原始 98MB，只提交 public/assets/video/ 下压缩后的成品）
 /精灵公主-星雨120fps.mp4
+
+# 梓动态壁纸源文件（4K 120fps 原始 264MB，只提交 public/assets/video/ 下 2K 成品）
+/梓AI超分.mp4

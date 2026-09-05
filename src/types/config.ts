@@ -7,6 +7,36 @@ export type WallpaperMode = "banner" | "none" | "video";
 
 export type TopAppBarContentAlign = "left" | "center";
 
+/**
+ * 单个可选动态视频壁纸（显示设置面板「动态壁纸」选择器的条目）。
+ * 由 `backgroundVideos` 声明；legacy `backgroundVideo` 会合并为 id="default" 的首项。
+ */
+export type BackgroundWallpaperConfig = {
+	/** 壁纸唯一标识：访客选择持久化到 localStorage 的值，发布后不要变更。 */
+	id: string;
+	/** 设置面板显示名；缺省时回退 i18n「默认」（legacy 条目）或 id 本身。 */
+	label?: string;
+	/** 视频源：不同帧率的地址，key 为帧率档位（如 "60"、"120"）。 */
+	src: Record<string, string>;
+	/** 默认帧率档位（对应 src 的 key）。 */
+	defaultFps?: string;
+	/** 视频裁切焦点位置："top"、"center" 或 "bottom"。 */
+	position?: "top" | "center" | "bottom";
+	/**
+	 * 壁纸预览封面：延迟加载（deferLoad）壁纸未就绪时 Banner 的占位静帧；
+	 * 站内路径（以 "/" 开头）或外链均可，仅在 video 模式且视频未就绪时请求。
+	 */
+	poster?: string;
+	/** 设置面板缩略图；缺省回退 poster。 */
+	thumb?: string;
+	/**
+	 * 延迟加载：选中后不自动挂载视频，等访客在设置面板点选触发下载（带进度条）
+	 * 完成后再淡入播放；首次下载成功后经 Cache API 跨会话复用。
+	 * 大文件壁纸建议开启，防止首屏渲染过慢。
+	 */
+	deferLoad?: boolean;
+};
+
 export type DisplaySettingsConfig = {
 	/** 是否在显示设置面板展示配色风格（9 宫格）选择器（默认 true） */
 	colorStyle?: boolean;
@@ -59,7 +89,7 @@ export type SiteConfig = {
 	wallpaperMode: {
 		defaultMode: WallpaperMode;
 	};
-	/** 动态视频背景（wallpaperMode === "video" 时使用）。 */
+	/** 动态视频背景（wallpaperMode === "video" 时使用，合并为壁纸列表 id="default" 的首项）。 */
 	backgroundVideo?: {
 		/** 视频源：不同帧率的地址，key 为帧率档位（如 "60"、"120"）。 */
 		src: Record<string, string>;
@@ -72,7 +102,19 @@ export type SiteConfig = {
 			enable: boolean;
 			opacity: number;
 		};
+		/** 设置面板缩略图；缺省回退 poster。 */
+		thumb?: string;
+		/** 壁纸预览封面（仅作为普通壁纸的兜底占位；延迟加载语义见 backgroundVideos）。 */
+		poster?: string;
 	};
+	/**
+	 * 额外可选动态壁纸列表：与 legacy backgroundVideo 合并进显示设置的
+	 * 「动态壁纸」选择器。仅一条（未配置 backgroundVideos）时不渲染选择器，
+	 * 行为与旧版一致（零额外负担）。
+	 */
+	backgroundVideos?: BackgroundWallpaperConfig[];
+	/** 默认壁纸 id（须为合并列表中的某一项；缺省取列表第一项）。 */
+	defaultWallpaperId?: string;
 	/** 页面背景纹理系统配置，支持布尔值直接开关或详细配置对象 */
 	texture?: boolean | TextureConfig;
 	banner: {

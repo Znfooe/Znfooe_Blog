@@ -248,6 +248,16 @@ enum I18nKey {
 	wallpaperModeVideo = "wallpaperModeVideo",
 	/** 动态视频背景的帧率档位标签 */
 	backgroundVideoFps = "backgroundVideoFps",
+	/** 动态壁纸选择器标题 */
+	backgroundWallpaper = "backgroundWallpaper",
+	/** legacy 默认壁纸条目的显示名 */
+	backgroundWallpaperDefault = "backgroundWallpaperDefault",
+	/** 延迟壁纸下载中标签 */
+	backgroundWallpaperLoading = "backgroundWallpaperLoading",
+	/** 延迟壁纸就绪标签 */
+	backgroundWallpaperReady = "backgroundWallpaperReady",
+	/** 延迟壁纸下载失败提示（点击重试） */
+	backgroundWallpaperFailed = "backgroundWallpaperFailed",
 
 	texturePreset = "texturePreset",
 	texturePresetNone = "texturePresetNone",
@@ -333,6 +343,8 @@ enum I18nKey {
 	openingAcknowledge = "openingAcknowledge",
 	/** 动态壁纸来源声明：{up} 为 UP 主名，{uid} 为 UID */
 	openingWallpaperCredit = "openingWallpaperCredit",
+	/** 动态壁纸来源声明（无 UID）：{up} 为 UP 主名 */
+	openingWallpaperCreditNoUid = "openingWallpaperCreditNoUid",
 	/** 提示可在右上角设置切换背景模式（视频 / 图片） */
 	openingWallpaperHint = "openingWallpaperHint",
 	/** 弹窗「不再显示」勾选项 */
