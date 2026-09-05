@@ -238,6 +238,30 @@ document.addEventListener('swup:content:replace', bindSearchTriggers);
 			color var(--m3e-duration-short) var(--m3e-easing-standard);
 	}
 
+		/* 壁纸专属语义色：白洲梓（id="zi"）壁纸下，导航栏「字体颜色」按固定淡紫色谱切色。
+		   - 默认：淡紫（直接覆写 nav-link color，避免改 --on-surface-variant 影响搜索/语言 icon）
+		   - hover / active：深一档紫（高特异性 selector，胜出 transparent 块）
+		   只动 nav-link 文字与下划线，不动 --primary / --on-surface / --on-surface-variant，
+		   这样 site title 左侧的品牌色块、search icon、语言切换、setting icon 都保持主题色，
+		   transparent 模式下也保持 white（视频 banner 上可读）；用户原话"字体颜色"不应
+		   波及 navbar 装饰元素。 */
+		:global(html[data-wallpaper-id="zi"]) .top-app-bar {
+			--zi-nav-tint: oklch(0.66 0.12 295);
+			--zi-nav-tint-strong: oklch(0.46 0.18 295);
+		}
+		:global(html[data-wallpaper-id="zi"]) .top-app-bar .top-app-bar__nav-link {
+			color: var(--zi-nav-tint);
+		}
+		:global(html[data-wallpaper-id="zi"]) .top-app-bar .top-app-bar__nav-link--active {
+			color: var(--zi-nav-tint-strong);
+		}
+		:global(html[data-wallpaper-id="zi"]) .top-app-bar .top-app-bar__nav-link:hover {
+			color: var(--zi-nav-tint-strong);
+		}
+		:global(html[data-wallpaper-id="zi"]) .top-app-bar .top-app-bar__nav-link--active::after {
+			background: var(--zi-nav-tint-strong);
+		}
+
 		.top-app-bar--transparent {
 			background: transparent;
 			box-shadow: none;

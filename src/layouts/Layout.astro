@@ -7,6 +7,7 @@ import ConfigCarrier from "@components/system/ConfigCarrier.astro";
 import UmamiRuntime from "@components/system/UmamiRuntime.astro";
 import {
 	expressiveCodeConfig,
+	getDefaultWallpaperId,
 	introConfig,
 	openingConfig,
 	profileConfig,
@@ -65,6 +66,7 @@ const lightTheme =
 	expressiveCodeConfig.lightTheme ?? expressiveCodeConfig.theme;
 const darkTheme = expressiveCodeConfig.darkTheme ?? expressiveCodeConfig.theme;
 const defaultWallpaperMode = siteConfig.wallpaperMode.defaultMode;
+const defaultWallpaperId = getDefaultWallpaperId();
 const textureOptions = resolveTextureOptions();
 const defaultTexturePreset = textureOptions.defaultPreset;
 const defaultTextureOpacity = textureOptions.defaultOpacity;
@@ -170,7 +172,7 @@ const hasMonoFont =
 			/>
 		))}
 
-		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, configHue, lightTheme, darkTheme, defaultWallpaperMode, defaultTexturePreset, defaultTextureOpacity, textureEnabled}}>
+		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, configHue, lightTheme, darkTheme, defaultWallpaperMode, defaultWallpaperId, defaultTexturePreset, defaultTextureOpacity, textureEnabled}}>
 			const theme = localStorage.getItem('theme') || DEFAULT_THEME;
 			let isDark = false;
 			switch (theme) {
@@ -196,11 +198,17 @@ const hasMonoFont =
 			if (localStorage.getItem('mc-motion') === 'reduced') {
 				document.documentElement.classList.add('motion-reduced');
 			}
-			const storedWallpaperMode = localStorage.getItem('wallpaper-mode');
-			const wallpaperMode = storedWallpaperMode === 'banner' || storedWallpaperMode === 'none' || storedWallpaperMode === 'video'
-				? storedWallpaperMode
-				: defaultWallpaperMode;
-			document.documentElement.dataset.wallpaperMode = wallpaperMode;
+const storedWallpaperMode = localStorage.getItem('wallpaper-mode');
+		const wallpaperMode = storedWallpaperMode === 'banner' || storedWallpaperMode === 'none' || storedWallpaperMode === 'video'
+			? storedWallpaperMode
+			: defaultWallpaperMode;
+		document.documentElement.dataset.wallpaperMode = wallpaperMode;
+
+		// 访客选择的壁纸：localStorage 没有则回退站点默认壁纸（视频模式下的 id="zi"）。
+		// 反映到 <html data-wallpaper-id>，让 TopAppBar 等组件按壁纸 id 切色（如
+		// 白洲梓 id="zi" 时导航栏文字色切为淡紫）。
+		const storedWallpaperId = localStorage.getItem('background-wallpaper');
+		document.documentElement.dataset.wallpaperId = storedWallpaperId || defaultWallpaperId;
 
 			if (textureEnabled) {
 				const storedTexturePreset = localStorage.getItem('texture-preset');
@@ -321,6 +329,8 @@ import { initLastUpdatedNotices } from "../utils/last-updated-notice";
 import {getHue, getStoredTheme, setHue, setTheme} from "../utils/setting-utils";
 import { WALLPAPER_MODE_CHANGE_EVENT, BANNER_HEIGHT, BANNER_HEIGHT_EXTEND } from "../constants/constants";
 import { copyPageLink } from "../utils/copy-page-link";
+import { BACKGROUND_WALLPAPER_CHANGE_EVENT } from "../utils/background-video";
+import { getDefaultWallpaperId as loadDefaultWallpaperId } from "@/config";
 
 function setClickOutsideToClose(panel: string, ignores: string[]) {
 	document.addEventListener('click', event => {
@@ -434,6 +444,14 @@ new MutationObserver(scrollFunction).observe(document.body, { attributes: true, 
 window.addEventListener(WALLPAPER_MODE_CHANGE_EVENT, () => requestAnimationFrame(scrollFunction));
 document.addEventListener('swup:page:view', scrollFunction);
 scrollFunction();
+
+// 壁纸 id 切换：把访客新选的 id 同步到 <html data-wallpaper-id>，让 TopAppBar 等
+// 组件按 id 切色（白洲梓 id="zi" → 导航栏文字淡紫）。
+window.addEventListener(BACKGROUND_WALLPAPER_CHANGE_EVENT, (event) => {
+	const detail = (event as CustomEvent<{ id?: string }>).detail;
+	const nextId = detail?.id || loadDefaultWallpaperId();
+	document.documentElement.dataset.wallpaperId = nextId;
+});
 </script>
 
 <script>
