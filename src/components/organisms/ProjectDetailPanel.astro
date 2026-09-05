@@ -11,6 +11,7 @@ import { getEntry, render } from "astro:content";
  * 未选中任何项目时，面板隐藏；选中后仅显示对应条目。
  */
 import Markdown from "@components/content/Markdown.astro";
+import ProjectShare from "@components/organisms/ProjectShare.astro";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
 import { getPostUrl } from "@utils/url-utils";
 import type { ProjectItem } from "@/types/projectsConfig";
@@ -62,6 +63,12 @@ const details = (
 					<Markdown class="mb-6">
 						<Content />
 					</Markdown>
+					<ProjectShare
+						title={detail.title}
+						description={detail.description}
+						published={detail.published}
+						postPath={detail.postUrl}
+					/>
 				</article>
 			);
 		})}

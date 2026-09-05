@@ -196,18 +196,20 @@ $effect(() => {
 					<div
 						class="projects-section__cell"
 						class:projects-section__cell--selected={selectedKey === project.key}
-						role="button"
-						tabindex="0"
-						aria-pressed={selectedKey === project.key}
-						onclick={() => selectProject(project.key)}
-						onkeydown={(event) => {
-							if (event.key === "Enter" || event.key === " ") {
-								event.preventDefault();
-								selectProject(project.key);
-							}
+						onclick={(event) => {
+							// 卡片内链接/按钮的点击归其自身（外链跳转、详情按钮），
+							// 不再冒泡触发选择；键盘与读屏用户走卡片内的「阅读详情」按钮。
+							// 单元格本身不设 role=button：ARIA widget 内嵌 <a> 会触发 nested-interactive。
+							if ((event.target as HTMLElement).closest("a, button")) return;
+							selectProject(project.key);
 						}}
 					>
-						<ProjectCard {project} delay={Math.min(index, 7) * 45} />
+						<ProjectCard
+							{project}
+							delay={Math.min(index, 7) * 45}
+							selected={selectedKey === project.key}
+							ontoggle={() => selectProject(project.key)}
+						/>
 					</div>
 				{/each}
 			</div>
@@ -339,11 +341,7 @@ $effect(() => {
 
 	&__cell
 		cursor: pointer
-		outline: none
 		border-radius: var(--shape-corner-l)
-
-		&:focus-visible
-			box-shadow: 0 0 0 2px var(--primary)
 
 		&--selected
 			:global(.project-card)

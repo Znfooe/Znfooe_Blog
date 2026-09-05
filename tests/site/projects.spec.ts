@@ -90,6 +90,46 @@ test.describe("项目页", () => {
 		).toBeHidden();
 	});
 
+	test("「阅读详情」按钮展开/收起详情并正确暴露 aria-expanded", async ({
+		page,
+	}) => {
+		const harness = page.locator('[data-project="project-harness-builder"]');
+		const toggle = harness.getByRole("button", { name: "阅读详情" });
+		await expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+		// 点击展开：面板可见，按钮转为「收起详情」并标记 expanded
+		await toggle.click();
+		await expect(
+			page.locator('[data-project-detail="project-harness-builder"]'),
+		).toBeVisible();
+		const collapse = harness.getByRole("button", { name: "收起详情" });
+		await expect(collapse).toHaveAttribute("aria-expanded", "true");
+
+		// 再点收起
+		await collapse.click();
+		await expect(
+			page.locator('[data-project-detail="project-harness-builder"]'),
+		).toBeHidden();
+	});
+
+	test("点击卡片内链接不触发展开（外链归链接自身）", async ({ page }) => {
+		const detail = page.locator(
+			'[data-project-detail="project-harness-builder"]',
+		);
+		await expect(detail).toBeHidden();
+
+		// 点击卡片内的源码链接（新标签打开）：不冒泡触发详情选择
+		const [popup] = await Promise.all([
+			page.waitForEvent("popup"),
+			page
+				.locator('[data-project="project-harness-builder"]')
+				.getByRole("link", { name: "查看源码" })
+				.click(),
+		]);
+		await popup.close();
+		await expect(detail).toBeHidden();
+	});
+
 	test("直接加载时导航高亮与侧栏页面过滤正确", async ({ page }) => {
 		await expect(
 			page.locator('[data-nav-key="projects"]').first(),

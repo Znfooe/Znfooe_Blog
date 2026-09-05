@@ -78,6 +78,7 @@ export const vi: Translation = {
 	[Key.projectSource]: "Xem mã nguồn",
 	[Key.projectTechnologies]: "Công nghệ",
 	[Key.projectReadMore]: "Đọc thêm",
+	[Key.projectCollapseDetail]: "Thu gọn chi tiết",
 	[Key.projectsNoResults]: "Không có dự án nào trong danh mục này",
 
 	[Key.devices]: "Thiết bị của tôi",

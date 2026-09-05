@@ -1,0 +1,46 @@
+---
+/**
+ * ProjectShare — 项目详情分享块（organism 片段）。
+ *
+ * 单独成组件的原因：`ArticleShare` 是 Svelte 组件，直接放进 Astro 的 `.map()`
+ * 回调 JSX 会触发类型推断失效（props 报 "does not exist on IntrinsicAttributes"）。
+ * 抽成独立的 Astro 组件后，在顶层渲染 `<ArticleShare>`，类型正常。
+ */
+import ArticleShare from "@components/organisms/ArticleShare.svelte";
+import { resolveAsset } from "@utils/asset-utils";
+import {
+	articleConfig,
+	profileConfig,
+	resolveArticleShareOptions,
+	siteConfig,
+} from "@/config";
+
+interface Props {
+	title: string;
+	description: string;
+	published: string;
+	postPath: string;
+}
+
+const { title, description, published, postPath } = Astro.props;
+
+const shareOptions = resolveArticleShareOptions(articleConfig);
+const authorAvatarUrl = shareOptions
+	? await resolveAsset(profileConfig.avatar ?? "")
+	: "";
+---
+
+{shareOptions && (
+	<ArticleShare
+		client:visible
+		options={shareOptions}
+		title={title}
+		description={description}
+		author={profileConfig.name}
+		published={published}
+		siteTitle={siteConfig.title}
+		postPath={postPath}
+		avatarUrl={authorAvatarUrl}
+		class="mb-6 rounded-xl"
+	/>
+)}

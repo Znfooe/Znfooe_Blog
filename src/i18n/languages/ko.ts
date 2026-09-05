@@ -76,6 +76,7 @@ export const ko: Translation = {
 	[Key.projectSource]: "소스 보기",
 	[Key.projectTechnologies]: "기술",
 	[Key.projectReadMore]: "자세히 보기",
+	[Key.projectCollapseDetail]: "상세 접기",
 	[Key.projectsNoResults]: "이 카테고리에 해당하는 프로젝트가 없습니다",
 
 	[Key.devices]: "내 기기",

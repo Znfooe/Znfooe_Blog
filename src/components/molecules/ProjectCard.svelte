@@ -14,6 +14,8 @@
  *   Svelte unused-CSS 剥离（见 rules/pitfalls.md 1.6）；
  * - 技术栈微胶囊（micro-badges）：统一 tonal pill 风格；
  * - 操作链接：M3 胶囊操作按钮，带图标与交互动效；
+ * - 详情切换（可选）：传入 ontoggle 时渲染「阅读详情 / 收起详情」胶囊按钮
+ *   （aria-expanded 语义），键盘与读屏用户由此展开就地详情；
  * - 封面加载失败自动回退到图标形态，不破版。
  */
 import I18nKey from "@i18n/i18nKey";
@@ -22,7 +24,17 @@ import Icon from "@iconify/svelte";
 import { reveal } from "@utils/motion";
 import type { ProjectItem, ProjectPhase } from "@/types/projectsConfig";
 
-let { project, delay = 0 }: { project: ProjectItem; delay?: number } = $props();
+let {
+	project,
+	delay = 0,
+	selected = false,
+	ontoggle,
+}: {
+	project: ProjectItem;
+	delay?: number;
+	selected?: boolean;
+	ontoggle?: () => void;
+} = $props();
 
 let coverFailed = $state(false);
 
@@ -127,8 +139,26 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 			</ul>
 		{/if}
 
-		{#if project.website || project.repository}
+		{#if project.website || project.repository || ontoggle}
 			<div class="project-card__actions">
+				{#if ontoggle}
+					<button
+						type="button"
+						class="project-card__detail-toggle"
+						aria-expanded={selected}
+						onclick={ontoggle}
+					>
+						<Icon
+							icon={selected
+								? "material-symbols:expand-less-rounded"
+								: "material-symbols:expand-more-rounded"}
+							aria-hidden="true"
+						/>
+						{selected
+							? i18n(I18nKey.projectCollapseDetail)
+							: i18n(I18nKey.projectReadMore)}
+					</button>
+				{/if}
 				{#if project.website}
 					<a href={project.website} target="_blank" rel="noopener noreferrer">
 						<Icon icon="material-symbols:open-in-new-rounded" aria-hidden="true" />
@@ -405,7 +435,7 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 				background: var(--surface-container-highest)
 				color: var(--on-surface)
 
-	/* 操作按钮：M3 胶囊操作按钮 */
+	/* 操作按钮：M3 胶囊操作按钮（链接与详情切换按钮同风格） */
 	&__actions
 		display: flex
 		flex-wrap: wrap
@@ -413,7 +443,8 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 		margin-top: auto
 		padding-top: 0.25rem
 
-		a
+		a,
+		button
 			display: inline-flex
 			align-items: center
 			gap: 0.3125rem
@@ -425,6 +456,7 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 			font-weight: 600
 			text-decoration: none
 			border: 1px solid unquote("color-mix(in oklab, var(--primary) 16%, transparent)")
+			cursor: pointer
 			transition:
 				background-color var(--m3e-duration-short) var(--m3e-easing-standard),
 				box-shadow var(--m3e-duration-short) var(--m3e-easing-standard),
@@ -434,6 +466,10 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 				background: unquote("color-mix(in oklab, var(--primary) 16%, transparent)")
 				box-shadow: var(--m3e-elevation-1)
 				transform: translateY(-1px)
+
+			&:focus-visible
+				outline: 2px solid var(--primary)
+				outline-offset: 2px
 
 			> :global(svg)
 				width: 1rem

@@ -72,6 +72,7 @@ export const zh_TW: Translation = {
 	[Key.projectSource]: "查看原始碼",
 	[Key.projectTechnologies]: "技術棧",
 	[Key.projectReadMore]: "閱讀詳情",
+	[Key.projectCollapseDetail]: "收起詳情",
 	[Key.projectsNoResults]: "沒有符合此分類的專案",
 
 	[Key.devices]: "我的設備",

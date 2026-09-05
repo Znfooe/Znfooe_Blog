@@ -77,6 +77,7 @@ export const tr: Translation = {
 	[Key.projectSource]: "Kaynak kodu görüntüle",
 	[Key.projectTechnologies]: "Teknolojiler",
 	[Key.projectReadMore]: "Devamını oku",
+	[Key.projectCollapseDetail]: "Detayı kapat",
 	[Key.projectsNoResults]: "Bu kategoriyle eşleşen proje yok",
 
 	[Key.devices]: "Cihazlarım",

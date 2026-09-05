@@ -78,6 +78,7 @@ export const id: Translation = {
 	[Key.projectSource]: "Lihat sumber",
 	[Key.projectTechnologies]: "Teknologi",
 	[Key.projectReadMore]: "Baca selengkapnya",
+	[Key.projectCollapseDetail]: "Tampilkan lebih sedikit",
 	[Key.projectsNoResults]: "Tidak ada proyek dalam kategori ini",
 
 	[Key.devices]: "Perangkat Saya",

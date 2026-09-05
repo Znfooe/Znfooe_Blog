@@ -77,6 +77,7 @@ export const es: Translation = {
 	[Key.projectSource]: "Ver código",
 	[Key.projectTechnologies]: "Tecnologías",
 	[Key.projectReadMore]: "Leer más",
+	[Key.projectCollapseDetail]: "Ver menos",
 	[Key.projectsNoResults]: "Ningún proyecto coincide con esta categoría",
 
 	[Key.devices]: "Mis Dispositivos",

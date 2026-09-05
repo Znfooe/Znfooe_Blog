@@ -72,6 +72,7 @@ export const zh_CN: Translation = {
 	[Key.projectSource]: "查看源码",
 	[Key.projectTechnologies]: "技术栈",
 	[Key.projectReadMore]: "阅读详情",
+	[Key.projectCollapseDetail]: "收起详情",
 	[Key.projectsNoResults]: "没有符合该分类的项目",
 
 	[Key.devices]: "我的设备",

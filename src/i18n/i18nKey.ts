@@ -70,6 +70,8 @@ enum I18nKey {
 	projectSource = "projectSource",
 	projectTechnologies = "projectTechnologies",
 	projectReadMore = "projectReadMore",
+	/** 项目卡片详情收起按钮（与 projectReadMore 成对） */
+	projectCollapseDetail = "projectCollapseDetail",
 	projectsNoResults = "projectsNoResults",
 
 	devices = "devices",
