@@ -288,7 +288,6 @@ export const zh_TW: Translation = {
 	[Key.backgroundWallpaper]: "動態桌布",
 	[Key.backgroundWallpaperDefault]: "預設",
 	[Key.backgroundWallpaperLoading]: "正在載入桌布",
-	[Key.backgroundWallpaperReady]: "已就緒",
 	[Key.backgroundWallpaperFailed]: "載入失敗，點擊重試",
 	[Key.texturePreset]: "背景紋理",
 	[Key.texturePresetNone]: "無紋理",

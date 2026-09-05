@@ -278,6 +278,7 @@ $effect(() => {
  * 新壁纸默认档；延迟壁纸（含失败重试与再点选）立即开始带进度下载。
  */
 function selectWallpaper(id: string) {
+	triggerLiquid(wallpaperId, id);
 	wallpaperId = id;
 	if (wallpaperMode !== "video") wallpaperMode = "video";
 	const wallpaper = wallpapers.find((w) => w.id === id);
@@ -288,8 +289,7 @@ function selectWallpaper(id: string) {
 	}
 	if (wallpaper.deferLoad) {
 		const videoUrl =
-			wallpaper.src[videoFps] ??
-			Object.values(wallpaper.src ?? {})[0];
+			wallpaper.src[videoFps] ?? Object.values(wallpaper.src ?? {})[0];
 		if (videoUrl) ensureWallpaperReady(videoUrl);
 	}
 	// 点选的选项恰好等于当前默认档（未持久化）时，$effect 的变更守卫会跳过；
@@ -299,6 +299,21 @@ function selectWallpaper(id: string) {
 		setWallpaperId(id);
 	}
 }
+
+// 液体填充/流失过渡：切换壁纸时旧行高亮向右流失、新行液体向右填入。
+// nonce 防止快速连点时旧定时器清掉新过渡；reduced-motion 下不触发。
+let liquidNonce = 0;
+let liquid = $state<{ from: string; to: string; nonce: number } | null>(null);
+function triggerLiquid(from: string, to: string) {
+	if (from === to || motionReduced) return;
+	const nonce = ++liquidNonce;
+	liquid = { from, to, nonce };
+	setTimeout(() => {
+		if (liquid?.nonce === nonce) liquid = null;
+	}, 450);
+}
+const isLiquidFill = (id: string) => liquid?.to === id;
+const isLiquidDrain = (id: string) => liquid?.from === id;
 $effect(() => {
 	if (texturePreset === lastAppliedTexturePreset) return;
 	lastAppliedTexturePreset = texturePreset;
@@ -465,7 +480,9 @@ const stylePreviews = $derived(
                                             aria-checked={wallpaperId === wallpaper.id}
                                             title={status === "error" ? i18n(I18nKey.backgroundWallpaperFailed) : name}
                                             class="wallpaper-option"
-                                            class:selected={wallpaperId === wallpaper.id}
+                                            class:selected={wallpaperId === wallpaper.id && !isLiquidFill(wallpaper.id)}
+                                            class:wallpaper-option--fill={isLiquidFill(wallpaper.id)}
+                                            class:wallpaper-option--drain={isLiquidDrain(wallpaper.id)}
                                             onclick={() => selectWallpaper(wallpaper.id)}
                                         >
                                             {#if wallpaper.thumb}
@@ -476,15 +493,19 @@ const stylePreviews = $derived(
                                                 <span class="wallpaper-option__status" title={i18n(I18nKey.backgroundWallpaperLoading)} aria-hidden="true">
                                                     <Icon icon="material-symbols:downloading-rounded" class="text-base" />
                                                 </span>
-                                            {:else if status === "ready"}
-                                                <span class="wallpaper-option__status" title={i18n(I18nKey.backgroundWallpaperReady)} aria-hidden="true">
-                                                    <Icon icon="material-symbols:check-circle-rounded" class="text-base" />
-                                                </span>
                                             {:else if status === "error"}
                                                 <span class="wallpaper-option__status" title={i18n(I18nKey.backgroundWallpaperFailed)} aria-hidden="true">
                                                     <Icon icon="material-symbols:error-outline-rounded" class="text-base" />
                                                 </span>
+                                            {:else if wallpaperId === wallpaper.id}
+                                                <!-- 选中勾：跟随当前选择（下载中优先展示进度） -->
+                                                <span class="wallpaper-option__status" aria-hidden="true">
+                                                    <Icon icon="material-symbols:check-circle-rounded" class="text-base" />
+                                                </span>
                                             {/if}
+                                            <span class="wallpaper-option__liquid" aria-hidden="true">
+                                                <span class="wallpaper-option__liquid-body"></span>
+                                            </span>
                                         </button>
                                     {/each}
                                 </div>
@@ -611,8 +632,10 @@ const stylePreviews = $derived(
             text-overflow: ellipsis
             white-space: nowrap
 
-/* 动态壁纸选择条目：缩略图 + 名称 + 延迟加载状态 */
+/* 动态壁纸选择条目：缩略图 + 名称 + 选中勾 + 液体填充/流失过渡 */
 .wallpaper-option
+    position: relative
+    overflow: hidden
     display: flex
     align-items: center
     gap: 0.625rem
@@ -633,6 +656,8 @@ const stylePreviews = $derived(
         color: var(--on-secondary-container)
 
 .wallpaper-option__thumb
+    position: relative
+    z-index: 1
     width: 4rem
     height: 2.25rem
     flex: none
@@ -641,6 +666,8 @@ const stylePreviews = $derived(
     box-shadow: unquote("inset 0 0 0 1px color-mix(in oklab, var(--on-surface) 15%, transparent)")
 
 .wallpaper-option__name
+    position: relative
+    z-index: 1
     flex: 1
     min-width: 0
     overflow: hidden
@@ -648,8 +675,67 @@ const stylePreviews = $derived(
     white-space: nowrap
 
 .wallpaper-option__status
+    position: relative
+    z-index: 1
     display: flex
     align-items: center
     flex: none
+
+/* 液体过渡层：切换时新选中行液体向右填入、旧行高亮向右流失，共享同色与波前形态 */
+.wallpaper-option__liquid
+    display: none
+    position: absolute
+    inset: 0
+    pointer-events: none
+    z-index: 0
+
+.wallpaper-option--fill .wallpaper-option__liquid
+    display: block
+    animation: wallpaper-liquid-fill var(--m3e-duration-long) var(--m3e-easing-emphasized-decelerate) forwards
+
+.wallpaper-option--drain .wallpaper-option__liquid
+    display: block
+    animation: wallpaper-liquid-drain var(--m3e-duration-long) var(--m3e-easing-emphasized-accelerate) forwards
+
+.wallpaper-option__liquid-body
+    position: absolute
+    inset: 0
+    background: var(--secondary-container)
+
+    /* 波前：半圆凸起沿高度平铺；填充挂右缘（凸向前进方向），流失挂左缘（凸向液体侧） */
+    &::before,
+    &::after
+        content: ""
+        position: absolute
+        top: 0
+        bottom: 0
+        width: 0.5rem
+        background-size: 0.5rem 0.5rem
+
+    &::before
+        right: 100%
+        background-image: radial-gradient(circle at 100% 50%, var(--secondary-container) 0.24rem, transparent 0.25rem)
+
+    &::after
+        left: 100%
+        background-image: radial-gradient(circle at 0 50%, var(--secondary-container) 0.24rem, transparent 0.25rem)
+
+@keyframes wallpaper-liquid-fill
+    from
+        transform: translateX(-101%)
+    to
+        transform: translateX(0)
+
+@keyframes wallpaper-liquid-drain
+    from
+        transform: translateX(0)
+    to
+        transform: translateX(101%)
+
+/* 系统级减少动效：跳过液体动画直接呈现终态（fill 终态 = 选中背景，drain 终态 = 完全移出） */
+@media (prefers-reduced-motion: reduce)
+    .wallpaper-option--fill .wallpaper-option__liquid,
+    .wallpaper-option--drain .wallpaper-option__liquid
+        animation-duration: 0.01ms
 
 </style>

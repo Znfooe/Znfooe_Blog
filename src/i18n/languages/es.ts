@@ -300,7 +300,6 @@ export const es: Translation = {
 	[Key.backgroundWallpaper]: "Fondo animado",
 	[Key.backgroundWallpaperDefault]: "Predeterminado",
 	[Key.backgroundWallpaperLoading]: "Cargando fondo",
-	[Key.backgroundWallpaperReady]: "Listo",
 	[Key.backgroundWallpaperFailed]: "Error; toca para reintentar",
 	[Key.texturePreset]: "Textura de fondo",
 	[Key.texturePresetNone]: "Ninguno",

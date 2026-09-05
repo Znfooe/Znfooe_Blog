@@ -298,7 +298,6 @@ export const ja: Translation = {
 	[Key.backgroundWallpaper]: "ライブ壁紙",
 	[Key.backgroundWallpaperDefault]: "デフォルト",
 	[Key.backgroundWallpaperLoading]: "壁紙を読み込み中",
-	[Key.backgroundWallpaperReady]: "準備完了",
 	[Key.backgroundWallpaperFailed]: "読み込みに失敗しました。タップで再試行",
 	[Key.texturePreset]: "背景テクスチャ",
 	[Key.texturePresetNone]: "なし",

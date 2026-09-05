@@ -301,7 +301,6 @@ export const id: Translation = {
 	[Key.backgroundWallpaper]: "Wallpaper dinamis",
 	[Key.backgroundWallpaperDefault]: "Bawaan",
 	[Key.backgroundWallpaperLoading]: "Memuat wallpaper",
-	[Key.backgroundWallpaperReady]: "Siap",
 	[Key.backgroundWallpaperFailed]: "Gagal, ketuk untuk coba lagi",
 	[Key.layoutMode]: "Tata letak",
 	[Key.layoutList]: "Daftar",

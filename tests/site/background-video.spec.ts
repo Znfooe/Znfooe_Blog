@@ -66,10 +66,7 @@ test.describe("Background video in banner", () => {
 		expect(videoRequests).toEqual([]);
 
 		// 封面静帧占位（poster 属性 + 视频层可见），避免空白横幅
-		await expect(video).toHaveAttribute(
-			"poster",
-			/background-video-zi-poster/,
-		);
+		await expect(video).toHaveAttribute("poster", /background-video-zi-poster/);
 		await expect(page.locator("#banner-wrapper")).toHaveClass(
 			/banner-stage--video/,
 		);
@@ -109,9 +106,51 @@ test.describe("Background video in banner", () => {
 		await expect(video).toHaveAttribute("src", /^blob:/, { timeout: 10_000 });
 
 		// 选择持久化：刷新后恢复该壁纸（会话恢复走 Cache API，免二次下载）
-		expect(await page.evaluate(() => localStorage.getItem("background-wallpaper"))).toBe(
-			"zi",
-		);
+		expect(
+			await page.evaluate(() => localStorage.getItem("background-wallpaper")),
+		).toBe("zi");
+	});
+
+	test("wallpaper selector: renamed labels, checkmark follows selection, liquid transition", async ({
+		page,
+	}) => {
+		await dismissOverlays(page);
+		await page.addInitScript(() => {
+			localStorage.removeItem("wallpaper-mode");
+			localStorage.removeItem("background-wallpaper");
+		});
+		await page.goto("/", { waitUntil: "load" });
+		await page
+			.locator("#intro-splash")
+			.waitFor({ state: "detached", timeout: 15_000 });
+		await page.locator("#display-settings-switch").click();
+
+		// 条目名使用站点配置的 label（legacy 条目也支持自定义名）
+		const jingling = page.getByRole("radio", { name: "精灵公主" });
+		const baizhou = page.getByRole("radio", { name: "白洲梓" });
+		await expect(jingling).toBeVisible();
+		await expect(baizhou).toBeVisible();
+
+		// 新访客默认壁纸为 zi：选中态与勾都在白洲梓行
+		await expect(baizhou).toHaveAttribute("aria-checked", "true");
+		await expect(baizhou.locator(".wallpaper-option__status")).toHaveCount(1);
+		await expect(jingling).toHaveAttribute("aria-checked", "false");
+		await expect(jingling.locator(".wallpaper-option__status")).toHaveCount(0);
+
+		// 切到精灵公主：勾随选中移动，触发液体过渡（旧行流失、新行填充）
+		await jingling.click();
+		await expect(jingling).toHaveAttribute("aria-checked", "true");
+		await expect(jingling.locator(".wallpaper-option__status")).toHaveCount(1);
+		await expect(baizhou).toHaveAttribute("aria-checked", "false");
+		await expect(baizhou.locator(".wallpaper-option__status")).toHaveCount(0);
+		await expect(jingling).toHaveClass(/wallpaper-option--fill/);
+		await expect(baizhou).toHaveClass(/wallpaper-option--drain/);
+
+		// 过渡结束后液体层清除，选中背景挂上
+		await expect(jingling).not.toHaveClass(/wallpaper-option--fill/, {
+			timeout: 2_000,
+		});
+		await expect(jingling).toHaveClass(/selected/);
 	});
 
 	test("switching to banner mode hides video and shows image", async ({
@@ -129,8 +168,6 @@ test.describe("Background video in banner", () => {
 		);
 
 		// 图片横幅可见
-		await expect(
-			page.locator(".banner-stage__image--active"),
-		).toBeVisible();
+		await expect(page.locator(".banner-stage__image--active")).toBeVisible();
 	});
 });

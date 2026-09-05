@@ -296,7 +296,6 @@ export const ko: Translation = {
 	[Key.backgroundWallpaper]: "라이브 배경화면",
 	[Key.backgroundWallpaperDefault]: "기본",
 	[Key.backgroundWallpaperLoading]: "배경화면 불러오는 중",
-	[Key.backgroundWallpaperReady]: "준비됨",
 	[Key.backgroundWallpaperFailed]: "실패함, 눌러서 재시도",
 	[Key.texturePreset]: "배경 텍스처",
 	[Key.texturePresetNone]: "없음",

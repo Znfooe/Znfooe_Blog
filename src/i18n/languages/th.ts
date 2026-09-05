@@ -287,7 +287,6 @@ export const th: Translation = {
 	[Key.backgroundWallpaper]: "วอลเปเปอร์เคลื่อนไหว",
 	[Key.backgroundWallpaperDefault]: "ค่าเริ่มต้น",
 	[Key.backgroundWallpaperLoading]: "กำลังโหลดวอลเปเปอร์",
-	[Key.backgroundWallpaperReady]: "พร้อมแล้ว",
 	[Key.backgroundWallpaperFailed]: "ล้มเหลว แตะเพื่อลองใหม่",
 	[Key.texturePreset]: "พื้นผิวพื้นหลัง",
 	[Key.texturePresetNone]: "ไม่มี",

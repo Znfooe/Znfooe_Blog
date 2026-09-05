@@ -297,7 +297,6 @@ export const en: Translation = {
 	[Key.backgroundWallpaper]: "Live wallpaper",
 	[Key.backgroundWallpaperDefault]: "Default",
 	[Key.backgroundWallpaperLoading]: "Loading wallpaper",
-	[Key.backgroundWallpaperReady]: "Ready",
 	[Key.backgroundWallpaperFailed]: "Failed, tap to retry",
 	[Key.texturePreset]: "Background Texture",
 	[Key.texturePresetNone]: "None",

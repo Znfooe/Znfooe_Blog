@@ -91,6 +91,8 @@ export type SiteConfig = {
 	};
 	/** 动态视频背景（wallpaperMode === "video" 时使用，合并为壁纸列表 id="default" 的首项）。 */
 	backgroundVideo?: {
+		/** 设置面板显示名；缺省时回退 i18n「默认」。 */
+		label?: string;
 		/** 视频源：不同帧率的地址，key 为帧率档位（如 "60"、"120"）。 */
 		src: Record<string, string>;
 		/** 默认帧率档位（对应 src 的 key）。 */

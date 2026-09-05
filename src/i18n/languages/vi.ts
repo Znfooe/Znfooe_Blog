@@ -299,7 +299,6 @@ export const vi: Translation = {
 	[Key.backgroundWallpaper]: "Hình nền động",
 	[Key.backgroundWallpaperDefault]: "Mặc định",
 	[Key.backgroundWallpaperLoading]: "Đang tải hình nền",
-	[Key.backgroundWallpaperReady]: "Sẵn sàng",
 	[Key.backgroundWallpaperFailed]: "Thất bại, chạm để thử lại",
 	[Key.texturePreset]: "Họa tiết nền",
 	[Key.texturePresetNone]: "Không có",

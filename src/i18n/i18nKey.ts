@@ -256,8 +256,6 @@ enum I18nKey {
 	backgroundWallpaperDefault = "backgroundWallpaperDefault",
 	/** 延迟壁纸下载中标签 */
 	backgroundWallpaperLoading = "backgroundWallpaperLoading",
-	/** 延迟壁纸就绪标签 */
-	backgroundWallpaperReady = "backgroundWallpaperReady",
 	/** 延迟壁纸下载失败提示（点击重试） */
 	backgroundWallpaperFailed = "backgroundWallpaperFailed",
 

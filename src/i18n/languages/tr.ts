@@ -300,7 +300,6 @@ export const tr: Translation = {
 	[Key.backgroundWallpaper]: "Canlı duvar kağıdı",
 	[Key.backgroundWallpaperDefault]: "Varsayılan",
 	[Key.backgroundWallpaperLoading]: "Duvar kağıdı yükleniyor",
-	[Key.backgroundWallpaperReady]: "Hazır",
 	[Key.backgroundWallpaperFailed]: "Başarısız, yeniden denemek için dokun",
 	[Key.texturePreset]: "Arka Plan Dokusu",
 	[Key.texturePresetNone]: "Yok",

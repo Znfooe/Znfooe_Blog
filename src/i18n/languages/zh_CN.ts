@@ -288,7 +288,6 @@ export const zh_CN: Translation = {
 	[Key.backgroundWallpaper]: "动态壁纸",
 	[Key.backgroundWallpaperDefault]: "默认",
 	[Key.backgroundWallpaperLoading]: "正在加载壁纸",
-	[Key.backgroundWallpaperReady]: "已就绪",
 	[Key.backgroundWallpaperFailed]: "加载失败，点击重试",
 	[Key.texturePreset]: "背景纹理",
 	[Key.texturePresetNone]: "无纹理",

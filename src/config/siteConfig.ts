@@ -1,7 +1,4 @@
-import type {
-	BackgroundWallpaperConfig,
-	SiteConfig,
-} from "@/types/config";
+import type { BackgroundWallpaperConfig, SiteConfig } from "@/types/config";
 import type {
 	ResolvedTextureOptions,
 	TextureConfig,
@@ -51,6 +48,8 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 	// 动态视频背景（仅当 wallpaperMode.defaultMode 或访客选择为 "video" 时生效）。
 	// 合并进壁纸列表时作为 id="default" 的首项。
 	backgroundVideo: {
+		// 设置面板显示名；缺省时回退 i18n「默认」
+		label: "精灵公主",
 		// 不同帧率的视频源；"60" 为默认档，也提供 "120" 高帧率档。
 		src: {
 			"60": "/assets/video/background-video-60fps.mp4",
@@ -71,7 +70,7 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		{
 			// 壁纸唯一标识（访客选择持久化的值，发布后不要变更）
 			id: "zi",
-			label: "梓 · AI 超分",
+			label: "白洲梓",
 			src: {
 				"60": "/assets/video/background-video-zi-60fps.mp4",
 				"120": "/assets/video/background-video-zi-120fps.mp4",
@@ -224,9 +223,17 @@ export function getDefaultStyle(): string {
 export function resolveBackgroundWallpapers(): BackgroundWallpaperConfig[] {
 	const list: BackgroundWallpaperConfig[] = [];
 	if (siteConfig.backgroundVideo) {
-		const { src, defaultFps, position, poster, thumb } =
+		const { label, src, defaultFps, position, poster, thumb } =
 			siteConfig.backgroundVideo;
-		list.push({ id: "default", src, defaultFps, position, poster, thumb });
+		list.push({
+			id: "default",
+			label,
+			src,
+			defaultFps,
+			position,
+			poster,
+			thumb,
+		});
 	}
 	for (const wallpaper of siteConfig.backgroundVideos ?? []) {
 		if (!wallpaper?.id || list.some((w) => w.id === wallpaper.id)) continue;
