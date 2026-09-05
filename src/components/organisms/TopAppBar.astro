@@ -239,12 +239,13 @@ document.addEventListener('swup:content:replace', bindSearchTriggers);
 	}
 
 		/* 壁纸专属语义色：白洲梓（id="zi"）壁纸下，导航栏「字体颜色」按固定淡紫色谱切色。
-		   - 默认：淡紫（直接覆写 nav-link color，避免改 --on-surface-variant 影响搜索/语言 icon）
-		   - hover / active：深一档紫（高特异性 selector，胜出 transparent 块）
-		   只动 nav-link 文字与下划线，不动 --primary / --on-surface / --on-surface-variant，
-		   这样 site title 左侧的品牌色块、search icon、语言切换、setting icon 都保持主题色，
-		   transparent 模式下也保持 white（视频 banner 上可读）；用户原话"字体颜色"不应
-		   波及 navbar 装饰元素。 */
+		   - nav-link 文字：默认淡紫 --zi-nav-tint，hover/active 深一档 --zi-nav-tint-strong，
+		     下划线同步深紫（selector 加 .top-app-bar 提高到 0,2,2，胜出 transparent 块）
+		   - 右上角图标按钮（search / display-settings / scheme-switch / language-switch）：
+		     也按淡紫一档切；用户报"这三个也需要淡紫色"。
+		     selector 直接选 navbar 内所有 button[id]，避开 site title（<a> 标签）。
+		   - 不动 --primary / --on-surface / --on-surface-variant：site title 文字与左侧
+		     品牌色块仍走主题色（transparent 模式下保持 white），不连带染色。 */
 		:global(html[data-wallpaper-id="zi"]) .top-app-bar {
 			--zi-nav-tint: oklch(0.66 0.12 295);
 			--zi-nav-tint-strong: oklch(0.46 0.18 295);
@@ -260,6 +261,39 @@ document.addEventListener('swup:content:replace', bindSearchTriggers);
 		}
 		:global(html[data-wallpaper-id="zi"]) .top-app-bar .top-app-bar__nav-link--active::after {
 			background: var(--zi-nav-tint-strong);
+		}
+		/* 右上角图标按钮（navbar 内所有带 id 的 button，site title 是 <a> 不受影响）。
+		   用 #search-switch / #display-settings-switch / #scheme-switch / #language-switch
+		   作为锚点。这些按钮在 Search.svelte / LightDarkSwitch.svelte / LanguageSwitch.svelte
+		   等客户端组件里渲染，Astro island 内的子元素不会带 Astro scoped 属性。
+		   用 :global(...) 把整个 selector 包裹，禁止 Astro 给末尾加 [data-astro-cid-qvhher2r]，
+		   这样 selector 才能匹配不带 cid 的按钮。
+		   特异性靠 #navbar #xxx（0,2,0）已足够压过 IconButton 的 .m3-icon-button.svelte-xxx
+		   （0,2,0）。同特异性下 source 顺序决定胜负：zi 块写在 TopAppBar.astro 末尾，胜出
+		   同特异性的 Svelte 组件样式。 */
+		:global(html[data-wallpaper-id="zi"] #navbar #search-switch),
+		:global(html[data-wallpaper-id="zi"] #navbar #display-settings-switch),
+		:global(html[data-wallpaper-id="zi"] #navbar #scheme-switch),
+		:global(html[data-wallpaper-id="zi"] #navbar #language-switch),
+		:global(html[data-wallpaper-id="zi"] #navbar #nav-drawer-switch) {
+			color: var(--zi-nav-tint);
+		}
+		:global(html[data-wallpaper-id="zi"] #navbar #search-switch:hover),
+		:global(html[data-wallpaper-id="zi"] #navbar #display-settings-switch:hover),
+		:global(html[data-wallpaper-id="zi"] #navbar #scheme-switch:hover),
+		:global(html[data-wallpaper-id="zi"] #navbar #language-switch:hover),
+		:global(html[data-wallpaper-id="zi"] #navbar #nav-drawer-switch:hover) {
+			color: var(--zi-nav-tint-strong);
+		}
+		/* 但 transparent 模式下（home 顶部 navbar 浮在视频 banner 上），图标必须保持 white
+		   才能在浅色视频上有对比度。这里 selector 同时含 .top-app-bar--transparent 修饰，
+		   特定性高于上面的默认块（同特异性下 source 顺序决定胜负，这块写在更后面）。 */
+		:global(html[data-wallpaper-id="zi"] #navbar.top-app-bar--transparent #search-switch),
+		:global(html[data-wallpaper-id="zi"] #navbar.top-app-bar--transparent #display-settings-switch),
+		:global(html[data-wallpaper-id="zi"] #navbar.top-app-bar--transparent #scheme-switch),
+		:global(html[data-wallpaper-id="zi"] #navbar.top-app-bar--transparent #language-switch),
+		:global(html[data-wallpaper-id="zi"] #navbar.top-app-bar--transparent #nav-drawer-switch) {
+			color: white;
 		}
 
 		.top-app-bar--transparent {
