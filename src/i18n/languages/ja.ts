@@ -76,6 +76,7 @@ export const ja: Translation = {
 	[Key.projectVisit]: "プロジェクトを見る",
 	[Key.projectSource]: "ソースを見る",
 	[Key.projectTechnologies]: "使用技術",
+	[Key.projectReadMore]: "詳細を読む",
 	[Key.projectsNoResults]: "このカテゴリに一致するプロジェクトはありません",
 
 	[Key.devices]: "デバイス",

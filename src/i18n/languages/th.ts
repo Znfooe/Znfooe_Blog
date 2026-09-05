@@ -71,6 +71,7 @@ export const th: Translation = {
 	[Key.projectVisit]: "เยี่ยมชมโปรเจกต์",
 	[Key.projectSource]: "ดูซอร์สโค้ด",
 	[Key.projectTechnologies]: "เทคโนโลยี",
+	[Key.projectReadMore]: "อ่านเพิ่มเติม",
 	[Key.projectsNoResults]: "ไม่พบโปรเจกต์ในหมวดหมู่นี้",
 
 	[Key.devices]: "อุปกรณ์ของฉัน",

@@ -32,6 +32,8 @@ export interface ProjectItem {
 	featured?: boolean;
 	website?: string;
 	repository?: string;
+	/** 项目详情文章 slug（指向 src/content/posts/ 下的文章，生成「阅读详情」入口）。 */
+	post?: string;
 	/** 自由格式的年份或时间范围，如 2024–2026。 */
 	year?: string;
 }

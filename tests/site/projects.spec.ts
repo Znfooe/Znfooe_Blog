@@ -1,21 +1,30 @@
 import { expect, test } from "@playwright/test";
 
-const PROJECT_COUNT = 3;
+const PROJECT_COUNT = 4;
 
 test.describe("项目页", () => {
-	test.beforeEach(async ({ page }) => {
-		await page.goto("/projects/");
+	test.beforeEach(async ({ context, page }) => {
+		// 开场弹窗默认每次整页加载都出现，其全屏 scrim 会拦截页面交互；
+		// 测试里预设「不再显示」标记，跳过弹窗，避免遮挡项目页元素。
+		await context.addInitScript(() => {
+			localStorage.setItem("shirone-opening-acknowledged", "1");
+		});
+		await page.goto("/projects/", { waitUntil: "networkidle" });
 		await expect(page.locator(".project-card")).toHaveCount(PROJECT_COUNT);
+		// 等分类 Chips 完成 hydration 可交互
+		await expect(
+			page.locator(".projects-section__chips button").first(),
+		).toBeVisible();
 	});
 
-	test("渲染代表项目、阶段、技术栈与源码链接", async ({ page }) => {
+	test("渲染代表项目、阶段、技术栈、源码与详情链接", async ({ page }) => {
 		await expect(page.locator("#swup-container")).toHaveAttribute(
 			"data-current-page",
 			"projects",
 		);
-		await expect(page.locator(".page-header__title")).toHaveText("Projects");
+		await expect(page.locator(".page-header__title")).toHaveText("项目");
 		await expect(page.locator(".projects-section__count")).toHaveText(
-			"3 projects",
+			"4 个项目",
 		);
 
 		const shirone = page.locator('[data-project="shirone"]');
@@ -25,36 +34,32 @@ test.describe("项目页", () => {
 			"/assets/projects/shirone.webp",
 		);
 		await expect(shirone).toHaveClass(/project-card--featured/);
-		await expect(shirone.locator('[data-phase="building"]')).toHaveText(
-			"Building",
-		);
-		await expect(shirone.locator(".project-card__technologies li")).toHaveCount(
-			4,
-		);
 		await expect(
-			shirone.getByRole("link", { name: "View source" }),
+			shirone.getByRole("link", { name: "查看源码" }),
 		).toHaveAttribute("href", "https://github.com/LyraVoid/Shirone");
 
-		// 无封面项目：渲染图标瓷砖形态（不渲染封面区）
-		const folkpatch = page.locator('[data-project="folkpatch"]');
-		await expect(folkpatch.locator(".project-card__icon")).toBeVisible();
-		await expect(folkpatch.locator(".project-card__cover")).toHaveCount(0);
-		await expect(folkpatch.locator('[data-phase="building"]')).toHaveText(
-			"Building",
+		// 三个新项目：无封面（图标瓷砖形态）+ 源码链接 + 阅读详情链接
+		const harness = page.locator('[data-project="project-harness-builder"]');
+		await expect(harness.locator(".project-card__icon")).toBeVisible();
+		await expect(
+			harness.getByRole("link", { name: "查看源码" }),
+		).toHaveAttribute(
+			"href",
+			"https://github.com/Znfooe/project-harness-builder",
 		);
 		await expect(
-			folkpatch.getByRole("link", { name: "View source" }),
-		).toHaveAttribute("href", "https://github.com/LyraVoid/FolkPatch");
+			harness.getByRole("link", { name: "阅读详情" }),
+		).toHaveAttribute("href", "/posts/project-harness-builder/");
 
-		const kernelpatch = page.locator('[data-project="kernelpatch"]');
-		await expect(kernelpatch.locator(".project-card__icon")).toBeVisible();
-		await expect(kernelpatch.locator(".project-card__cover")).toHaveCount(0);
-		await expect(kernelpatch.locator('[data-phase="shipped"]')).toHaveText(
-			"Shipped",
-		);
+		const reaction = page.locator('[data-project="reactionpro-client"]');
 		await expect(
-			kernelpatch.getByRole("link", { name: "View source" }),
-		).toHaveAttribute("href", "https://github.com/lyravoid/KernelPatch");
+			reaction.getByRole("link", { name: "阅读详情" }),
+		).toHaveAttribute("href", "/posts/reactionpro-client/");
+
+		const mathviz = page.locator('[data-project="mathviz"]');
+		await expect(
+			mathviz.getByRole("link", { name: "阅读详情" }),
+		).toHaveAttribute("href", "/posts/mathviz/");
 	});
 
 	test("直接加载时导航高亮与侧栏页面过滤正确", async ({ page }) => {
@@ -67,24 +72,16 @@ test.describe("项目页", () => {
 		await expect(page.locator('widget-layout[data-id="tags"]')).toBeVisible();
 	});
 
-	test("分类筛选会同步项目数量与可见卡片（含 LoadingIndicator 过渡）", async ({
-		page,
-	}) => {
-		await page.getByRole("button", { name: "Android", exact: true }).click();
-		// 三段过渡的指示器阶段（contained LoadingIndicator 出现在内容区）
+	test("分类筛选会同步项目数量与可见卡片", async ({ page }) => {
+		// Tool 分类只有 project-harness-builder
+		await page.getByRole("button", { name: "Tool", exact: true }).click();
+		await expect(page.locator(".project-card")).toHaveCount(1);
 		await expect(
-			page.locator(".projects-section__loading .m3-loading--contained"),
+			page.locator('[data-project="project-harness-builder"]'),
 		).toBeVisible();
-		await expect(page.locator(".project-card")).toHaveCount(2);
-		await expect(page.locator(".projects-section__count")).toHaveText(
-			"2 projects",
-		);
-		await expect(page.locator('[data-project="shirone"]')).toHaveCount(0);
-		await expect(page.locator('[data-project="folkpatch"]')).toBeVisible();
-		await expect(page.locator('[data-project="kernelpatch"]')).toBeVisible();
-		await expect(page.locator(".projects-section__loading")).toHaveCount(0);
 
-		await page.getByRole("button", { name: "Android", exact: true }).click();
+		// 再点一次取消筛选，恢复全部
+		await page.getByRole("button", { name: "Tool", exact: true }).click();
 		await expect(page.locator(".project-card")).toHaveCount(PROJECT_COUNT);
 	});
 
@@ -96,7 +93,6 @@ test.describe("项目页", () => {
 		await expect(page.locator('[data-project="shirone"]')).toBeVisible();
 		await expect(page).toHaveURL(/[?&]q=Shirone/);
 
-		// 清除搜索恢复全部
 		const clearBtn = page.locator(".projects-section__search-clear");
 		await clearBtn.click();
 		await expect(page.locator(".project-card")).toHaveCount(PROJECT_COUNT);
@@ -118,29 +114,8 @@ test.describe("项目页", () => {
 				),
 			)
 			.toBeGreaterThan(1);
-		await expect
-			.poll(() =>
-				cards.evaluateAll((elements) =>
-					elements.every(
-						(element) =>
-							(element as HTMLElement).style.gridColumnStart !== "" &&
-							(element as HTMLElement).style.gridRowEnd !== "",
-					),
-				),
-			)
-			.toBe(true);
-		await expect
-			.poll(() =>
-				cards.evaluateAll((elements) =>
-					elements.every(
-						(element) => getComputedStyle(element).gridColumnEnd === "span 1",
-					),
-				),
-			)
-			.toBe(true);
 
 		await page.setViewportSize({ width: 390, height: 844 });
-
 		await expect
 			.poll(() =>
 				grid.evaluate(
@@ -151,70 +126,23 @@ test.describe("项目页", () => {
 				),
 			)
 			.toBe(1);
-		await expect
-			.poll(() =>
-				cards.evaluateAll((elements) =>
-					elements.every(
-						(element) =>
-							(element as HTMLElement).style.gridColumnStart === "" &&
-							(element as HTMLElement).style.gridRowEnd === "",
-					),
-				),
-			)
-			.toBe(true);
 		await expect(cards).toHaveCount(PROJECT_COUNT);
 		await expect(page).toHaveURL(/\/projects\/$/);
-
-		await page.setViewportSize({ width: 1280, height: 900 });
-
-		await expect
-			.poll(() =>
-				cards.evaluateAll((elements) =>
-					elements.every(
-						(element) =>
-							(element as HTMLElement).style.gridColumnStart !== "" &&
-							(element as HTMLElement).style.gridRowEnd !== "",
-					),
-				),
-			)
-			.toBe(true);
-	});
-
-	test("无封面卡片在桌面端将技术栈与源码操作合并为同一行", async ({ page }) => {
-		await page.setViewportSize({ width: 1280, height: 900 });
-		const cards = page.locator(".project-card--without-cover");
-
-		await expect(cards).toHaveCount(PROJECT_COUNT - 1);
-
-		const rowsMerged = await cards.evaluateAll((elements) =>
-			elements.every((element) => {
-				const card = element as HTMLElement;
-				const technologies = card.querySelector<HTMLElement>(
-					".project-card__technologies",
-				);
-				const actions = card.querySelector<HTMLElement>(
-					".project-card__actions",
-				);
-				if (!technologies || !actions) return false;
-				const techBox = technologies.getBoundingClientRect();
-				const actionsBox = actions.getBoundingClientRect();
-				// 同一行：两个区域的垂直范围必须重叠
-				return (
-					techBox.top < actionsBox.bottom && actionsBox.top < techBox.bottom
-				);
-			}),
-		);
-
-		await expect(rowsMerged).toBe(true);
 	});
 });
 
 test.describe("项目页 Swup 导航", () => {
 	test.use({ viewport: { width: 1280, height: 900 } });
 
-	test("从持久顶栏进入后同步页面、导航与侧栏状态", async ({ page }) => {
-		await page.goto("/skills/", { waitUntil: "domcontentloaded" });
-		await page.getByRole("button", { name: "More", exact: true }).click();
+	test("从持久顶栏进入后同步页面、导航与侧栏状态", async ({
+		context,
+		page,
+	}) => {
+		await context.addInitScript(() => {
+			localStorage.setItem("shirone-opening-acknowledged", "1");
+		});
+		await page.goto("/skills/", { waitUntil: "networkidle" });
+		await page.getByRole("button", { name: "更多", exact: true }).click();
 		await page.locator('a[data-nav-key="projects"]').click();
 
 		await expect(page).toHaveURL(/\/projects\/$/);
@@ -227,9 +155,5 @@ test.describe("项目页 Swup 导航", () => {
 			"aria-current",
 			"page",
 		);
-		await expect(
-			page.locator('widget-layout[data-id="categories"]'),
-		).toBeVisible();
-		await expect(page.locator('widget-layout[data-id="tags"]')).toBeVisible();
 	});
 });

@@ -69,6 +69,7 @@ enum I18nKey {
 	projectVisit = "projectVisit",
 	projectSource = "projectSource",
 	projectTechnologies = "projectTechnologies",
+	projectReadMore = "projectReadMore",
 	projectsNoResults = "projectsNoResults",
 
 	devices = "devices",

@@ -20,9 +20,19 @@ export const projectsConfig: ProjectsConfig = withUserConfig("projects", {
 			icon: "material-symbols:palette-outline-rounded",
 		},
 		{
-			key: "android",
-			label: "Android",
-			icon: "material-symbols:android-rounded",
+			key: "tool",
+			label: "Tool",
+			icon: "material-symbols:handyman-outline-rounded",
+		},
+		{
+			key: "app",
+			label: "App",
+			icon: "material-symbols:apps-rounded",
+		},
+		{
+			key: "web",
+			label: "Web",
+			icon: "material-symbols:language-rounded",
 		},
 	],
 	// disabledKeys: [],

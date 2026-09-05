@@ -77,6 +77,7 @@ export const en: Translation = {
 	[Key.projectVisit]: "Visit project",
 	[Key.projectSource]: "View source",
 	[Key.projectTechnologies]: "Technologies",
+	[Key.projectReadMore]: "Read more",
 	[Key.projectsNoResults]: "No projects matched this category",
 
 	[Key.devices]: "My Devices",

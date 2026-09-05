@@ -76,6 +76,7 @@ export const tr: Translation = {
 	[Key.projectVisit]: "Projeyi ziyaret et",
 	[Key.projectSource]: "Kaynak kodu görüntüle",
 	[Key.projectTechnologies]: "Teknolojiler",
+	[Key.projectReadMore]: "Devamını oku",
 	[Key.projectsNoResults]: "Bu kategoriyle eşleşen proje yok",
 
 	[Key.devices]: "Cihazlarım",
