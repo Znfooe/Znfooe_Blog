@@ -296,6 +296,7 @@ export const ja: Translation = {
 	[Key.wallpaperModeVideo]: "動画",
 	[Key.backgroundVideoFps]: "フレームレート",
 	[Key.backgroundWallpaper]: "ライブ壁紙",
+	[Key.staticWallpaper]: "静止画壁紙",
 	[Key.backgroundWallpaperDefault]: "デフォルト",
 	[Key.backgroundWallpaperLoading]: "壁紙を読み込み中",
 	[Key.backgroundWallpaperFailed]: "読み込みに失敗しました。タップで再試行",
@@ -328,13 +329,16 @@ export const ja: Translation = {
 	[Key.introSkip]: "スキップ",
 
 	[Key.openingTitle]: "ようこそ",
-	[Key.openingForkNotice]: "本プロジェクトは {repo} を二次開発したものです。{author} 様のオープンソースに感謝！",
+	[Key.openingForkNotice]:
+		"本プロジェクトは {repo} を二次開発したものです。{author} 様のオープンソースに感謝！",
 	[Key.openingDevDisclaimer]:
 		"このサイトは現在開発中です。不具合があるかもしれませんが、ご了承ください。",
 	[Key.openingAcknowledge]: "確認しました（{seconds}s）",
-	[Key.openingWallpaperCredit]: "ライブ壁紙は Bilibili の {up}（UID: {uid}）より",
+	[Key.openingWallpaperCredit]:
+		"ライブ壁紙は Bilibili の {up}（UID: {uid}）より",
 	[Key.openingWallpaperCreditNoUid]: "ライブ壁紙は Bilibili の {up} より",
-	[Key.openingWallpaperHint]: "右上の「表示設定」で「動画」または「画像」の背景を切り替えられます。",
+	[Key.openingWallpaperHint]:
+		"右上の「表示設定」で「動画」または「画像」の背景を切り替えられます。",
 	[Key.openingNeverShow]: "次回から表示しない",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。

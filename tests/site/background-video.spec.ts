@@ -11,6 +11,19 @@ import { expect, test } from "@playwright/test";
 
 const ZI_VIDEO_URL = "**/assets/video/background-video-zi-60fps.mp4";
 
+async function expectCurrentStaticWallpaper(
+	page: import("@playwright/test").Page,
+	pattern: RegExp,
+) {
+	await expect
+		.poll(() =>
+			page
+				.locator(".banner-stage__image--active")
+				.evaluate((image) => (image as HTMLImageElement).currentSrc),
+		)
+		.toMatch(pattern);
+}
+
 /** 跳过开场动画与开场公告遮罩（与壁纸选择无关，避免拦截点击）。 */
 async function dismissOverlays(page: import("@playwright/test").Page) {
 	await page.addInitScript(() => {
@@ -169,5 +182,109 @@ test.describe("Background video in banner", () => {
 
 		// 图片横幅可见
 		await expect(page.locator(".banner-stage__image--active")).toBeVisible();
+	});
+
+	test("static wallpaper switches immediately, persists, and reuses the liquid option state", async ({
+		page,
+	}) => {
+		await dismissOverlays(page);
+		await page.addInitScript(() => {
+			localStorage.setItem("wallpaper-mode", "banner");
+		});
+		await page.goto("/", { waitUntil: "load" });
+		await page
+			.locator("#intro-splash")
+			.waitFor({ state: "detached", timeout: 15_000 });
+		await page.locator("#display-settings-switch").click();
+
+		const group = page.getByRole("radiogroup", { name: "静态壁纸" });
+		const defaultOption = group.getByRole("radio", { name: "默认" });
+		const blueArchive = group.getByRole("radio", { name: "蔚蓝档案 · 海边" });
+		await expect(group).toBeVisible();
+		await expect(defaultOption).toHaveAttribute("aria-checked", "true");
+
+		await blueArchive.click();
+		await expect(blueArchive).toHaveAttribute("aria-checked", "true");
+		await expect(blueArchive).toHaveClass(/wallpaper-option--fill/);
+		await expect(defaultOption).toHaveClass(/wallpaper-option--drain/);
+		await expect(page.locator("#banner-wrapper")).toHaveAttribute(
+			"data-static-wallpaper-id",
+			"blue-archive-beach",
+		);
+		await expectCurrentStaticWallpaper(page, /02-blue-archive-beach/);
+		await expect(
+			page.locator('source[data-banner-source="desktop-avif"]'),
+		).toHaveAttribute("srcset", /02-blue-archive-beach/);
+		await expect(
+			page.locator('source[data-banner-source="desktop-webp"]'),
+		).toHaveAttribute("srcset", /02-blue-archive-beach.*3840w/);
+		expect(
+			await page.evaluate(() => localStorage.getItem("static-wallpaper")),
+		).toBe("blue-archive-beach");
+
+		await page.locator("#display-settings-switch").click();
+		await page.locator('#navbar a[href*="/archive"]').first().click();
+		await expect(page).toHaveURL(/\/archive\/?$/);
+		await expect(page.locator("#banner-wrapper")).toHaveAttribute(
+			"data-static-wallpaper-id",
+			"blue-archive-beach",
+		);
+		await expectCurrentStaticWallpaper(page, /02-blue-archive-beach/);
+
+		await page.reload({ waitUntil: "load" });
+		await expect(page.locator("#banner-wrapper")).toHaveAttribute(
+			"data-static-wallpaper-id",
+			"blue-archive-beach",
+		);
+		await expectCurrentStaticWallpaper(page, /02-blue-archive-beach/);
+	});
+
+	test("static wallpaper liquid animation is skipped for reduced motion", async ({
+		page,
+	}) => {
+		await dismissOverlays(page);
+		await page.addInitScript(() => {
+			localStorage.setItem("wallpaper-mode", "banner");
+			localStorage.setItem("mc-motion", "reduced");
+		});
+		await page.goto("/", { waitUntil: "load" });
+		await page
+			.locator("#intro-splash")
+			.waitFor({ state: "detached", timeout: 15_000 });
+		await page.locator("#display-settings-switch").click();
+
+		const group = page.getByRole("radiogroup", { name: "静态壁纸" });
+		const blueArchive = group.getByRole("radio", { name: "蔚蓝档案 · 海边" });
+		await blueArchive.click();
+		await expect(blueArchive).toHaveAttribute("aria-checked", "true");
+		await expect(blueArchive).not.toHaveClass(/wallpaper-option--fill/);
+	});
+
+	test("desktop-only static wallpaper keeps the configured mobile banner", async ({
+		page,
+	}) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await dismissOverlays(page);
+		await page.addInitScript(() => {
+			localStorage.setItem("wallpaper-mode", "banner");
+			localStorage.setItem("static-wallpaper", "blue-archive-beach");
+		});
+		await page.goto("/", { waitUntil: "load" });
+
+		await expect(page.locator("#banner-wrapper")).toHaveAttribute(
+			"data-static-wallpaper-id",
+			"blue-archive-beach",
+		);
+		await expect
+			.poll(() =>
+				page
+					.locator(".banner-stage__image--active")
+					.evaluate((image) => (image as HTMLImageElement).currentSrc),
+			)
+			.not.toMatch(/02-blue-archive-beach/);
+		await page.locator("#display-settings-switch").click();
+		await expect(
+			page.getByRole("radiogroup", { name: "静态壁纸" }),
+		).toBeHidden();
 	});
 });

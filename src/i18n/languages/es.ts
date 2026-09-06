@@ -298,6 +298,7 @@ export const es: Translation = {
 	[Key.wallpaperModeVideo]: "Vídeo",
 	[Key.backgroundVideoFps]: "Fotogramas",
 	[Key.backgroundWallpaper]: "Fondo animado",
+	[Key.staticWallpaper]: "Fondo estático",
 	[Key.backgroundWallpaperDefault]: "Predeterminado",
 	[Key.backgroundWallpaperLoading]: "Cargando fondo",
 	[Key.backgroundWallpaperFailed]: "Error; toca para reintentar",
@@ -331,13 +332,17 @@ export const es: Translation = {
 	[Key.introSkip]: "Saltar",
 
 	[Key.openingTitle]: "Bienvenido",
-	[Key.openingForkNotice]: "Este proyecto es una bifurcación de {repo}. ¡Gracias a {author} por abrir su código!",
+	[Key.openingForkNotice]:
+		"Este proyecto es una bifurcación de {repo}. ¡Gracias a {author} por abrir su código!",
 	[Key.openingDevDisclaimer]:
 		"Este sitio sigue en desarrollo y puede tener algunos fallos. Gracias por tu comprensión.",
 	[Key.openingAcknowledge]: "He leído esto（{seconds}s）",
-	[Key.openingWallpaperCredit]: "Fondo animado del creador de Bilibili {up} (UID: {uid})",
-	[Key.openingWallpaperCreditNoUid]: "Fondo animado del creador de Bilibili {up}",
-	[Key.openingWallpaperHint]: "Puedes alternar entre fondo de Vídeo e Imagen en Ajustes de pantalla (arriba a la derecha).",
+	[Key.openingWallpaperCredit]:
+		"Fondo animado del creador de Bilibili {up} (UID: {uid})",
+	[Key.openingWallpaperCreditNoUid]:
+		"Fondo animado del creador de Bilibili {up}",
+	[Key.openingWallpaperHint]:
+		"Puedes alternar entre fondo de Vídeo e Imagen en Ajustes de pantalla (arriba a la derecha).",
 	[Key.openingNeverShow]: "No mostrar de nuevo",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。

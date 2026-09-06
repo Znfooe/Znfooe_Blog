@@ -6,8 +6,10 @@ import { resolveMediaUrl } from "@utils/background-video";
 import { url } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
 import {
+	getDefaultStaticWallpaperId,
 	getDefaultWallpaperId,
 	resolveBackgroundWallpapers,
+	resolveStaticWallpapers,
 	siteConfig,
 } from "@/config";
 import type { SidebarPage } from "@/types/sidebarConfig";
@@ -43,6 +45,7 @@ interface ResponsiveBannerImage {
 const optimizeBannerImage = async (
 	src: string,
 	viewport: "desktop" | "mobile",
+	profile: "banner" | "wallpaper" = "banner",
 ): Promise<ResponsiveBannerImage> => {
 	const resolved = await resolveImageAsset(src);
 	if (typeof resolved === "string") {
@@ -54,7 +57,11 @@ const optimizeBannerImage = async (
 	}
 
 	const requestedWidths =
-		viewport === "desktop" ? [1280, 1600, 1920] : [640, 828, 1080];
+		viewport === "desktop"
+			? profile === "wallpaper"
+				? [1920, 2560, 3200, 3840]
+				: [1280, 1600, 1920]
+			: [640, 828, 1080];
 	const widths = [
 		...new Set([
 			...requestedWidths.filter((width) => width <= resolved.width),
@@ -69,8 +76,8 @@ const optimizeBannerImage = async (
 			})),
 		);
 	const [avif, webp] = await Promise.all([
-		createCandidates("avif", 55),
-		createCandidates("webp", 68),
+		createCandidates("avif", profile === "wallpaper" ? 80 : 55),
+		createCandidates("webp", profile === "wallpaper" ? 92 : 68),
 	]);
 	const fallback = webp.at(-1)?.image.src ?? resolved.src;
 	return {
@@ -139,6 +146,39 @@ const videoWallpapersJson = JSON.stringify(
 const initialVideoWallpaper =
 	videoWallpapers.find((w) => w.id === videoDefaultWallpaperId) ??
 	videoWallpapers[0];
+
+// 静态壁纸源图只在配置有效列表时进入 Astro 图片管线。桌面图按既有 Banner
+// 管线生成候选；未提供 mobileSrc 时保留 banner.src.mobile，不自动裁切横图。
+const staticWallpapers = resolveStaticWallpapers();
+const staticDefaultWallpaperId = getDefaultStaticWallpaperId();
+const staticWallpapersJson = JSON.stringify(
+	await Promise.all(
+		staticWallpapers.map(async (wallpaper) => {
+			// 用户选择的桌面壁纸保留最高 4K 候选与更高编码质量；普通 Banner
+			// 继续沿用原有 1920px/低码率策略，避免无关页面增加带宽。
+			const desktop = await optimizeBannerImage(
+				wallpaper.src,
+				"desktop",
+				"wallpaper",
+			);
+			const mobile = wallpaper.mobileSrc
+				? await optimizeBannerImage(wallpaper.mobileSrc, "mobile")
+				: null;
+			return {
+				id: wallpaper.id,
+				// 保留完整 picture 契约，而不是只把 fallback 交给客户端。
+				desktop,
+				mobile,
+				position: wallpaper.position ?? siteConfig.banner.position ?? "center",
+				mobilePosition:
+					wallpaper.mobilePosition ??
+					wallpaper.position ??
+					siteConfig.banner.position ??
+					"center",
+			};
+		}),
+	),
+);
 ---
 
 <section
@@ -164,26 +204,45 @@ const initialVideoWallpaper =
 	data-subtitle-typewriter-pause-time={String(Math.max(typewriter.pauseTime ?? 2000, 0))}
 	data-video-wallpapers={videoWallpapersJson}
 	data-video-wallpaper-default={videoDefaultWallpaperId}
+	{...(staticWallpapers.length > 0
+		? {
+				"data-static-wallpapers": staticWallpapersJson,
+				"data-static-wallpaper-default": staticDefaultWallpaperId,
+			}
+		: {})}
 >
 	<div class="banner-stage__media" aria-hidden="true">
 		<picture>
-			{initialDesktopImage?.avifSrcset && (
-				<source media="(min-width: 1024px)" type="image/avif" srcset={initialDesktopImage.avifSrcset} sizes="100vw" />
-			)}
-			{initialDesktopImage?.webpSrcset && (
-				<source media="(min-width: 1024px)" type="image/webp" srcset={initialDesktopImage.webpSrcset} sizes="100vw" />
-			)}
-			{initialDesktopImage && !initialDesktopImage.avifSrcset && !initialDesktopImage.webpSrcset && (
-				<source media="(min-width: 1024px)" srcset={initialDesktopImage.fallback} />
-			)}
-			{initialMobileBanner && initialMobileImage?.avifSrcset && (
-				<source media="(max-width: 1023.98px)" type="image/avif" srcset={initialMobileImage.avifSrcset} sizes="100vw" />
-			)}
-			{initialMobileBanner && initialMobileImage?.webpSrcset && (
-				<source media="(max-width: 1023.98px)" type="image/webp" srcset={initialMobileImage.webpSrcset} sizes="100vw" />
-			)}
-			{initialMobileBanner && initialMobileImage && !initialMobileImage.avifSrcset && !initialMobileImage.webpSrcset && (
-				<source media="(max-width: 1023.98px)" srcset={initialMobileImage.fallback} />
+			{staticWallpapers.length > 0 ? (
+				<>
+					<source data-banner-source="desktop-avif" media="(min-width: 1024px)" type="image/avif" srcset={initialDesktopImage?.avifSrcset || undefined} sizes="100vw" />
+					<source data-banner-source="desktop-webp" media="(min-width: 1024px)" type="image/webp" srcset={initialDesktopImage?.webpSrcset || undefined} sizes="100vw" />
+					<source data-banner-source="desktop-fallback" media="(min-width: 1024px)" srcset={initialDesktopImage?.fallback || undefined} />
+					<source data-banner-source="mobile-avif" media="(max-width: 1023.98px)" type="image/avif" srcset={initialMobileBanner ? initialMobileImage?.avifSrcset || undefined : undefined} sizes="100vw" />
+					<source data-banner-source="mobile-webp" media="(max-width: 1023.98px)" type="image/webp" srcset={initialMobileBanner ? initialMobileImage?.webpSrcset || undefined : undefined} sizes="100vw" />
+					<source data-banner-source="mobile-fallback" media="(max-width: 1023.98px)" srcset={initialMobileBanner ? initialMobileImage?.fallback || undefined : undefined} />
+				</>
+			) : (
+				<>
+					{initialDesktopImage?.avifSrcset && (
+						<source media="(min-width: 1024px)" type="image/avif" srcset={initialDesktopImage.avifSrcset} sizes="100vw" />
+					)}
+					{initialDesktopImage?.webpSrcset && (
+						<source media="(min-width: 1024px)" type="image/webp" srcset={initialDesktopImage.webpSrcset} sizes="100vw" />
+					)}
+					{initialDesktopImage && !initialDesktopImage.avifSrcset && !initialDesktopImage.webpSrcset && (
+						<source media="(min-width: 1024px)" srcset={initialDesktopImage.fallback} />
+					)}
+					{initialMobileBanner && initialMobileImage?.avifSrcset && (
+						<source media="(max-width: 1023.98px)" type="image/avif" srcset={initialMobileImage.avifSrcset} sizes="100vw" />
+					)}
+					{initialMobileBanner && initialMobileImage?.webpSrcset && (
+						<source media="(max-width: 1023.98px)" type="image/webp" srcset={initialMobileImage.webpSrcset} sizes="100vw" />
+					)}
+					{initialMobileBanner && initialMobileImage && !initialMobileImage.avifSrcset && !initialMobileImage.webpSrcset && (
+						<source media="(max-width: 1023.98px)" srcset={initialMobileImage.fallback} />
+					)}
+				</>
 			)}
 			<img
 				class="banner-stage__image banner-stage__image--front banner-stage__image--active"
@@ -273,6 +332,10 @@ const initialVideoWallpaper =
 		resolveWallpaperVideoUrl,
 	} from "@utils/background-video";
 	import { WALLPAPER_MODE_CHANGE_EVENT } from "@constants/constants";
+	import {
+		getStoredStaticWallpaperId,
+		STATIC_WALLPAPER_CHANGE_EVENT,
+	} from "@utils/static-wallpaper";
 	import type { SidebarPage } from "@/types/sidebarConfig";
 
 	interface BannerRuntime {
@@ -312,6 +375,20 @@ const initialVideoWallpaper =
 		poster: string;
 		deferLoad: boolean;
 	}
+	interface RuntimeResponsiveBannerImage {
+		fallback: string;
+		avifSrcset: string;
+		webpSrcset: string;
+		width?: number;
+		height?: number;
+	}
+	interface RuntimeStaticWallpaper {
+		id: string;
+		desktop: RuntimeResponsiveBannerImage;
+		mobile: RuntimeResponsiveBannerImage | null;
+		position: string;
+		mobilePosition: string;
+	}
 	const videoWallpapers = (() => {
 		try {
 			const parsed = JSON.parse(stage?.dataset.videoWallpapers ?? "[]");
@@ -326,6 +403,20 @@ const initialVideoWallpaper =
 		stage?.dataset.videoWallpaperDefault ??
 		videoWallpapers[0]?.id ??
 		"default";
+	const staticWallpapers = (() => {
+		try {
+			const parsed = JSON.parse(stage?.dataset.staticWallpapers ?? "[]");
+			return Array.isArray(parsed)
+				? (parsed as RuntimeStaticWallpaper[])
+				: ([] as RuntimeStaticWallpaper[]);
+		} catch {
+			return [] as RuntimeStaticWallpaper[];
+		}
+	})();
+	const staticDefaultWallpaperId =
+		stage?.dataset.staticWallpaperDefault ??
+		staticWallpapers[0]?.id ??
+		"";
 
 	function currentVideoWallpaper(): RuntimeVideoWallpaper | undefined {
 		const storedId = getStoredWallpaperId(videoDefaultWallpaperId);
@@ -333,6 +424,17 @@ const initialVideoWallpaper =
 			videoWallpapers.find((w) => w.id === storedId) ??
 			videoWallpapers.find((w) => w.id === videoDefaultWallpaperId) ??
 			videoWallpapers[0]
+		);
+	}
+
+	function currentStaticWallpaper(): RuntimeStaticWallpaper | undefined {
+		const storedId = getStoredStaticWallpaperId(staticDefaultWallpaperId);
+		return (
+			staticWallpapers.find((wallpaper) => wallpaper.id === storedId) ??
+			staticWallpapers.find(
+				(wallpaper) => wallpaper.id === staticDefaultWallpaperId,
+			) ??
+			staticWallpapers[0]
 		);
 	}
 	const subtitle = stage?.querySelector<HTMLParagraphElement>(
@@ -396,6 +498,84 @@ const initialVideoWallpaper =
 		return window.matchMedia("(min-width: 1024px)").matches
 			? "desktop"
 			: "mobile";
+	}
+
+	function currentImages(viewport: BannerViewport): string[] {
+		const wallpaper = currentStaticWallpaper();
+		if (!wallpaper) return runtime.images[viewport];
+		if (viewport === "desktop" && wallpaper.desktop?.fallback) {
+			return [wallpaper.desktop.fallback];
+		}
+		if (viewport === "mobile" && wallpaper.mobile?.fallback) {
+			return [wallpaper.mobile.fallback];
+		}
+		return runtime.images[viewport];
+	}
+
+	function currentImagePosition(viewport: BannerViewport): string {
+		const wallpaper = currentStaticWallpaper();
+		if (!wallpaper) return stage?.dataset.position || "center";
+		if (viewport === "mobile" && !wallpaper.mobile?.fallback) {
+			return stage?.dataset.position || "center";
+		}
+		return viewport === "mobile"
+			? wallpaper.mobilePosition || wallpaper.position || "center"
+			: wallpaper.position || "center";
+	}
+
+	const picture = stage?.querySelector<HTMLPictureElement>(
+		".banner-stage__media picture",
+	);
+	function readInitialResponsiveImage(
+		viewport: BannerViewport,
+	): RuntimeResponsiveBannerImage {
+		const read = (format: "avif" | "webp" | "fallback") =>
+			picture
+				?.querySelector<HTMLSourceElement>(
+					`[data-banner-source="${viewport}-${format}"]`,
+				)
+				?.getAttribute("srcset") ?? "";
+		return {
+			fallback: runtime.images[viewport][0] ?? read("fallback"),
+			avifSrcset: read("avif"),
+			webpSrcset: read("webp"),
+		};
+	}
+	const initialResponsiveImages = {
+		desktop: readInitialResponsiveImage("desktop"),
+		mobile: readInitialResponsiveImage("mobile"),
+	};
+
+	function setPictureSource(
+		viewport: BannerViewport,
+		format: "avif" | "webp" | "fallback",
+		srcset: string,
+	) {
+		const source = picture?.querySelector<HTMLSourceElement>(
+			`[data-banner-source="${viewport}-${format}"]`,
+		);
+		if (!source) return;
+		if (srcset) source.setAttribute("srcset", srcset);
+		else source.removeAttribute("srcset");
+	}
+
+	/**
+	 * 同步当前静态壁纸的完整 picture 候选。桌面专用条目在移动端明确回退
+	 * 初始 mobile Banner，不把 16:9 桌面图隐式裁切成竖屏图。
+	 */
+	function syncResponsivePictureSources() {
+		if (!picture || !staticWallpapers.length) return;
+		const wallpaper = currentStaticWallpaper();
+		const desktop = wallpaper?.desktop ?? initialResponsiveImages.desktop;
+		const mobile = wallpaper?.mobile ?? initialResponsiveImages.mobile;
+		for (const [viewport, image] of [
+			["desktop", desktop],
+			["mobile", mobile],
+		] as const) {
+			setPictureSource(viewport, "avif", image.avifSrcset);
+			setPictureSource(viewport, "webp", image.webpSrcset);
+			setPictureSource(viewport, "fallback", image.fallback);
+		}
 	}
 
 	function stopRotation() {
@@ -629,7 +809,7 @@ const initialVideoWallpaper =
 		const next = layers[nextLayer];
 		const previous = layers[runtime.activeLayer];
 		if (next.src !== new URL(src, window.location.href).href) next.src = src;
-		next.style.objectPosition = stage?.dataset.position || "center";
+		next.style.objectPosition = currentImagePosition(currentViewport());
 
 		const interval = getCarouselInterval();
 		const fadeDuration = getFadeDuration();
@@ -884,7 +1064,15 @@ const initialVideoWallpaper =
 	function syncBanner(pageOverride?: SidebarPage, contextOverride?: BannerContext) {
 		if (!stage) return;
 		const viewport = currentViewport();
-		const images = runtime.images[viewport];
+		const images = currentImages(viewport);
+		const staticWallpaper = currentStaticWallpaper();
+		if (staticWallpaper) {
+			stage.dataset.staticWallpaperId = staticWallpaper.id;
+			document.documentElement.dataset.staticWallpaperId = staticWallpaper.id;
+		} else {
+			delete stage.dataset.staticWallpaperId;
+			delete document.documentElement.dataset.staticWallpaperId;
+		}
 		const page = pageOverride ?? currentPage();
 		const state = resolveBannerState({
 			mode: getStoredWallpaperMode(),
@@ -919,6 +1107,7 @@ const initialVideoWallpaper =
 			stopLayerMotions();
 			return;
 		}
+		syncResponsivePictureSources();
 
 		if (runtime.activeGroup !== state.assetGroup) {
 			runtime.activeGroup = state.assetGroup;
@@ -980,6 +1169,12 @@ const initialVideoWallpaper =
 			window.addEventListener(BACKGROUND_WALLPAPER_PROGRESS_EVENT, () => {
 				// 下载完成（或失败）后重新同步视频层。
 				syncVideo(getStoredWallpaperMode());
+			});
+			window.addEventListener(STATIC_WALLPAPER_CHANGE_EVENT, () => {
+				// 图片组签名发生变化：强制从新壁纸首帧开始并复用既有交叉淡化层。
+				runtime.activeGroup = null;
+				runtime.activeIndex = 0;
+				syncBanner();
 			});
 			window.addEventListener("resize", () => {
 				if (currentViewport() === "desktop" && stage?.hidden === false) {

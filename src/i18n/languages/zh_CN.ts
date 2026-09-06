@@ -286,6 +286,7 @@ export const zh_CN: Translation = {
 	[Key.wallpaperModeVideo]: "视频",
 	[Key.backgroundVideoFps]: "帧率",
 	[Key.backgroundWallpaper]: "动态壁纸",
+	[Key.staticWallpaper]: "静态壁纸",
 	[Key.backgroundWallpaperDefault]: "默认",
 	[Key.backgroundWallpaperLoading]: "正在加载壁纸",
 	[Key.backgroundWallpaperFailed]: "加载失败，点击重试",
@@ -325,7 +326,8 @@ export const zh_CN: Translation = {
 	[Key.openingAcknowledge]: "我已阅读（{seconds}s）",
 	[Key.openingWallpaperCredit]: "动态壁纸来源于 B站UP：{up}（UID：{uid}）",
 	[Key.openingWallpaperCreditNoUid]: "动态壁纸来源于 B站UP：{up}",
-	[Key.openingWallpaperHint]: "可在右上角「显示设置」中切换「视频」或「图片」背景。",
+	[Key.openingWallpaperHint]:
+		"可在右上角「显示设置」中切换「视频」或「图片」背景。",
 	[Key.openingNeverShow]: "不再显示",
 
 	// 诗意 bio：取「雨替天空记下落下的字句」之意，跳脱直译、贴近原文情绪。

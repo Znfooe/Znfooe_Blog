@@ -299,6 +299,7 @@ export const id: Translation = {
 	[Key.wallpaperModeVideo]: "Video",
 	[Key.backgroundVideoFps]: "Kecepatan bingkai",
 	[Key.backgroundWallpaper]: "Wallpaper dinamis",
+	[Key.staticWallpaper]: "Wallpaper statis",
 	[Key.backgroundWallpaperDefault]: "Bawaan",
 	[Key.backgroundWallpaperLoading]: "Memuat wallpaper",
 	[Key.backgroundWallpaperFailed]: "Gagal, ketuk untuk coba lagi",
@@ -332,13 +333,17 @@ export const id: Translation = {
 	[Key.introSkip]: "Lewati",
 
 	[Key.openingTitle]: "Selamat datang",
-	[Key.openingForkNotice]: "Proyek ini dikembangkan dari {repo}. Terima kasih kepada {author} yang telah membuka sumbernya!",
+	[Key.openingForkNotice]:
+		"Proyek ini dikembangkan dari {repo}. Terima kasih kepada {author} yang telah membuka sumbernya!",
 	[Key.openingDevDisclaimer]:
 		"Situs ini masih dalam pengembangan dan mungkin memiliki beberapa kekurangan. Terima kasih atas pengertiannya.",
 	[Key.openingAcknowledge]: "Saya telah membaca ini（{seconds}s）",
-	[Key.openingWallpaperCredit]: "Wallpaper hidup dari kreator Bilibili {up} (UID: {uid})",
-	[Key.openingWallpaperCreditNoUid]: "Wallpaper hidup dari kreator Bilibili {up}",
-	[Key.openingWallpaperHint]: "Anda dapat beralih antara latar Video dan Gambar di Pengaturan Tampilan (kanan atas).",
+	[Key.openingWallpaperCredit]:
+		"Wallpaper hidup dari kreator Bilibili {up} (UID: {uid})",
+	[Key.openingWallpaperCreditNoUid]:
+		"Wallpaper hidup dari kreator Bilibili {up}",
+	[Key.openingWallpaperHint]:
+		"Anda dapat beralih antara latar Video dan Gambar di Pengaturan Tampilan (kanan atas).",
 	[Key.openingNeverShow]: "Jangan tampilkan lagi",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。

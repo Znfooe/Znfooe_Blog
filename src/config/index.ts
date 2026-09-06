@@ -59,10 +59,12 @@ export { projectsConfig } from "./projectsConfig";
 export { sidebarConfig } from "./sidebarConfig";
 export {
 	getDefaultSpec,
+	getDefaultStaticWallpaperId,
 	getDefaultStyle,
 	getDefaultWallpaperId,
 	resolveBackgroundWallpapers,
 	resolveDisplaySettings,
+	resolveStaticWallpapers,
 	resolveTextureOptions,
 	siteConfig,
 } from "./siteConfig";

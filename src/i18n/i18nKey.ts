@@ -252,6 +252,7 @@ enum I18nKey {
 	backgroundVideoFps = "backgroundVideoFps",
 	/** 动态壁纸选择器标题 */
 	backgroundWallpaper = "backgroundWallpaper",
+	staticWallpaper = "staticWallpaper",
 	/** legacy 默认壁纸条目的显示名 */
 	backgroundWallpaperDefault = "backgroundWallpaperDefault",
 	/** 延迟壁纸下载中标签 */

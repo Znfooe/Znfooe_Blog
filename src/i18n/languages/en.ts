@@ -295,6 +295,7 @@ export const en: Translation = {
 	[Key.wallpaperModeVideo]: "Video",
 	[Key.backgroundVideoFps]: "Frame rate",
 	[Key.backgroundWallpaper]: "Live wallpaper",
+	[Key.staticWallpaper]: "Static wallpaper",
 	[Key.backgroundWallpaperDefault]: "Default",
 	[Key.backgroundWallpaperLoading]: "Loading wallpaper",
 	[Key.backgroundWallpaperFailed]: "Failed, tap to retry",
@@ -329,13 +330,16 @@ export const en: Translation = {
 	[Key.introSkip]: "Skip",
 
 	[Key.openingTitle]: "Welcome",
-	[Key.openingForkNotice]: "This project is forked from {repo}. Thanks to {author} for open-sourcing it!",
+	[Key.openingForkNotice]:
+		"This project is forked from {repo}. Thanks to {author} for open-sourcing it!",
 	[Key.openingDevDisclaimer]:
 		"This site is still under development and may have some rough edges. Thanks for your understanding.",
 	[Key.openingAcknowledge]: "I have read this ({seconds}s)",
-	[Key.openingWallpaperCredit]: "Live wallpaper by Bilibili creator {up} (UID: {uid})",
+	[Key.openingWallpaperCredit]:
+		"Live wallpaper by Bilibili creator {up} (UID: {uid})",
 	[Key.openingWallpaperCreditNoUid]: "Live wallpaper by Bilibili creator {up}",
-	[Key.openingWallpaperHint]: "You can switch between Video and Image backgrounds in the Display Settings at the top-right.",
+	[Key.openingWallpaperHint]:
+		"You can switch between Video and Image backgrounds in the Display Settings at the top-right.",
 	[Key.openingNeverShow]: "Don't show again",
 
 	// 诗意 bio：保留原文

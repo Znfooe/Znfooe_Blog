@@ -7,6 +7,27 @@ export type WallpaperMode = "banner" | "none" | "video";
 
 export type TopAppBarContentAlign = "left" | "center";
 
+/** 显示设置面板「静态壁纸」选择器中的单个桌面壁纸。 */
+export type StaticWallpaperConfig = {
+	/** 稳定唯一标识：访客选择会持久化到 localStorage，发布后不要变更。 */
+	id: string;
+	/** 设置面板显示名；缺省时回退 id（id="default" 时回退 i18n「默认」）。 */
+	label?: string;
+	/** 桌面横幅源图；推荐使用 src/assets 下的相对路径以进入 Astro 图片管线。 */
+	src: string;
+	/**
+	 * 可选移动端专用源图。不得由桌面横图自动裁切生成；缺省时移动端继续使用
+	 * banner.src.mobile，且桌面静态壁纸选择器不会在移动端显示。
+	 */
+	mobileSrc?: string;
+	/** 设置面板缩略图；缺省时由 src 构建轻量 WebP 预览。 */
+	thumb?: string;
+	/** 桌面图片裁切焦点位置。 */
+	position?: "top" | "center" | "bottom";
+	/** 移动端图片裁切焦点位置；缺省回退 position。 */
+	mobilePosition?: "top" | "center" | "bottom";
+};
+
 /**
  * 单个可选动态视频壁纸（显示设置面板「动态壁纸」选择器的条目）。
  * 由 `backgroundVideos` 声明；legacy `backgroundVideo` 会合并为 id="default" 的首项。
@@ -44,6 +65,8 @@ export type DisplaySettingsConfig = {
 	colorSpec?: boolean;
 	/** 是否在显示设置面板展示 Page background（页面背景 纯色 / 横幅）切换器（默认 true） */
 	wallpaperMode?: boolean;
+	/** 是否展示静态壁纸选择器（默认 true；无有效列表时仍为零 DOM / 零请求） */
+	staticWallpaper?: boolean;
 	/** 是否在显示设置面板展示 Layout（文章列表布局 列表 / 网格）切换器（默认 true） */
 	layoutMode?: boolean;
 	/** 是否在显示设置面板展示 Reduce motion（减少动效）切换器（默认 true） */
@@ -117,6 +140,13 @@ export type SiteConfig = {
 	backgroundVideos?: BackgroundWallpaperConfig[];
 	/** 默认壁纸 id（须为合并列表中的某一项；缺省取列表第一项）。 */
 	defaultWallpaperId?: string;
+	/**
+	 * 可选静态桌面壁纸列表。未配置或为空时沿用 banner.src 的既有轮播行为，
+	 * 不渲染选择器，也不生成或请求额外图片。
+	 */
+	staticWallpapers?: StaticWallpaperConfig[];
+	/** 默认静态壁纸 id（须为 staticWallpapers 中的某一项；缺省取第一项）。 */
+	defaultStaticWallpaperId?: string;
 	/** 页面背景纹理系统配置，支持布尔值直接开关或详细配置对象 */
 	texture?: boolean | TextureConfig;
 	banner: {

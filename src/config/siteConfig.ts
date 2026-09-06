@@ -1,4 +1,8 @@
-import type { BackgroundWallpaperConfig, SiteConfig } from "@/types/config";
+import type {
+	BackgroundWallpaperConfig,
+	SiteConfig,
+	StaticWallpaperConfig,
+} from "@/types/config";
 import type {
 	ResolvedTextureOptions,
 	TextureConfig,
@@ -23,6 +27,7 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		colorStyle: true, // 是否展示配色风格 9 宫格
 		colorSpec: true, // 是否展示 Color Spec 调色规范切换
 		wallpaperMode: true, // 是否展示页面背景（纯色/横幅）切换
+		staticWallpaper: true, // 是否展示静态壁纸选择器（有至少两项时生效）
 		layoutMode: true, // 是否展示文章列表布局（列表/网格）切换
 		reduceMotion: true, // 是否展示减少动效切换
 		texture: true, // 是否展示背景纹理选择
@@ -86,6 +91,41 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 	],
 	// 新访客未做选择时的默认壁纸 id（须在合并列表中）
 	defaultWallpaperId: "zi",
+	// 静态桌面壁纸列表。src / thumb 使用 src/assets 相对路径时会由 Astro 输出
+	// 响应式 WebP/AVIF；未提供 mobileSrc 的条目不会拿横图强行裁切到移动端。
+	staticWallpapers: [
+		{
+			id: "default",
+			// 默认项保持现有 banner 行为与素材；省略 label 时由 UI 使用 i18n「默认」。
+			src: "/banner/1.png",
+			mobileSrc: "/banner/1.png",
+			thumb: "assets/images/banner/desktop/1.webp",
+			position: "center",
+		},
+		{
+			id: "blue-archive-beach",
+			label: "蔚蓝档案 · 海边",
+			src: "assets/images/banner/desktop/02-blue-archive-beach.webp",
+			thumb: "assets/images/banner/desktop/02-blue-archive-beach.webp",
+			position: "center",
+		},
+		{
+			id: "azur-lane-beach",
+			label: "碧蓝航线 · 海边",
+			src: "assets/images/banner/desktop/03-azur-lane-beach.webp",
+			thumb: "assets/images/banner/desktop/03-azur-lane-beach.webp",
+			position: "center",
+		},
+		{
+			id: "genshin-beach",
+			label: "可莉、瑶瑶与纳西妲 · 海边",
+			src: "assets/images/banner/desktop/04-genshin-klee-yaoyao-nahida-beach.webp",
+			thumb:
+				"assets/images/banner/desktop/04-genshin-klee-yaoyao-nahida-beach.webp",
+			position: "center",
+		},
+	],
+	defaultStaticWallpaperId: "default",
 	// 页面背景纹理系统配置（5 大精美预设 + 零开销 HCT 动态取色）
 	texture: {
 		enable: true, // 是否启用背景纹理系统
@@ -252,6 +292,35 @@ export function getDefaultWallpaperId(): string {
 	return wallpapers[0]?.id ?? "default";
 }
 
+/**
+ * 解析静态桌面壁纸列表：过滤空 id/src 与重复 id；未配置时返回空数组，
+ * 由 BannerStage 完整沿用 banner.src 的既有行为。
+ */
+export function resolveStaticWallpapers(): StaticWallpaperConfig[] {
+	const list: StaticWallpaperConfig[] = [];
+	for (const wallpaper of siteConfig.staticWallpapers ?? []) {
+		if (
+			!wallpaper?.id ||
+			!wallpaper.src ||
+			list.some((item) => item.id === wallpaper.id)
+		) {
+			continue;
+		}
+		list.push(wallpaper);
+	}
+	return list;
+}
+
+/** 站点默认静态壁纸 id；无效配置回退列表第一项，无列表时返回空字符串。 */
+export function getDefaultStaticWallpaperId(): string {
+	const wallpapers = resolveStaticWallpapers();
+	const explicit = siteConfig.defaultStaticWallpaperId;
+	if (explicit && wallpapers.some((wallpaper) => wallpaper.id === explicit)) {
+		return explicit;
+	}
+	return wallpapers[0]?.id ?? "";
+}
+
 /** 站点默认 Color Spec（2021 / 2025） */
 export function getDefaultSpec(): string {
 	return siteConfig.themeColor.spec;
@@ -262,6 +331,7 @@ export function resolveDisplaySettings(): {
 	colorStyle: boolean;
 	colorSpec: boolean;
 	wallpaperMode: boolean;
+	staticWallpaper: boolean;
 	layoutMode: boolean;
 	reduceMotion: boolean;
 	texture: boolean;
@@ -275,6 +345,8 @@ export function resolveDisplaySettings(): {
 		colorStyle: cfg?.colorStyle ?? true,
 		colorSpec: cfg?.colorSpec ?? true,
 		wallpaperMode: cfg?.wallpaperMode ?? true,
+		staticWallpaper:
+			(cfg?.staticWallpaper ?? true) && resolveStaticWallpapers().length > 1,
 		layoutMode: cfg?.layoutMode ?? true,
 		reduceMotion: cfg?.reduceMotion ?? true,
 		texture: textureOpts.enable && (cfg?.texture ?? true),

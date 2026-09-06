@@ -79,6 +79,22 @@ artifacts/lighthouse/*
 # generated AI skills plugin packages
 artifacts/shirone-ai-*
 
+# locally generated wallpaper source and super-resolution candidates
+/artifacts/wallpaper-candidates/
+
+# transient files created by local Windows tooling
+/_tmp_*
+
+# project harness generated specifications and prompts (local-only)
+/CONTEXT.md
+/CLAUDE.md
+/提示词/
+/docs/TECH-STACK.md
+/docs/spec.md
+/docs/*-spec.md
+/docs/adr/
+/docs/project-harness-checklist.md
+
 # 原始头像源图（项目根），只提交处理后的 src/assets/images/avatar.webp
 头像.jpg
 

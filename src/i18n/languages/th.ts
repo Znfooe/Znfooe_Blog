@@ -285,6 +285,7 @@ export const th: Translation = {
 	[Key.wallpaperModeVideo]: "วิดีโอ",
 	[Key.backgroundVideoFps]: "อัตราเฟรม",
 	[Key.backgroundWallpaper]: "วอลเปเปอร์เคลื่อนไหว",
+	[Key.staticWallpaper]: "วอลเปเปอร์แบบภาพนิ่ง",
 	[Key.backgroundWallpaperDefault]: "ค่าเริ่มต้น",
 	[Key.backgroundWallpaperLoading]: "กำลังโหลดวอลเปเปอร์",
 	[Key.backgroundWallpaperFailed]: "ล้มเหลว แตะเพื่อลองใหม่",
@@ -317,13 +318,17 @@ export const th: Translation = {
 	[Key.introSkip]: "ข้าม",
 
 	[Key.openingTitle]: "ยินดีต้อนรับ",
-	[Key.openingForkNotice]: "โปรเจกต์นี้พัฒนาต่อยอดจาก {repo} ขอบคุณ {author} ที่เปิดซอร์ส!",
+	[Key.openingForkNotice]:
+		"โปรเจกต์นี้พัฒนาต่อยอดจาก {repo} ขอบคุณ {author} ที่เปิดซอร์ส!",
 	[Key.openingDevDisclaimer]:
 		"เว็บไซต์นี้ยังอยู่ระหว่างการพัฒนาและอาจมีข้อบกพร่องบางประการ ขออภัยในความไม่สะดวก",
 	[Key.openingAcknowledge]: "ฉันได้อ่านแล้ว（{seconds}s）",
-	[Key.openingWallpaperCredit]: "วอลเปเปอร์เคลื่อนไหวจากครีเอเตอร์ Bilibili {up}（UID: {uid}）",
-	[Key.openingWallpaperCreditNoUid]: "วอลเปเปอร์เคลื่อนไหวจากครีเอเตอร์ Bilibili {up}",
-	[Key.openingWallpaperHint]: "สลับพื้นหลัง 'วิดีโอ' หรือ 'รูปภาพ' ได้ที่การตั้งค่าการแสดงผล (มุมขวาบน)",
+	[Key.openingWallpaperCredit]:
+		"วอลเปเปอร์เคลื่อนไหวจากครีเอเตอร์ Bilibili {up}（UID: {uid}）",
+	[Key.openingWallpaperCreditNoUid]:
+		"วอลเปเปอร์เคลื่อนไหวจากครีเอเตอร์ Bilibili {up}",
+	[Key.openingWallpaperHint]:
+		"สลับพื้นหลัง 'วิดีโอ' หรือ 'รูปภาพ' ได้ที่การตั้งค่าการแสดงผล (มุมขวาบน)",
 	[Key.openingNeverShow]: "ไม่แสดงอีก",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。

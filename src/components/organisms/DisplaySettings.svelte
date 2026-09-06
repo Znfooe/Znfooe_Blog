@@ -33,6 +33,7 @@ import {
 	type McStyle,
 	resolveScheme,
 } from "@utils/mc-utils";
+import { prefersReducedMotion } from "@utils/motion";
 import {
 	getDefaultHue,
 	getDefaultTextureOpacity,
@@ -48,10 +49,15 @@ import {
 	setTexturePreset,
 	setWallpaperMode,
 } from "@utils/setting-utils";
+import {
+	getStoredStaticWallpaperId,
+	setStaticWallpaperId,
+} from "@utils/static-wallpaper";
 import { getSpec, getStyle, setSpec, setStyle } from "@utils/theme-utils";
 import { onMount } from "svelte";
 import {
 	getDefaultSpec,
+	getDefaultStaticWallpaperId,
 	getDefaultStyle,
 	getDefaultWallpaperId,
 	resolveBackgroundWallpapers,
@@ -62,7 +68,19 @@ import type { WallpaperMode } from "@/types/config";
 import type { PostListMode } from "@/types/postListConfig";
 import type { TexturePreset } from "@/types/textureConfig";
 
-let { class: className = "" }: { class?: string } = $props();
+interface StaticWallpaperPreview {
+	id: string;
+	label?: string;
+	thumb?: string;
+}
+
+let {
+	class: className = "",
+	staticWallpapers = [],
+}: {
+	class?: string;
+	staticWallpapers?: StaticWallpaperPreview[];
+} = $props();
 
 const displayConfig = resolveDisplaySettings();
 
@@ -112,6 +130,23 @@ const currentWallpaper = $derived(
 		wallpapers.find((w) => w.id === defaultWallpaperId) ??
 		wallpapers[0],
 );
+
+// 静态桌面壁纸：预览 URL 由 TopAppBar 的 Astro 服务端边界生成，避免把
+// src/assets 原始路径或图片处理逻辑带进客户端。列表不足两项时零选择器 DOM。
+const defaultStaticWallpaperId = getDefaultStaticWallpaperId();
+const initialStaticWallpaperId = getStoredStaticWallpaperId(
+	defaultStaticWallpaperId,
+);
+let staticWallpaperId = $state(
+	staticWallpapers.some(
+		(wallpaper) => wallpaper.id === initialStaticWallpaperId,
+	)
+		? initialStaticWallpaperId
+		: defaultStaticWallpaperId,
+);
+let lastAppliedStaticWallpaperId = staticWallpaperId;
+const showStaticWallpaperSelector =
+	displayConfig.staticWallpaper && staticWallpapers.length > 1;
 
 // 动态视频背景帧率档位（60 / 120），跟随当前壁纸的源档位
 const initialWallpaper = currentWallpaper;
@@ -225,6 +260,7 @@ function confirmReset() {
 	postListMode = defaultLayoutMode;
 	wallpaperMode = defaultWallpaperMode;
 	wallpaperId = defaultWallpaperId;
+	staticWallpaperId = defaultStaticWallpaperId;
 	texturePreset = defaultTexturePreset;
 	textureOpacity = defaultTextureOpacity;
 	const resetWallpaper = currentWallpaper;
@@ -240,6 +276,7 @@ const isDirty = $derived(
 		postListMode !== defaultLayoutMode ||
 		wallpaperMode !== defaultWallpaperMode ||
 		wallpaperId !== defaultWallpaperId ||
+		staticWallpaperId !== defaultStaticWallpaperId ||
 		texturePreset !== defaultTexturePreset ||
 		textureOpacity !== defaultTextureOpacity,
 );
@@ -267,6 +304,11 @@ $effect(() => {
 	setWallpaperId(wallpaperId);
 });
 $effect(() => {
+	if (staticWallpaperId === lastAppliedStaticWallpaperId) return;
+	lastAppliedStaticWallpaperId = staticWallpaperId;
+	setStaticWallpaperId(staticWallpaperId);
+});
+$effect(() => {
 	// 仅在访客真正切换帧率时持久化并广播，避免挂载时触发下载
 	if (videoFps === lastAppliedVideoFps) return;
 	lastAppliedVideoFps = videoFps;
@@ -278,7 +320,7 @@ $effect(() => {
  * 新壁纸默认档；延迟壁纸（含失败重试与再点选）立即开始带进度下载。
  */
 function selectWallpaper(id: string) {
-	triggerLiquid(wallpaperId, id);
+	triggerLiquid(`video:${wallpaperId}`, `video:${id}`);
 	wallpaperId = id;
 	if (wallpaperMode !== "video") wallpaperMode = "video";
 	const wallpaper = wallpapers.find((w) => w.id === id);
@@ -300,20 +342,81 @@ function selectWallpaper(id: string) {
 	}
 }
 
+/** 点选静态桌面壁纸：即时切换 Banner 图片层并隐含切换到 banner 模式。 */
+function selectStaticWallpaper(id: string) {
+	triggerLiquid(`static:${staticWallpaperId}`, `static:${id}`);
+	staticWallpaperId = id;
+	if (wallpaperMode !== "banner") wallpaperMode = "banner";
+}
+
+type WallpaperSelectorKind = "static" | "video";
+
+/**
+ * ARIA radio group keyboard model shared by static and video wallpaper lists.
+ * Arrow keys wrap, Home/End jump, and moving focus also commits selection.
+ */
+function handleWallpaperGroupKeydown(
+	event: KeyboardEvent,
+	kind: WallpaperSelectorKind,
+) {
+	if (
+		![
+			"ArrowLeft",
+			"ArrowRight",
+			"ArrowUp",
+			"ArrowDown",
+			"Home",
+			"End",
+		].includes(event.key)
+	)
+		return;
+	const group = event.currentTarget as HTMLElement;
+	const options = [
+		...group.querySelectorAll<HTMLButtonElement>(
+			':scope > [role="radio"]:not(:disabled)',
+		),
+	];
+	if (!options.length) return;
+	const current = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+		'[role="radio"]',
+	);
+	const currentIndex = Math.max(
+		0,
+		options.indexOf(current as HTMLButtonElement),
+	);
+	let nextIndex = currentIndex;
+	if (event.key === "Home") nextIndex = 0;
+	else if (event.key === "End") nextIndex = options.length - 1;
+	else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+		nextIndex = (currentIndex - 1 + options.length) % options.length;
+	} else {
+		nextIndex = (currentIndex + 1) % options.length;
+	}
+	const next = options[nextIndex];
+	const id = next.dataset.wallpaperOptionId;
+	if (!id) return;
+	event.preventDefault();
+	next.focus();
+	if (kind === "static") selectStaticWallpaper(id);
+	else selectWallpaper(id);
+}
+
 // 液体填充/流失过渡：切换壁纸时旧行高亮向右流失、新行液体向右填入。
 // nonce 防止快速连点时旧定时器清掉新过渡；reduced-motion 下不触发。
 let liquidNonce = 0;
 let liquid = $state<{ from: string; to: string; nonce: number } | null>(null);
 function triggerLiquid(from: string, to: string) {
-	if (from === to || motionReduced) return;
+	if (from === to || motionReduced || prefersReducedMotion()) return;
 	const nonce = ++liquidNonce;
 	liquid = { from, to, nonce };
 	setTimeout(() => {
 		if (liquid?.nonce === nonce) liquid = null;
 	}, 450);
 }
-const isLiquidFill = (id: string) => liquid?.to === id;
-const isLiquidDrain = (id: string) => liquid?.from === id;
+const isLiquidFill = (kind: "static" | "video", id: string) =>
+	liquid?.to === `${kind}:${id}`;
+const isLiquidDrain = (kind: "static" | "video", id: string) =>
+	liquid?.from === `${kind}:${id}`;
 $effect(() => {
 	if (texturePreset === lastAppliedTexturePreset) return;
 	lastAppliedTexturePreset = texturePreset;
@@ -453,7 +556,7 @@ const stylePreviews = $derived(
         </div>
 
         <!-- 段二：界面布局（页面背景 + 列表布局 + 背景纹理） -->
-        {#if displayConfig.wallpaperMode || displayConfig.layoutMode || displayConfig.texture}
+        {#if displayConfig.wallpaperMode || showStaticWallpaperSelector || displayConfig.layoutMode || displayConfig.texture}
             <div class="p-4 flex flex-col gap-3">
                 {#if displayConfig.wallpaperMode}
                     <div class="flex flex-col gap-1.5">
@@ -467,10 +570,10 @@ const stylePreviews = $derived(
                             bind:value={wallpaperMode}
                             label={i18n(I18nKey.wallpaperMode)}
                         />
-                        {#if showWallpaperSelector}
+                        {#if wallpaperMode === "video" && showWallpaperSelector}
                             <div class="flex flex-col gap-1.5 mt-1">
                                 <span class="text-sm font-bold text-[var(--on-surface-variant)] ml-1">{i18n(I18nKey.backgroundWallpaper)}</span>
-                                <div class="flex flex-col gap-1" role="radiogroup" aria-label={i18n(I18nKey.backgroundWallpaper)}>
+                                <div class="flex flex-col gap-1" role="radiogroup" aria-label={i18n(I18nKey.backgroundWallpaper)} onkeydown={(event) => handleWallpaperGroupKeydown(event, "video")}>
                                     {#each wallpapers as wallpaper (wallpaper.id)}
                                         {@const status = wallpaperStatus(wallpaper)}
                                         {@const name = wallpaper.label ?? (wallpaper.id === "default" ? i18n(I18nKey.backgroundWallpaperDefault) : wallpaper.id)}
@@ -478,11 +581,13 @@ const stylePreviews = $derived(
                                             type="button"
                                             role="radio"
                                             aria-checked={wallpaperId === wallpaper.id}
+											tabindex={wallpaperId === wallpaper.id ? 0 : -1}
+											data-wallpaper-option-id={wallpaper.id}
                                             title={status === "error" ? i18n(I18nKey.backgroundWallpaperFailed) : name}
                                             class="wallpaper-option"
-                                            class:selected={wallpaperId === wallpaper.id && !isLiquidFill(wallpaper.id)}
-                                            class:wallpaper-option--fill={isLiquidFill(wallpaper.id)}
-                                            class:wallpaper-option--drain={isLiquidDrain(wallpaper.id)}
+                                            class:selected={wallpaperId === wallpaper.id && !isLiquidFill("video", wallpaper.id)}
+                                            class:wallpaper-option--fill={isLiquidFill("video", wallpaper.id)}
+                                            class:wallpaper-option--drain={isLiquidDrain("video", wallpaper.id)}
                                             onclick={() => selectWallpaper(wallpaper.id)}
                                         >
                                             {#if wallpaper.thumb}
@@ -541,6 +646,43 @@ const stylePreviews = $derived(
                     </div>
                 {/if}
 
+                {#if showStaticWallpaperSelector && (!displayConfig.wallpaperMode || wallpaperMode === "banner")}
+                    <div class="static-wallpaper-selector flex flex-col gap-1.5">
+                        <span class="text-sm font-bold text-[var(--on-surface-variant)] ml-1">{i18n(I18nKey.staticWallpaper)}</span>
+                        <div class="flex flex-col gap-1" role="radiogroup" aria-label={i18n(I18nKey.staticWallpaper)} onkeydown={(event) => handleWallpaperGroupKeydown(event, "static")}>
+                            {#each staticWallpapers as wallpaper (wallpaper.id)}
+                                {@const name = wallpaper.label ?? (wallpaper.id === "default" ? i18n(I18nKey.backgroundWallpaperDefault) : wallpaper.id)}
+                                <button
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={staticWallpaperId === wallpaper.id}
+                                    tabindex={staticWallpaperId === wallpaper.id ? 0 : -1}
+									data-wallpaper-option-id={wallpaper.id}
+                                    title={name}
+                                    class="wallpaper-option"
+                                    class:selected={staticWallpaperId === wallpaper.id && !isLiquidFill("static", wallpaper.id)}
+                                    class:wallpaper-option--fill={isLiquidFill("static", wallpaper.id)}
+                                    class:wallpaper-option--drain={isLiquidDrain("static", wallpaper.id)}
+                                    onclick={() => selectStaticWallpaper(wallpaper.id)}
+                                >
+                                    {#if wallpaper.thumb}
+                                        <img class="wallpaper-option__thumb" src={wallpaper.thumb} alt="" loading="lazy" decoding="async" />
+                                    {/if}
+                                    <span class="wallpaper-option__name">{name}</span>
+                                    {#if staticWallpaperId === wallpaper.id}
+                                        <span class="wallpaper-option__status" aria-hidden="true">
+                                            <Icon icon="material-symbols:check-circle-rounded" class="text-base" />
+                                        </span>
+                                    {/if}
+                                    <span class="wallpaper-option__liquid" aria-hidden="true">
+                                        <span class="wallpaper-option__liquid-body"></span>
+                                    </span>
+                                </button>
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
+
                 {#if displayConfig.layoutMode}
                     <div class="flex flex-col gap-1.5">
                         <span class="text-sm font-bold text-[var(--on-surface-variant)] ml-1">{i18n(I18nKey.layoutMode)}</span>
@@ -595,6 +737,8 @@ const stylePreviews = $derived(
 
 
 <style lang="stylus">
+    @import "../../styles/breakpoints.styl"
+
     .m3-style-cell
         display: flex
         flex-direction: column
@@ -632,7 +776,7 @@ const stylePreviews = $derived(
             text-overflow: ellipsis
             white-space: nowrap
 
-/* 动态壁纸选择条目：缩略图 + 名称 + 选中勾 + 液体填充/流失过渡 */
+/* 静态/动态壁纸共享条目：缩略图 + 名称 + 选中勾 + 液体填充/流失过渡 */
 .wallpaper-option
     position: relative
     overflow: hidden
@@ -733,9 +877,18 @@ const stylePreviews = $derived(
         transform: translateX(101%)
 
 /* 系统级减少动效：跳过液体动画直接呈现终态（fill 终态 = 选中背景，drain 终态 = 完全移出） */
+:global(html.motion-reduced) .wallpaper-option--fill .wallpaper-option__liquid,
+:global(html.motion-reduced) .wallpaper-option--drain .wallpaper-option__liquid
+    animation-duration: 0.01ms
+
 @media (prefers-reduced-motion: reduce)
     .wallpaper-option--fill .wallpaper-option__liquid,
     .wallpaper-option--drain .wallpaper-option__liquid
         animation-duration: 0.01ms
+
+/* 新增三张素材只有桌面构图；移动端继续使用 banner.src.mobile，不做自动裁切。 */
+@media (max-width: bp-lg - 1px)
+    .static-wallpaper-selector
+        display: none
 
 </style>

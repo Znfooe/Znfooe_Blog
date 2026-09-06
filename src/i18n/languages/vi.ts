@@ -297,6 +297,7 @@ export const vi: Translation = {
 	[Key.wallpaperModeVideo]: "Video",
 	[Key.backgroundVideoFps]: "Tốc độ khung hình",
 	[Key.backgroundWallpaper]: "Hình nền động",
+	[Key.staticWallpaper]: "Hình nền tĩnh",
 	[Key.backgroundWallpaperDefault]: "Mặc định",
 	[Key.backgroundWallpaperLoading]: "Đang tải hình nền",
 	[Key.backgroundWallpaperFailed]: "Thất bại, chạm để thử lại",
@@ -330,13 +331,17 @@ export const vi: Translation = {
 	[Key.introSkip]: "Bỏ qua",
 
 	[Key.openingTitle]: "Chào mừng",
-	[Key.openingForkNotice]: "Dự án này được phát triển dựa trên {repo}. Cảm ơn {author} đã mở mã nguồn!",
+	[Key.openingForkNotice]:
+		"Dự án này được phát triển dựa trên {repo}. Cảm ơn {author} đã mở mã nguồn!",
 	[Key.openingDevDisclaimer]:
 		"Trang web này đang trong quá trình phát triển và có thể còn một số lỗi. Xin cảm ơn sự thông cảm của bạn.",
 	[Key.openingAcknowledge]: "Tôi đã đọc（{seconds}s）",
-	[Key.openingWallpaperCredit]: "Hình nền động từ nhà sáng tạo Bilibili {up}（UID: {uid}）",
-	[Key.openingWallpaperCreditNoUid]: "Hình nền động từ nhà sáng tạo Bilibili {up}",
-	[Key.openingWallpaperHint]: "Bạn có thể chuyển đổi giữa nền Video và Hình ảnh trong Cài đặt hiển thị (góc trên bên phải).",
+	[Key.openingWallpaperCredit]:
+		"Hình nền động từ nhà sáng tạo Bilibili {up}（UID: {uid}）",
+	[Key.openingWallpaperCreditNoUid]:
+		"Hình nền động từ nhà sáng tạo Bilibili {up}",
+	[Key.openingWallpaperHint]:
+		"Bạn có thể chuyển đổi giữa nền Video và Hình ảnh trong Cài đặt hiển thị (góc trên bên phải).",
 	[Key.openingNeverShow]: "Không hiển thị lại",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。

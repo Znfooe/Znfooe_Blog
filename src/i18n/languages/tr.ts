@@ -298,6 +298,7 @@ export const tr: Translation = {
 	[Key.wallpaperModeVideo]: "Video",
 	[Key.backgroundVideoFps]: "Kare hızı",
 	[Key.backgroundWallpaper]: "Canlı duvar kağıdı",
+	[Key.staticWallpaper]: "Statik duvar kağıdı",
 	[Key.backgroundWallpaperDefault]: "Varsayılan",
 	[Key.backgroundWallpaperLoading]: "Duvar kağıdı yükleniyor",
 	[Key.backgroundWallpaperFailed]: "Başarısız, yeniden denemek için dokun",
@@ -331,13 +332,17 @@ export const tr: Translation = {
 	[Key.introSkip]: "Atla",
 
 	[Key.openingTitle]: "Hoş geldiniz",
-	[Key.openingForkNotice]: "Bu proje {repo} projesinden çatallanmıştır. Kaynağını açtığı için {author}'a teşekkürler!",
+	[Key.openingForkNotice]:
+		"Bu proje {repo} projesinden çatallanmıştır. Kaynağını açtığı için {author}'a teşekkürler!",
 	[Key.openingDevDisclaimer]:
 		"Bu site hâlâ geliştirme aşamasındadır ve bazı kusurlar içerebilir. Anlayışınız için teşekkürler.",
 	[Key.openingAcknowledge]: "Bunu okudum（{seconds}s）",
-	[Key.openingWallpaperCredit]: "Canlı duvar kağıdı: Bilibili yaratıcısı {up}（UID: {uid}）",
-	[Key.openingWallpaperCreditNoUid]: "Canlı duvar kağıdı: Bilibili yaratıcısı {up}",
-	[Key.openingWallpaperHint]: "Sağ üstteki Görüntü Ayarları'ndan Video veya Görsel arka planı değiştirebilirsiniz.",
+	[Key.openingWallpaperCredit]:
+		"Canlı duvar kağıdı: Bilibili yaratıcısı {up}（UID: {uid}）",
+	[Key.openingWallpaperCreditNoUid]:
+		"Canlı duvar kağıdı: Bilibili yaratıcısı {up}",
+	[Key.openingWallpaperHint]:
+		"Sağ üstteki Görüntü Ayarları'ndan Video veya Görsel arka planı değiştirebilirsiniz.",
 	[Key.openingNeverShow]: "Bir daha gösterme",
 
 	// 诗意 bio：跨语言通用原文，保留原诗意。

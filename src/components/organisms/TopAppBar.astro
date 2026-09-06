@@ -5,11 +5,17 @@
  * 站点标题（回首页）、右侧搜索/显示设置/主题切换。
  * 菜单按钮点击派发 site-drawer:toggle 事件，由 SiteNavigationDrawer 监听开合。
  */
+import { getImage } from "astro:assets";
 import IconButton from "@components/atoms/action/IconButton.svelte";
+import { resolveImageAsset } from "@utils/asset-utils";
 import { resolveNavBarLinks, resolvePageKey } from "@utils/nav-utils";
 import { localizedUrl, url } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
-import { siteConfig } from "@/config";
+import {
+	resolveDisplaySettings,
+	resolveStaticWallpapers,
+	siteConfig,
+} from "@/config";
 import { navBarConfig } from "@/config/navBarConfig";
 import DisplaySettings from "./DisplaySettings.svelte";
 import LanguageSwitch from "./LanguageSwitch.svelte";
@@ -19,6 +25,30 @@ import Search from "./Search.svelte";
 const className = Astro.props.class;
 const links = resolveNavBarLinks(navBarConfig.links);
 const currentPageKey = resolvePageKey(Astro.url);
+const displaySettings = resolveDisplaySettings();
+const staticWallpaperPreviews = displaySettings.staticWallpaper
+	? await Promise.all(
+			resolveStaticWallpapers().map(async (wallpaper) => {
+				const source = await resolveImageAsset(
+					wallpaper.thumb ?? wallpaper.src,
+				);
+				const thumb =
+					typeof source === "string"
+						? source.startsWith("/")
+							? url(source)
+							: source
+						: (
+								await getImage({
+									src: source,
+									width: Math.min(320, source.width),
+									format: "webp",
+									quality: 68,
+								})
+							).src;
+				return { id: wallpaper.id, label: wallpaper.label, thumb };
+			}),
+		)
+	: [];
 
 function hrefFor(path?: string) {
 	return path ? localizedUrl(path) : undefined;
@@ -94,7 +124,13 @@ function isActive(link: (typeof links)[number]): boolean {
 		)}
 		<LightDarkSwitch client:only="svelte"></LightDarkSwitch>
 		<LanguageSwitch client:only="svelte"></LanguageSwitch>
-		<DisplaySettings client:only="svelte" class="top-full right-4 max-w-[calc(100vw-2rem)] md:right-0"></DisplaySettings>
+		<DisplaySettings
+			client:only="svelte"
+			class="top-full right-4 max-w-[calc(100vw-2rem)] md:right-0"
+			staticWallpapers={staticWallpaperPreviews.length > 1
+				? staticWallpaperPreviews
+				: undefined}
+		></DisplaySettings>
 	</div>
 </div>
 

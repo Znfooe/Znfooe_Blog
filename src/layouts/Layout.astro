@@ -7,6 +7,7 @@ import ConfigCarrier from "@components/system/ConfigCarrier.astro";
 import UmamiRuntime from "@components/system/UmamiRuntime.astro";
 import {
 	expressiveCodeConfig,
+	getDefaultStaticWallpaperId,
 	getDefaultWallpaperId,
 	introConfig,
 	openingConfig,
@@ -29,12 +30,12 @@ import {
 	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
 } from "../constants/constants";
 import { defaultFavicons } from "../constants/icon";
+import { LANGUAGES, languageFromPath } from "../i18n/languages";
 import type { Favicon } from "../types/config";
 import { createFontRoleStyle } from "../utils/font-options";
 import { INTRO_ATTRIBUTE, INTRO_STORAGE_KEY } from "../utils/intro-splash";
 import { resolvePageWidth } from "../utils/responsive-utils";
 import { pathsEqual, url } from "../utils/url-utils";
-import { LANGUAGES, languageFromPath } from "../i18n/languages";
 import "../styles/main.css";
 import "../styles/font-faces.css";
 import textureStyles from "../styles/textures.css?raw";
@@ -67,6 +68,7 @@ const lightTheme =
 const darkTheme = expressiveCodeConfig.darkTheme ?? expressiveCodeConfig.theme;
 const defaultWallpaperMode = siteConfig.wallpaperMode.defaultMode;
 const defaultWallpaperId = getDefaultWallpaperId();
+const defaultStaticWallpaperId = getDefaultStaticWallpaperId();
 const textureOptions = resolveTextureOptions();
 const defaultTexturePreset = textureOptions.defaultPreset;
 const defaultTextureOpacity = textureOptions.defaultOpacity;
@@ -172,7 +174,7 @@ const hasMonoFont =
 			/>
 		))}
 
-		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, configHue, lightTheme, darkTheme, defaultWallpaperMode, defaultWallpaperId, defaultTexturePreset, defaultTextureOpacity, textureEnabled}}>
+		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, configHue, lightTheme, darkTheme, defaultWallpaperMode, defaultWallpaperId, defaultStaticWallpaperId, defaultTexturePreset, defaultTextureOpacity, textureEnabled}}>
 			const theme = localStorage.getItem('theme') || DEFAULT_THEME;
 			let isDark = false;
 			switch (theme) {
@@ -209,6 +211,12 @@ const storedWallpaperMode = localStorage.getItem('wallpaper-mode');
 		// 白洲梓 id="zi" 时导航栏文字色切为淡紫）。
 		const storedWallpaperId = localStorage.getItem('background-wallpaper');
 		document.documentElement.dataset.wallpaperId = storedWallpaperId || defaultWallpaperId;
+
+		// 静态壁纸使用独立偏好键，避免与动态视频壁纸 id 互相覆盖。
+		const storedStaticWallpaperId = localStorage.getItem('static-wallpaper');
+		if (storedStaticWallpaperId || defaultStaticWallpaperId) {
+			document.documentElement.dataset.staticWallpaperId = storedStaticWallpaperId || defaultStaticWallpaperId;
+		}
 
 			if (textureEnabled) {
 				const storedTexturePreset = localStorage.getItem('texture-preset');

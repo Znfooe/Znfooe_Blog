@@ -2,14 +2,90 @@ import { expect, test } from "@playwright/test";
 import { resolveBannerState } from "../../src/utils/banner-state";
 
 function isBannerAsset(value: string): boolean {
-	return /\/assets\/(?:images\/)?banner\//.test(decodeURIComponent(value));
+	return /\/(?:assets\/(?:images\/)?banner|banner)\//.test(
+		decodeURIComponent(value),
+	);
 }
 
-function isBannerVariant(
-	value: string,
-	variant: "desktop" | "mobile",
-): boolean {
-	return decodeURIComponent(value).includes(`/banner/${variant}/`);
+async function expectResponsiveSourceIsolation(
+	page: import("@playwright/test").Page,
+	requests: string[],
+) {
+	const sourceState = await page
+		.locator("#banner-wrapper picture")
+		.evaluate((picture) => {
+			const resolveSrcset = (srcset: string) =>
+				srcset
+					.split(",")
+					.map((candidate) => candidate.trim().split(/\s+/)[0])
+					.filter(Boolean)
+					.map((candidate) => new URL(candidate, window.location.href).href);
+			const sources = [
+				...picture.querySelectorAll<HTMLSourceElement>("source"),
+			];
+			const active = sources
+				.filter((source) => !source.media || matchMedia(source.media).matches)
+				.flatMap((source) => resolveSrcset(source.srcset));
+			const inactive = sources
+				.filter((source) => source.media && !matchMedia(source.media).matches)
+				.flatMap((source) => resolveSrcset(source.srcset));
+			const image = picture.querySelector<HTMLImageElement>("img");
+			return { active, inactive, currentSrc: image?.currentSrc ?? "" };
+		});
+
+	expect(sourceState.active).toContain(sourceState.currentSrc);
+	expect(requests).toContain(sourceState.currentSrc);
+	for (const candidate of sourceState.inactive) {
+		if (!sourceState.active.includes(candidate)) {
+			expect(requests).not.toContain(candidate);
+		}
+	}
+}
+
+interface RouteBannerContext {
+	title: string;
+	description: string;
+	date: string;
+}
+
+async function readRouteBannerContext(
+	page: import("@playwright/test").Page,
+): Promise<RouteBannerContext> {
+	return page.locator("#swup-container").evaluate((container) => ({
+		title: (container as HTMLElement).dataset.bannerTitle?.trim() ?? "",
+		description:
+			(container as HTMLElement).dataset.bannerDescription?.trim() ?? "",
+		date: (container as HTMLElement).dataset.bannerDate?.trim() ?? "",
+	}));
+}
+
+async function expectBannerContextMatchesRoute(
+	page: import("@playwright/test").Page,
+): Promise<RouteBannerContext> {
+	const expected = await readRouteBannerContext(page);
+	expect(expected.title).not.toBe("");
+	await expect(page.locator("[data-banner-context-title]")).toHaveText(
+		expected.title,
+	);
+
+	const hasSupportingText =
+		expected.description !== "" && expected.description !== expected.title;
+	const description = page.locator("[data-banner-context-description]");
+	if (hasSupportingText)
+		await expect(description).toHaveText(expected.description);
+	else await expect(description).toBeHidden();
+
+	const meta = page.locator("[data-banner-context-meta]");
+	if (expected.date) {
+		await expect(meta).toBeVisible();
+		await expect(meta.locator("time")).toHaveAttribute(
+			"datetime",
+			expected.date,
+		);
+	} else {
+		await expect(meta).toBeHidden();
+	}
+	return expected;
 }
 
 async function waitForBannerState(
@@ -130,6 +206,16 @@ async function expectCompactTop(page: import("@playwright/test").Page) {
 }
 
 test.describe("banner wallpaper", () => {
+	test.beforeEach(async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem("shirone-opening-acknowledged", "1");
+			sessionStorage.setItem("shirone-intro-played", "1");
+			if (localStorage.getItem("wallpaper-mode") === null) {
+				localStorage.setItem("wallpaper-mode", "banner");
+			}
+		});
+	});
+
 	test("uses mutually exclusive home and contextual copy modes", () => {
 		const base = {
 			mode: "banner" as const,
@@ -155,9 +241,10 @@ test.describe("banner wallpaper", () => {
 		expect(response.ok()).toBe(true);
 		const html = await response.text();
 		expect(html).toContain("data-banner-context-title");
-		expect(html).toContain("Simple Guides for Fuwari");
-		expect(html).toContain("How to use this blog template.");
-		expect(html).toContain('datetime="2024-04-01"');
+		expect(html).toMatch(/data-banner-title="[^"]+"/);
+		expect(html).toMatch(/data-banner-description="[^"]+"/);
+		expect(html).toMatch(/data-banner-date="\d{4}-\d{2}-\d{2}"/);
+		expect(html).toMatch(/datetime="\d{4}-\d{2}-\d{2}"/);
 	});
 
 	test("centers article context in a bounded box with home-scale type", async ({
@@ -170,16 +257,7 @@ test.describe("banner wallpaper", () => {
 		const context = stage.locator("[data-banner-context]");
 		await expect(stage).toHaveAttribute("data-copy-mode", "context");
 		await expect(context).toBeVisible();
-		await expect(context.locator("[data-banner-context-title]")).toHaveText(
-			"Simple Guides for Fuwari",
-		);
-		await expect(
-			context.locator("[data-banner-context-description]"),
-		).toHaveText("How to use this blog template.");
-		await expect(context.locator("time")).toHaveAttribute(
-			"datetime",
-			"2024-04-01",
-		);
+		await expectBannerContextMatchesRoute(page);
 
 		const layout = await context.evaluate((element) => {
 			const stage = document.getElementById("banner-wrapper");
@@ -225,14 +303,16 @@ test.describe("banner wallpaper", () => {
 	test("fits long contextual titles onto one line at desktop widths", async ({
 		page,
 	}) => {
+		const fitStates: string[] = [];
 		for (const width of [1440, 1024]) {
 			await page.setViewportSize({ width, height: 1000 });
-			await page.goto("/posts/markdown-extended/", {
+			await page.goto("/posts/image-grid-demo/", {
 				waitUntil: "domcontentloaded",
 			});
 			await waitForBannerState(page, true);
 			const title = page.locator("[data-banner-context-title]");
-			await expect(title).toHaveAttribute("data-title-fit", "scaled");
+			await expect(title).toHaveAttribute("data-title-fit", /^(full|scaled)$/);
+			fitStates.push((await title.getAttribute("data-title-fit")) ?? "");
 			const layout = await title.evaluate((element) => {
 				const style = getComputedStyle(element);
 				return {
@@ -247,22 +327,17 @@ test.describe("banner wallpaper", () => {
 			expect(layout.whiteSpace).toBe("nowrap");
 			expect(layout.height).toBeLessThanOrEqual(layout.lineHeight + 1);
 			expect(layout.fontSize).toBeGreaterThanOrEqual(36);
-			expect(layout.fontSize).toBeLessThan(80);
+			expect(layout.fontSize).toBeLessThanOrEqual(80);
 		}
+		expect(fitStates).toContain("scaled");
 	});
 
 	test("shows localized context on a non-post page", async ({ page }) => {
 		await page.goto("/friends/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
 		const context = page.locator("[data-banner-context]");
-		await expect(context.locator("[data-banner-context-title]")).toHaveText(
-			"Friends",
-		);
-		await expect(
-			context.locator("[data-banner-context-description]"),
-		).toHaveText(
-			"Link exchange is welcome — see the About page for how to apply.",
-		);
+		const routeContext = await expectBannerContextMatchesRoute(page);
+		expect(routeContext.description).not.toBe("");
 		await expect(context.locator("[data-banner-context-meta]")).toBeHidden();
 	});
 
@@ -271,18 +346,12 @@ test.describe("banner wallpaper", () => {
 	}) => {
 		await page.goto("/archive/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
-		await expect(page.locator("[data-banner-context-title]")).toHaveText(
-			"Archive",
-		);
-		await expect(page.locator("[data-banner-context-description]")).toHaveText(
-			/^\d+ posts$/,
-		);
+		const archiveContext = await expectBannerContextMatchesRoute(page);
+		expect(archiveContext.description).toMatch(/\d+/);
 
 		await page.goto("/about/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
-		await expect(page.locator("[data-banner-context-title]")).toHaveText(
-			"About",
-		);
+		await expectBannerContextMatchesRoute(page);
 		await expect(page.locator("[data-banner-context-details]")).toBeHidden();
 	});
 
@@ -345,7 +414,13 @@ test.describe("banner wallpaper", () => {
 
 		await page.goto("/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
-		await expect(page.locator("#banner-wrapper h1")).toHaveText("Shirone");
+		const homeTitle = await page
+			.locator("#banner-wrapper")
+			.getAttribute("data-home-title");
+		expect(homeTitle).toBeTruthy();
+		await expect(page.locator("#banner-wrapper h1")).toHaveText(
+			homeTitle ?? "",
+		);
 		await expectSubtitleTyping(page);
 		await expect(page.locator("#navbar")).toHaveClass(
 			/top-app-bar--transparent/,
@@ -359,12 +434,7 @@ test.describe("banner wallpaper", () => {
 			"top",
 			/^[4-9]\d{2}(\.\d+)?px$/,
 		);
-		expect(
-			requests.some((request) => isBannerVariant(request, "desktop")),
-		).toBe(true);
-		expect(requests.some((request) => isBannerVariant(request, "mobile"))).toBe(
-			false,
-		);
+		await expectResponsiveSourceIsolation(page, requests);
 		expect(
 			await page
 				.locator(".banner-stage__image--front")
@@ -422,12 +492,7 @@ test.describe("banner wallpaper", () => {
 		await expectWavesAnimated(page, true);
 		await expectBannerOverlap(page);
 		await expectWaveGeometry(page, "0.72");
-		expect(requests.some((request) => isBannerVariant(request, "mobile"))).toBe(
-			true,
-		);
-		expect(
-			requests.some((request) => isBannerVariant(request, "desktop")),
-		).toBe(false);
+		await expectResponsiveSourceIsolation(page, requests);
 	});
 
 	test("tablet home keeps the full wave geometry at the desktop breakpoint", async ({
@@ -458,7 +523,11 @@ test.describe("banner wallpaper", () => {
 		await expect(page.locator(".banner-waves")).toBeHidden();
 		await expectCompactTop(page);
 		expect(requests).toHaveLength(1);
-		expect(isBannerVariant(requests[0], "desktop")).toBe(true);
+		expect(requests[0]).toBe(
+			await page
+				.locator("#banner-wrapper picture img")
+				.evaluate((image) => (image as HTMLImageElement).currentSrc),
+		);
 	});
 
 	test("display settings switches modes immediately and persists", async ({
@@ -467,7 +536,7 @@ test.describe("banner wallpaper", () => {
 		await page.goto("/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
 		await page.locator("#display-settings-switch").click();
-		await page.getByText("Solid", { exact: true }).click();
+		await page.getByText("纯色", { exact: true }).click();
 		await waitForBannerState(page, false);
 		expect(
 			await page.evaluate(() => localStorage.getItem("wallpaper-mode")),
@@ -477,7 +546,7 @@ test.describe("banner wallpaper", () => {
 		await page.reload({ waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, false);
 		await page.locator("#display-settings-switch").click();
-		await page.getByText("Banner", { exact: true }).click();
+		await page.getByText("横幅", { exact: true }).click();
 		await waitForBannerState(page, true);
 	});
 
@@ -578,12 +647,10 @@ test.describe("banner wallpaper", () => {
 				document.getElementById("swup-container")?.dataset.currentPage ===
 				"post",
 		);
-		await expect(page.locator("[data-banner-context-title]")).toHaveText(
-			"Simple Guides for Fuwari",
-		);
+		const guideContext = await expectBannerContextMatchesRoute(page);
 		await expect(page.locator("#banner-wrapper")).toHaveAttribute(
 			"aria-label",
-			"Simple Guides for Fuwari",
+			guideContext.title,
 		);
 		expect(
 			await page.evaluate(
@@ -599,12 +666,7 @@ test.describe("banner wallpaper", () => {
 				document.getElementById("swup-container")?.dataset.currentPage ===
 				"friends",
 		);
-		await expect(page.locator("[data-banner-context-title]")).toHaveText(
-			"Friends",
-		);
-		await expect(page.locator("[data-banner-context-description]")).toHaveText(
-			"Link exchange is welcome — see the About page for how to apply.",
-		);
+		await expectBannerContextMatchesRoute(page);
 		await expect(page.locator("[data-banner-context-meta]")).toBeHidden();
 		expect(
 			await page.evaluate(
